@@ -1,24 +1,6 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-
-function CheckIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.7"
-    >
-      <path d="m5 12 4.5 4.5L19 7" />
-    </svg>
-  );
-}
+import SiteHeader from "@/components/site-header";
 
 function ArrowIcon() {
   return (
@@ -36,180 +18,190 @@ function ArrowIcon() {
   );
 }
 
+function CheckIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.7"
+    >
+      <path d="m5 12 4.5 4.5L19 7" />
+    </svg>
+  );
+}
+
 const milestones = [
   [
     "01",
-    "The beginning",
-    "Estatein starts with a simple idea: finding a great property should feel personal, clear, and inspiring.",
+    "A local beginning",
+    "RentDeer began in Damansara during the pandemic, when a group of property professionals saw a better way to support renters and landlords.",
   ],
   [
     "02",
-    "Growing together",
-    "We built a community of homeowners, investors, and experts who believe in making better decisions together.",
+    "Bridging the rental gap",
+    "We built a rental experience around ready-to-move-in homes, reliable management, and communication people can trust.",
   ],
   [
     "03",
-    "A wider view",
-    "Today, our work spans homes, investments, and the long-term relationships that make a place feel like yours.",
+    "Growing the community",
+    "From rooms to whole units, RentDeer keeps building a more connected rental community across Klang Valley.",
   ],
   [
     "04",
-    "What comes next",
-    "We keep raising the bar for property discovery with thoughtful technology and human support.",
+    "Making renting better",
+    "We are continuing to improve the search, enquiry, agreement, and move-in journey for everyone involved.",
+  ],
+];
+
+const values = [
+  [
+    "Transparency",
+    "Clear listings, honest conversations, and no unnecessary surprises.",
+  ],
+  [
+    "Community",
+    "Better homes start with better relationships between tenants and owners.",
+  ],
+  [
+    "Simplicity",
+    "Every step should be easy to understand, from search to signing.",
+  ],
+  [
+    "Empowerment",
+    "Useful information helps every renter and property partner decide with confidence.",
   ],
 ];
 
 const team = [
-  ["Sophia Turner", "Chief Executive Officer", "/estatein/property-villa.png"],
-  ["Daniel Ramirez", "Head of Property", "/estatein/property-tower.png"],
-  ["Emily Johnson", "Client Experience Lead", "/estatein/property-campus.png"],
+  [
+    "Dr. Irfan",
+    "Chief Executive Officer",
+    "/estatein/property-villa.png",
+    "At RentDeer, Dr. Irfan is realising a vision in which rental living and property ownership in Malaysia become simple, secure, and attainable for every individual who aspires to a stable home or a sustainable investment.",
+    "He is committed to shaping a future where young Malaysians can build wealth with confidence, and where tenants can live with dignity, stability, and peace of mind.",
+  ],
+  [
+    "En Haziq",
+    "Chief Operating Officer",
+    "/estatein/property-tower.png",
+    "At RentDeer, En Haziq is helping realise a vision in which rental living and property ownership in Malaysia become simple, secure, and attainable for every individual who aspires to a stable home or a sustainable investment.",
+    "He is committed to shaping a future where young Malaysians can build wealth with confidence, and where tenants can live with dignity, stability, and peace of mind.",
+  ],
+  [
+    "En Syafiq",
+    "Chief Financial Officer",
+    "/estatein/property-campus.png",
+    "At RentDeer, Syafiq is realising a vision in which rental living and property ownership in Malaysia become simple, secure, and attainable for every individual who aspires to a stable home or a sustainable investment.",
+    "He is committed to shaping a future where young Malaysians can build wealth with confidence, and where tenants can live with dignity, stability, and peace of mind.",
+  ],
 ];
 
 export default function AboutPage() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const closeMenu = () => setMenuOpen(false);
-
   return (
     <main className="about-page">
       <div className="announcement-bar">
-        <span>✨ Discover Your Dream Property with Estatein</span>
-        <Link href="/#properties" onClick={closeMenu}>
-          Learn More <ArrowIcon />
+        <span>✨ Rent smarter. Live better with RentDeer.</span>
+        <Link href="/properties">
+          Find a stay <ArrowIcon />
         </Link>
       </div>
-
-      <header className="site-header">
-        <Link
-          className="brand"
-          href="/"
-          aria-label="Estatein home"
-          onClick={closeMenu}
-        >
-          <Image
-            src="/estatein/logo.png"
-            alt="Estatein"
-            width={148}
-            height={45}
-            priority
-          />
-        </Link>
-        <nav
-          className={menuOpen ? "main-nav is-open" : "main-nav"}
-          aria-label="Main navigation"
-        >
-          <Link className="nav-link" href="/" onClick={closeMenu}>
-            Home
-          </Link>
-          <Link className="nav-link active" href="/about" onClick={closeMenu}>
-            About Us
-          </Link>
-          <Link className="nav-link" href="/properties" onClick={closeMenu}>
-            Properties
-          </Link>
-          <Link className="nav-link" href="/services" onClick={closeMenu}>
-            Services
-          </Link>
-        </nav>
-        <Link className="contact-button" href="/contact" onClick={closeMenu}>
-          Contact Us
-        </Link>
-        <button
-          type="button"
-          className="menu-toggle"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? (
-            <span aria-hidden="true">×</span>
-          ) : (
-            <span aria-hidden="true">☰</span>
-          )}
-        </button>
-      </header>
-
+      <SiteHeader active="about" />
       <section className="about-hero" id="about-hero">
         <div className="about-hero-copy">
-          <span className="section-kicker">ABOUT ESTATEIN</span>
+          <span className="section-kicker">ABOUT RENTDEER</span>
           <h1>
-            Our story is rooted in <span>better beginnings.</span>
+            We Are <span>RentDeer.</span>
           </h1>
           <p>
-            We believe finding the right property is more than a transaction. It
-            is the start of a new chapter, a new idea, or a place where life can
-            unfold.
+            Better rental living begins with a home you can trust and a team
+            that genuinely cares about the people inside it.
           </p>
         </div>
         <div className="about-hero-art" aria-hidden="true">
           <Image src="/estatein/about-pattern-lines.png" alt="" fill />
         </div>
       </section>
-
       <section className="content-section about-intro" id="story">
         <div className="about-intro-image">
           <Image
             src="/estatein/property-tower.png"
-            alt="Modern glass building at dusk"
+            alt="Modern residential building"
             fill
             sizes="(max-width: 700px) 100vw, 50vw"
           />
         </div>
         <div className="about-intro-copy">
-          <span className="section-kicker">OUR PURPOSE</span>
-          <h2>Property decisions deserve a human point of view.</h2>
+          <span className="section-kicker">BEHIND RENTDEER</span>
+          <h2>Comfortable, quality living should be accessible to everyone.</h2>
           <p>
-            Estatein brings together a considered collection of properties,
-            practical expertise, and a team who listens. We make the process
-            feel less like a search and more like a confident next step.
+            In the heart of Damansara, during the difficult days of the COVID-19
+            pandemic, RentDeer Sdn Bhd was founded with a simple but meaningful
+            purpose. A group of real estate agents came together with a shared
+            belief: that comfortable, quality living should be accessible to
+            everyone, no matter their budget.
+          </p>
+          <p>
+            Through our work with both renters and landlords, we saw firsthand
+            the challenges they faced. Many renters struggled to find clean,
+            affordable rooms they could trust. At the same time, landlords were
+            dealing with property maintenance issues, unreliable tenants, and a
+            lack of dependable management support.
+          </p>
+          <p>
+            RentDeer was created to bridge this gap. We aim to provide renters
+            with well-managed, ready-to-move-in homes, while giving landlords a
+            reliable and transparent team to help care for their properties. At
+            the heart of RentDeer is a sincere commitment to make renting
+            easier, fairer, and more worry-free for everyone involved.
           </p>
           <div className="about-points">
-            <div className="about-point">
-              <span className="about-point-icon">
-                <CheckIcon />
-              </span>
-              <div>
-                <strong>Trusted perspective</strong>
-                <span>Clear advice for meaningful decisions.</span>
+            {values.map(([title, text]) => (
+              <div className="about-point" key={title}>
+                <span className="about-point-icon">
+                  <CheckIcon />
+                </span>
+                <div>
+                  <strong>{title}</strong>
+                  <span>{text}</span>
+                </div>
               </div>
-            </div>
-            <div className="about-point">
-              <span className="about-point-icon">
-                <CheckIcon />
-              </span>
-              <div>
-                <strong>Curated quality</strong>
-                <span>Properties selected with intention.</span>
-              </div>
-            </div>
-            <div className="about-point">
-              <span className="about-point-icon">
-                <CheckIcon />
-              </span>
-              <div>
-                <strong>Built for people</strong>
-                <span>Support that stays with you.</span>
-              </div>
-            </div>
-            <div className="about-point">
-              <span className="about-point-icon">
-                <CheckIcon />
-              </span>
-              <div>
-                <strong>Always evolving</strong>
-                <span>Better tools for a changing market.</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
-
+      <section className="about-section rental-belief" id="rental-belief">
+        <span className="section-kicker">OUR BELIEF</span>
+        <h2>We live and breathe rental.</h2>
+        <p>
+          From the beginning, we have aimed to improve the standard of rental
+          living for both tenants and landlords. We believe that better homes
+          come from proper management, clear communication, and sincere care for
+          the people who live in our spaces.
+        </p>
+        <p>
+          For renters, this means rooms that are clean, move-in ready, and
+          supported by a responsive team. For landlords, this means dependable
+          tenants, consistent property upkeep, and a management system that
+          protects the value of their investment.
+        </p>
+        <p>
+          We continue to refine our services, enhance our processes, and listen
+          to feedback from both tenants and property owners. Our goal is simple:
+          to build a rental ecosystem where everyone benefits—where renters feel
+          truly at home, and landlords feel confident with every unit they place
+          under our care.
+        </p>
+      </section>
       <section className="about-section" id="journey">
         <span className="section-kicker">OUR JOURNEY</span>
-        <h2>A little history. A lot of intention.</h2>
+        <h2>Built locally. Growing with purpose.</h2>
         <p>
-          From one thoughtful idea to a growing property community, every
-          chapter has sharpened what we stand for: making space for better
-          decisions.
+          RentDeer is creating a rental experience that feels transparent,
+          reliable, and simple across Klang Valley.
         </p>
         <div className="journey-grid">
           {milestones.map(([number, title, text]) => (
@@ -221,20 +213,15 @@ export default function AboutPage() {
           ))}
         </div>
       </section>
-
       <section className="about-section" id="team">
         <div className="about-team">
           <div>
             <span className="section-kicker">OUR TEAM</span>
-            <h2>People who make the process feel possible.</h2>
+            <h2>People behind a better rental experience.</h2>
           </div>
-          <p>
-            Our team combines local knowledge, strategic thinking, and a genuine
-            love for helping people find their place.
-          </p>
         </div>
         <div className="team-grid">
-          {team.map(([name, role, image]) => (
+          {team.map(([name, role, image, firstBio, secondBio]) => (
             <article className="team-card" key={name}>
               <div className="team-card-image">
                 <Image
@@ -247,43 +234,40 @@ export default function AboutPage() {
               <div className="team-card-content">
                 <h3>{name}</h3>
                 <p>{role}</p>
+                <div className="team-card-bio">
+                  <p>{firstBio}</p>
+                  <p>{secondBio}</p>
+                </div>
               </div>
             </article>
           ))}
         </div>
       </section>
-
       <section className="contact-cta about-cta" id="about-contact">
         <div>
           <span className="section-kicker">START YOUR JOURNEY</span>
-          <h2>Let&apos;s find what&apos;s next.</h2>
-          <p>
-            Whether you are looking for a home or your next investment, we are
-            ready to help.
-          </p>
+          <h2>Find your place with RentDeer.</h2>
+          <p>Browse current rentals or tell our team what you need next.</p>
         </div>
         <Link className="button button-primary" href="/properties">
           Explore Properties <ArrowIcon />
         </Link>
       </section>
-
       <footer className="site-footer about-footer">
         <div>
           <Link className="brand footer-brand" href="/">
-            <Image
-              src="/estatein/logo.png"
-              alt="Estatein"
-              width={148}
-              height={45}
-            />
+            <span className="brand-wordmark">
+              <span className="brand-symbol">R</span>RentDeer
+            </span>
           </Link>
-          <p>Building better beginnings, one property at a time.</p>
+          <p>Rent smarter. Live better.</p>
         </div>
         <div className="footer-links">
           <div>
             <strong>Explore</strong>
             <Link href="/">Home</Link>
             <Link href="/about">About Us</Link>
+            <Link href="/faq">FAQ</Link>
           </div>
           <div>
             <strong>Discover</strong>
@@ -292,18 +276,12 @@ export default function AboutPage() {
           </div>
           <div>
             <strong>Connect</strong>
-            <a href="mailto:hello@estatein.com">Email Us</a>
-            <a
-              href="https://www.instagram.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Instagram
-            </a>
+            <a href="mailto:hello.rentdeer@gmail.com">Email Us</a>
+            <a href="/contact">Contact Us</a>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Estatein. All Rights Reserved.</span>
+          <span>© 2026 RentDeer Sdn Bhd. All Rights Reserved.</span>
           <span>Privacy Policy&nbsp;&nbsp; · &nbsp;&nbsp;Terms of Use</span>
         </div>
       </footer>

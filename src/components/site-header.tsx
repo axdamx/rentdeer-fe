@@ -1,11 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 type SiteHeaderProps = {
-  active?: "home" | "about" | "properties" | "services" | "contact";
+  active?:
+    | "home"
+    | "about"
+    | "properties"
+    | "services"
+    | "faq"
+    | "bulletin"
+    | "contact";
 };
 
 const navigation = [
@@ -13,6 +19,8 @@ const navigation = [
   ["about", "About Us", "/about"],
   ["properties", "Properties", "/properties"],
   ["services", "Services", "/services"],
+  ["faq", "FAQ", "/faq"],
+  ["bulletin", "Bulletin", "/bulletin"],
 ] as const;
 
 export default function SiteHeader({ active }: SiteHeaderProps) {
@@ -22,17 +30,13 @@ export default function SiteHeader({ active }: SiteHeaderProps) {
     <header className="site-header">
       <Link
         className="brand"
-        aria-label="Estatein home"
+        aria-label="RentDeer home"
         href="/"
         onClick={() => setMenuOpen(false)}
       >
-        <Image
-          src="/estatein/logo.png"
-          alt="Estatein"
-          width={148}
-          height={45}
-          priority
-        />
+        <span className="brand-wordmark">
+          <span className="brand-symbol">R</span>RentDeer
+        </span>
       </Link>
       <nav
         className={menuOpen ? "main-nav is-open" : "main-nav"}

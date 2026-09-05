@@ -82,69 +82,69 @@ function Icon({ name }: { name: IconName }) {
 
 const properties = [
   {
-    title: "Seaside Serenity Villa",
-    location: "Malibu, California",
-    type: "Villas",
+    title: "Fully Furnished Master Room",
+    location: "Damansara Damai",
+    type: "Master Bedroom",
     image: "/estatein/property-villa.png",
-    price: "$2,850,000",
-    beds: "4",
-    baths: "3",
+    price: "RM850 / month",
+    beds: "1",
+    baths: "1",
   },
   {
-    title: "Metropolitan Haven",
-    location: "New York, New York",
-    type: "Apartments",
+    title: "Bright Medium Room",
+    location: "Kota Damansara",
+    type: "Medium Bedroom",
     image: "/estatein/property-tower.png",
-    price: "$1,650,000",
-    beds: "2",
-    baths: "2",
+    price: "RM700 / month",
+    beds: "1",
+    baths: "1",
   },
   {
-    title: "Rustic Retreat Cottage",
-    location: "Austin, Texas",
-    type: "Houses",
+    title: "Private Soho Studio",
+    location: "Ara Damansara",
+    type: "Soho/Studio",
     image: "/estatein/property-campus.png",
-    price: "$850,000",
-    beds: "3",
-    baths: "2",
+    price: "RM1,500 / month",
+    beds: "1",
+    baths: "1",
   },
 ];
 
 const features = [
   {
     icon: "building" as IconName,
-    title: "Find Your Dream Home",
-    text: "Explore our curated selection of properties.",
+    title: "Find a Room That Fits",
+    text: "Search ready-to-move-in rooms by location and budget.",
   },
   {
     icon: "search" as IconName,
-    title: "Unlock Property Value",
-    text: "Discover opportunities that work for you.",
+    title: "Make Renting Simple",
+    text: "See clear rental details before you enquire.",
   },
   {
     icon: "building" as IconName,
-    title: "Effortless Property Management",
-    text: "Let us handle the details with care.",
+    title: "Support for Landlords",
+    text: "Protect your units with dependable management.",
   },
   {
     icon: "spark" as IconName,
-    title: "Smart Investments, Informed Decisions",
-    text: "Build your future with expert guidance.",
+    title: "Agreements Made Easy",
+    text: "Create, review, and sign tenancy agreements securely.",
   },
 ];
 
 const faqs = [
   [
-    "How do I search for properties on Estatein?",
-    "Use our search tools to explore properties by location, price, property type, and more. Our team is also available to help you find the right fit.",
+    "Does RentDeer accept internship tenants?",
+    "Yes, internship tenants are welcome to stay with us. Contact the team to check available rooms and requirements.",
   ],
   [
-    "What documents do I need to buy a property?",
-    "Requirements vary by location, but our advisors guide you through every document and step before you make an offer.",
+    "Is a deposit required?",
+    "Yes, a deposit is required upon booking confirmation. Our team will explain the amount and terms before you commit.",
   ],
   [
-    "Can I schedule a property viewing?",
-    "Absolutely. Open any listing and contact our team to choose a convenient time for an in-person or virtual tour.",
+    "What is the minimum rental period?",
+    "The minimum rental period is six months, helping create a stable living environment while keeping the process straightforward.",
   ],
 ];
 
@@ -166,7 +166,7 @@ export default function Home() {
   return (
     <main className="estatein-shell">
       <div className="announcement-bar">
-        <span>✨ Discover Your Dream Property with Estatein</span>
+        <span>✨ Rent smarter. Live better with RentDeer.</span>
         <button type="button" onClick={() => scrollTo("properties")}>
           Learn More <Icon name="arrow" />
         </button>
@@ -176,16 +176,12 @@ export default function Home() {
         <button
           type="button"
           className="brand"
-          aria-label="Estatein home"
+          aria-label="RentDeer home"
           onClick={() => scrollTo("home")}
         >
-          <Image
-            src="/estatein/logo.png"
-            alt="Estatein"
-            width={148}
-            height={45}
-            priority
-          />
+          <span className="brand-wordmark">
+            <span className="brand-symbol">R</span>RentDeer
+          </span>
         </button>
         <nav
           className={menuOpen ? "main-nav is-open" : "main-nav"}
@@ -215,6 +211,20 @@ export default function Home() {
           >
             Services
           </Link>
+          <Link
+            className="nav-link"
+            href="/faq"
+            onClick={() => setMenuOpen(false)}
+          >
+            FAQ
+          </Link>
+          <Link
+            className="nav-link"
+            href="/bulletin"
+            onClick={() => setMenuOpen(false)}
+          >
+            Bulletin
+          </Link>
         </nav>
         <Link
           className="contact-button"
@@ -237,11 +247,11 @@ export default function Home() {
         <div className="hero-copy">
           <span className="eyebrow">REAL ESTATE, REIMAGINED</span>
           <h1>
-            Discover Your Dream <span>Property</span> with Estatein
+            Rent Smarter. <span>Live Better.</span>
           </h1>
           <p>
-            Your journey to finding the perfect property begins here. Explore
-            our listings to find the home that matches your dreams.
+            Find clean, affordable, ready-to-move-in rooms across Klang Valley —
+            with clear rental terms and a team that is here when you need us.
           </p>
           <div className="hero-actions">
             <button
@@ -256,27 +266,27 @@ export default function Home() {
               className="button button-primary"
               onClick={() => (window.location.href = "/properties")}
             >
-              Browse Properties
+              Find Property
             </button>
           </div>
           <div className="stats-grid">
             <div>
               <strong>
-                200<span>+</span>
+                500<span>+</span>
               </strong>
-              <small>Happy Customers</small>
+              <small>Rooms &amp; units</small>
             </div>
             <div>
               <strong>
-                10k<span>+</span>
+                11<span>+</span>
               </strong>
-              <small>Properties For Clients</small>
+              <small>Locations in Klang Valley</small>
             </div>
             <div>
               <strong>
-                16<span>+</span>
+                24<span>/7</span>
               </strong>
-              <small>Years of Experience</small>
+              <small>Customer support</small>
             </div>
           </div>
         </div>
@@ -324,35 +334,28 @@ export default function Home() {
             <h2>We make finding property feel effortless</h2>
           </div>
           <p>
-            At Estatein, we combine a refined property experience with personal
-            guidance. Wherever you are in your journey, our experts are here to
-            make the next step simple.
+            At RentDeer, we believe finding or managing a home shouldn&apos;t be
+            stressful. We connect renters and landlords with well-managed
+            spaces, clear communication, and dependable support.
           </p>
         </div>
         <div className="values-grid">
           <div className="value-panel">
             <span className="value-number">01</span>
-            <h3>Curated listings</h3>
-            <p>
-              Every home is selected for its quality, character, and long-term
-              value.
-            </p>
+            <h3>Transparency</h3>
+            <p>Review property details and rental terms before you commit.</p>
           </div>
           <div className="value-panel">
             <span className="value-number">02</span>
-            <h3>Expert guidance</h3>
+            <h3>Community</h3>
             <p>
-              Move forward with a partner who understands both the market and
-              your goals.
+              Live comfortably with support from a team that stays connected.
             </p>
           </div>
           <div className="value-panel">
             <span className="value-number">03</span>
-            <h3>Human support</h3>
-            <p>
-              From first search to final signature, you never have to navigate
-              alone.
-            </p>
+            <h3>Simplicity</h3>
+            <p>Search, enquire, and move in with fewer unknowns.</p>
           </div>
         </div>
       </section>
@@ -360,23 +363,28 @@ export default function Home() {
       <section className="content-section properties-section" id="properties">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">FEATURED PROPERTIES</span>
-            <h2>Find the place that feels like home</h2>
+            <span className="section-kicker">FEATURED RENTALS</span>
+            <h2>Find your new stay</h2>
           </div>
-          <button
-            type="button"
+          <Link
             className="button button-secondary desktop-only"
-            onClick={() => scrollTo("contact")}
+            href="/properties"
           >
-            View All Properties
-          </button>
+            View All Rentals
+          </Link>
         </div>
         <div
           className="property-tabs"
           role="tablist"
           aria-label="Filter properties"
         >
-          {["All", "Villas", "Apartments", "Houses"].map((type) => (
+          {[
+            "All",
+            "Master Bedroom",
+            "Medium Bedroom",
+            "Single Bedroom",
+            "Whole Unit",
+          ].map((type) => (
             <button
               type="button"
               key={type}
@@ -403,25 +411,20 @@ export default function Home() {
                 <span className="property-location">{property.location}</span>
                 <h3>{property.title}</h3>
                 <p>
-                  Spacious interiors and thoughtful details designed for the way
-                  you live.
+                  {property.type} available in a well-managed RentDeer home.
                 </p>
                 <div className="property-details">
                   <span>
-                    <Icon name="building" /> {property.beds} Beds
+                    <Icon name="building" /> {property.beds} Bedroom
                   </span>
                   <span>
-                    <Icon name="spark" /> {property.baths} Baths
+                    <Icon name="spark" /> {property.baths} Toilet
                   </span>
                   <strong>{property.price}</strong>
                 </div>
-                <button
-                  type="button"
-                  className="property-button"
-                  onClick={() => scrollTo("contact")}
-                >
-                  View Property Details <Icon name="arrow" />
-                </button>
+                <Link className="property-button" href="/properties">
+                  View Rental Details <Icon name="arrow" />
+                </Link>
               </div>
             </article>
           ))}
@@ -433,10 +436,12 @@ export default function Home() {
         <div>
           <span className="section-kicker">CLIENT STORIES</span>
           <blockquote>
-            Estatein turned what felt like an overwhelming search into a clear
-            and exciting journey. We found a home that truly feels like ours.
+            They are reliable and operate with integrity. I really recommend
+            RentDeer to anyone looking for great renters.
           </blockquote>
-          <p className="quote-author">— Olivia Martinez, New York</p>
+          <p className="quote-author">
+            — Zulyasih Normalasari, RentDeer tenant
+          </p>
         </div>
       </section>
 
@@ -444,11 +449,11 @@ export default function Home() {
         <div className="section-heading">
           <div>
             <span className="section-kicker">FREQUENTLY ASKED QUESTIONS</span>
-            <h2>Answers for every step of the journey</h2>
+            <h2>Answers before you move in</h2>
           </div>
           <p>
-            Have a question? Explore our answers or reach out to the Estatein
-            team for personal guidance.
+            Find quick answers about deposits, cooking, pets, rental periods,
+            and parking — or reach out to our team.
           </p>
         </div>
         <div className="faq-list">
@@ -474,10 +479,10 @@ export default function Home() {
       <section className="contact-cta" id="contact">
         <div>
           <span className="section-kicker">READY WHEN YOU ARE</span>
-          <h2>Your dream property is just a click away.</h2>
+          <h2>Let&apos;s talk about your next stay.</h2>
           <p>
-            Tell us what you are looking for and our experts will help you take
-            the next step.
+            Whether you are a tenant, landlord, or property agent, RentDeer is
+            here to help.
           </p>
         </div>
         <button
@@ -485,7 +490,7 @@ export default function Home() {
           className="button button-primary"
           onClick={() => (window.location.href = "mailto:hello@estatein.com")}
         >
-          Get Started <Icon name="arrow" />
+          Contact RentDeer <Icon name="arrow" />
         </button>
       </section>
 
@@ -496,14 +501,11 @@ export default function Home() {
             className="brand footer-brand"
             onClick={() => scrollTo("home")}
           >
-            <Image
-              src="/estatein/logo.png"
-              alt="Estatein"
-              width={148}
-              height={45}
-            />
+            <span className="brand-wordmark">
+              <span className="brand-symbol">R</span>RentDeer
+            </span>
           </button>
-          <p>Building better beginnings, one property at a time.</p>
+          <p>Rent smarter. Live better.</p>
         </div>
         <div className="footer-links">
           <div>
@@ -514,11 +516,13 @@ export default function Home() {
             <button type="button" onClick={() => scrollTo("properties")}>
               Properties
             </button>
+            <Link href="/faq">FAQ</Link>
+            <Link href="/bulletin">Bulletin</Link>
           </div>
           <div>
             <strong>Services</strong>
             <button type="button" onClick={() => scrollTo("services")}>
-              Property Management
+              Landlord Services
             </button>
             <button type="button" onClick={() => scrollTo("contact")}>
               Contact Us
@@ -529,7 +533,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() =>
-                (window.location.href = "mailto:hello@estatein.com")
+                (window.location.href = "mailto:hello.rentdeer@gmail.com")
               }
             >
               Email Us
@@ -549,7 +553,7 @@ export default function Home() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Estatein. All Rights Reserved.</span>
+          <span>© 2026 RentDeer Sdn Bhd. All Rights Reserved.</span>
           <span>Privacy Policy&nbsp;&nbsp; · &nbsp;&nbsp;Terms of Use</span>
         </div>
       </footer>

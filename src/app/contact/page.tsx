@@ -22,51 +22,56 @@ function ArrowIcon() {
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
   };
-
   return (
     <main className="contact-page">
       <div className="announcement-bar">
-        <span>✨ Discover Your Dream Property with Estatein</span>
-        <Link href="/about">
-          Learn More <ArrowIcon />
+        <span>✨ Rent smarter. Live better with RentDeer.</span>
+        <Link href="/faq">
+          Read the FAQ <ArrowIcon />
         </Link>
       </div>
       <SiteHeader active="contact" />
       <section className="contact-hero">
-        <span className="section-kicker">CONTACT ESTATEIN</span>
+        <span className="section-kicker">CONTACT RENTDEER</span>
         <h1>
           Let&apos;s make your next move feel <span>simple.</span>
         </h1>
         <p>
-          Whether you are buying, selling, investing, or just beginning to
-          explore, we are here to listen.
+          Whether you are looking for a room, managing a property, or building a
+          partnership, our team is ready to help.
         </p>
       </section>
       <section className="contact-layout content-section">
         <div className="contact-details">
           <span className="section-kicker">START A CONVERSATION</span>
-          <h2>We&apos;d love to hear what you&apos;re looking for.</h2>
+          <h2>We&apos;re here for your next rental step.</h2>
           <p>
-            Tell us a little about your goals and the Estatein team will get
-            back to you with a thoughtful next step.
+            Choose the path that fits your enquiry and the RentDeer team will
+            get back to you.
           </p>
           <div className="contact-detail-list">
-            <a href="mailto:hello@estatein.com">
+            <a href="mailto:hello.rentdeer@gmail.com">
               <strong>Email us</strong>
-              <span>hello@estatein.com</span>
+              <span>hello.rentdeer@gmail.com</span>
             </a>
-            <a href="tel:+12125550184">
-              <strong>Call us</strong>
-              <span>+1 (212) 555-0184</span>
+            <a href="tel:+60192523804">
+              <strong>Tenant enquiries</strong>
+              <span>+6019 252 3804 · WhatsApp +6019 343 3804</span>
+            </a>
+            <a href="tel:+601139282804">
+              <strong>Landlord enquiries</strong>
+              <span>WhatsApp +6011 3928 2804</span>
             </a>
             <div>
               <strong>Visit us</strong>
-              <span>28 Mercer Street, New York</span>
+              <span>
+                S-036 &amp; S-042, Seasons Square, Jalan PJU 10/3C, Damansara
+                Damai, 47380 Petaling Jaya, Selangor, Malaysia
+              </span>
             </div>
           </div>
         </div>
@@ -96,10 +101,11 @@ export default function ContactPage() {
               <option value="" disabled>
                 Select an option
               </option>
-              <option>Buying a property</option>
-              <option>Selling a property</option>
-              <option>Property management</option>
-              <option>Investment advisory</option>
+              <option>Viewing a room</option>
+              <option>Booking a room</option>
+              <option>Landlord management</option>
+              <option>Property agent partnership</option>
+              <option>General question</option>
             </select>
           </label>
           <label>
@@ -116,11 +122,11 @@ export default function ContactPage() {
             <span>I agree to the privacy policy and terms of use.</span>
           </label>
           <button type="submit" className="button button-primary">
-            {submitted ? "Message Sent" : "Send Message"} <ArrowIcon />
+            {submitted ? "Enquiry Ready" : "Send Enquiry"} <ArrowIcon />
           </button>
           {submitted && (
             <p className="form-success" aria-live="polite">
-              Thanks — your message is ready for the Estatein team.
+              Thanks — your enquiry is ready for the RentDeer team.
             </p>
           )}
         </form>
@@ -128,7 +134,7 @@ export default function ContactPage() {
       <section className="contact-cta contact-bottom">
         <div>
           <span className="section-kicker">PREFER TO BROWSE?</span>
-          <h2>Explore properties at your own pace.</h2>
+          <h2>Explore current rental listings.</h2>
         </div>
         <Link className="button button-secondary" href="/properties">
           View Listings <ArrowIcon />

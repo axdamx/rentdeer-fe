@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import SiteHeader from "@/components/site-header";
-import { properties } from "@/lib/properties";
+import { cities, properties, roomTypes } from "@/lib/properties";
 
 function SearchIcon() {
   return (
@@ -41,35 +41,46 @@ function ArrowIcon() {
 
 const prices = [
   ["Any budget", 0],
-  ["Under $1M", 1000000],
-  ["Under $2M", 2000000],
-  ["Under $3M", 3000000],
+  ["Under RM600", 600],
+  ["Under RM1,000", 1000],
+  ["Under RM1,600", 1600],
+  ["Under RM2,200", 2200],
 ] as const;
 
 export default function PropertiesPage() {
-  const [intent, setIntent] = useState("Buy");
+  const [furnishedOnly, setFurnishedOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("All");
+  const [city, setCity] = useState("All locations");
   const [maxPrice, setMaxPrice] = useState(0);
   const [searched, setSearched] = useState(false);
 
   const filteredProperties = useMemo(
     () =>
       properties.filter((property) => {
-        const matchesQuery = `${property.title} ${property.location}`
-          .toLowerCase()
-          .includes(query.trim().toLowerCase());
-        const matchesType = type === "All" || property.type === type;
-        const matchesPrice = maxPrice === 0 || property.price <= maxPrice;
-        return matchesQuery && matchesType && matchesPrice;
+        const matchesQuery =
+          `${property.title} ${property.location} ${property.roomType}`
+            .toLowerCase()
+            .includes(query.trim().toLowerCase());
+        const matchesType = type === "All" || property.roomType === type;
+        const matchesCity = city === "All locations" || property.city === city;
+        const matchesPrice = maxPrice === 0 || property.monthlyRent <= maxPrice;
+        const matchesFurnished = !furnishedOnly || property.furnished;
+        return (
+          matchesQuery &&
+          matchesType &&
+          matchesCity &&
+          matchesPrice &&
+          matchesFurnished
+        );
       }),
-    [maxPrice, query, type],
+    [city, furnishedOnly, maxPrice, query, type],
   );
 
   return (
     <main className="listing-page">
       <div className="announcement-bar">
-        <span>✨ Discover Your Dream Property with Estatein</span>
+        <span>✨ Rent smarter. Live better with RentDeer.</span>
         <Link href="/about">
           Learn More <ArrowIcon />
         </Link>
@@ -78,62 +89,74 @@ export default function PropertiesPage() {
 
       <section className="listing-hero">
         <div className="listing-hero-copy">
-          <span className="section-kicker">PROPERTY COLLECTION</span>
+          <span className="section-kicker">FIND YOUR NEW STAY</span>
           <h1>
-            Find a place that feels like <span>yours.</span>
+            Find a room that feels like <span>home.</span>
           </h1>
           <p>
-            Explore our handpicked selection of homes and investment
-            opportunities, each chosen to make your next move feel clear.
+            Browse clean, affordable, ready-to-move-in rooms and units across
+            Klang Valley, with the details you need before you enquire.
           </p>
         </div>
         <search className="search-panel" aria-label="Search properties">
           <div
             className="search-tabs"
             role="tablist"
-            aria-label="Listing intent"
+            aria-label="Listing filters"
           >
             <button
               type="button"
-              className={intent === "Buy" ? "is-selected" : ""}
-              onClick={() => setIntent("Buy")}
+              className={!furnishedOnly ? "is-selected" : ""}
+              onClick={() => setFurnishedOnly(false)}
             >
-              Buy
+              All stays
             </button>
             <button
               type="button"
-              className={intent === "Rent" ? "is-selected" : ""}
-              onClick={() => setIntent("Rent")}
+              className={furnishedOnly ? "is-selected" : ""}
+              onClick={() => setFurnishedOnly(true)}
             >
-              Rent
+              Fully furnished
             </button>
           </div>
           <div className="search-row">
             <label>
-              <span>Location or keyword</span>
+              <span>Search keyword</span>
               <div className="input-with-icon">
                 <SearchIcon />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="e.g. Malibu, villa"
+                  placeholder="e.g. Damansara, master room"
                 />
               </div>
             </label>
             <label>
-              <span>Property type</span>
+              <span>City</span>
+              <select
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+              >
+                <option>All locations</option>
+                {cities.map((location) => (
+                  <option key={location}>{location}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Room type</span>
               <select
                 value={type}
                 onChange={(event) => setType(event.target.value)}
               >
                 <option>All</option>
-                <option>Villas</option>
-                <option>Apartments</option>
-                <option>Houses</option>
+                {roomTypes.map((roomType) => (
+                  <option key={roomType}>{roomType}</option>
+                ))}
               </select>
             </label>
             <label>
-              <span>Price range</span>
+              <span>Monthly budget</span>
               <select
                 value={maxPrice}
                 onChange={(event) => setMaxPrice(Number(event.target.value))}
@@ -155,7 +178,7 @@ export default function PropertiesPage() {
           </div>
           {searched && (
             <p className="search-feedback" aria-live="polite">
-              Showing {filteredProperties.length} {intent.toLowerCase()}{" "}
+              Showing {filteredProperties.length} rental{" "}
               {filteredProperties.length === 1 ? "property" : "properties"}{" "}
               matching your search.
             </p>
@@ -167,16 +190,16 @@ export default function PropertiesPage() {
         <div className="section-heading">
           <div>
             <span className="section-kicker">EXPLORE LISTINGS</span>
-            <h2>{filteredProperties.length} properties waiting for you</h2>
+            <h2>{filteredProperties.length} stays waiting for you</h2>
           </div>
           <p>
-            Refine your search anytime. Every listing includes the details you
-            need to take the next step with confidence.
+            Refine by room type, city, and monthly budget. Every listing is
+            built around the details renters need to decide with confidence.
           </p>
         </div>
         <div className="listing-toolbar">
           <div className="listing-filters">
-            {["All", "Villas", "Apartments", "Houses"].map((filter) => (
+            {["All", ...roomTypes].map((filter) => (
               <button
                 type="button"
                 className={type === filter ? "is-selected" : ""}
@@ -205,22 +228,24 @@ export default function PropertiesPage() {
                     fill
                     sizes="(max-width: 760px) 100vw, 33vw"
                   />
-                  <span>{property.type}</span>
+                  <span>{property.roomType}</span>
                 </Link>
                 <div className="property-content">
-                  <span className="property-location">{property.location}</span>
+                  <span className="property-location">{property.city}</span>
                   <h3>{property.title}</h3>
                   <p>{property.description}</p>
                   <div className="property-details">
-                    <span>{property.beds} Beds</span>
-                    <span>{property.baths} Baths</span>
-                    <strong>${property.price.toLocaleString()}</strong>
+                    <span>{property.bedrooms} Bedroom</span>
+                    <span>{property.toilets} Toilet</span>
+                    <strong>
+                      RM{property.monthlyRent.toLocaleString()} / month
+                    </strong>
                   </div>
                   <Link
                     className="property-button"
                     href={`/properties/${property.slug}`}
                   >
-                    View Property Details <ArrowIcon />
+                    View Rental Details <ArrowIcon />
                   </Link>
                 </div>
               </article>
@@ -229,14 +254,16 @@ export default function PropertiesPage() {
         ) : (
           <div className="empty-results">
             <h3>No properties match those filters.</h3>
-            <p>Try a different location, property type, or price range.</p>
+            <p>Try a different city, room type, or monthly budget.</p>
             <button
               type="button"
               className="button button-secondary"
               onClick={() => {
                 setQuery("");
                 setType("All");
+                setCity("All locations");
                 setMaxPrice(0);
+                setFurnishedOnly(false);
               }}
             >
               Clear Filters
@@ -248,14 +275,14 @@ export default function PropertiesPage() {
       <section className="contact-cta listing-cta">
         <div>
           <span className="section-kicker">NEED A LITTLE HELP?</span>
-          <h2>Let&apos;s find the right fit together.</h2>
+          <h2>Let&apos;s find your next stay together.</h2>
           <p>
-            Share what you are looking for and an Estatein advisor will curate a
+            Share what you are looking for and a RentDeer advisor will curate a
             shortlist for you.
           </p>
         </div>
         <Link className="button button-primary" href="/contact">
-          Talk to an Advisor <ArrowIcon />
+          Talk to RentDeer <ArrowIcon />
         </Link>
       </section>
     </main>

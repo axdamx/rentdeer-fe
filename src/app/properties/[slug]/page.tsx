@@ -36,9 +36,9 @@ export default async function PropertyDetailPage({
   return (
     <main className="property-detail-page">
       <div className="announcement-bar">
-        <span>✨ Discover Your Dream Property with Estatein</span>
+        <span>✨ Rent smarter. Live better with RentDeer.</span>
         <Link href="/about">
-          Learn More <ArrowIcon />
+          Our Story <ArrowIcon />
         </Link>
       </div>
       <SiteHeader active="properties" />
@@ -58,15 +58,17 @@ export default async function PropertyDetailPage({
           />
         </div>
         <div className="detail-copy">
-          <span className="property-location">{property.location}</span>
+          <span className="property-location">
+            {property.city} · {property.roomType}
+          </span>
           <h1>{property.title}</h1>
           <p>{property.description}</p>
           <div className="detail-price">
-            <span>Price</span>
-            <strong>${property.price.toLocaleString()}</strong>
+            <span>Monthly rent</span>
+            <strong>RM{property.monthlyRent.toLocaleString()} / month</strong>
           </div>
           <Link className="button button-primary" href="/contact">
-            Inquire About This Property <ArrowIcon />
+            Enquire About This Stay <ArrowIcon />
           </Link>
         </div>
       </section>
@@ -74,34 +76,33 @@ export default async function PropertyDetailPage({
         <div className="detail-specs">
           <div>
             <span>Bedrooms</span>
-            <strong>{property.beds}</strong>
+            <strong>{property.bedrooms}</strong>
           </div>
           <div>
-            <span>Bathrooms</span>
-            <strong>{property.baths}</strong>
+            <span>Toilets</span>
+            <strong>{property.toilets}</strong>
           </div>
           <div>
             <span>Property size</span>
             <strong>{property.area}</strong>
           </div>
           <div>
-            <span>Property type</span>
-            <strong>{property.type}</strong>
+            <span>Room type</span>
+            <strong>{property.roomType}</strong>
           </div>
         </div>
         <div className="detail-lower">
           <div>
-            <span className="section-kicker">PROPERTY OVERVIEW</span>
-            <h2>Designed for how you want to live.</h2>
+            <span className="section-kicker">RENTAL OVERVIEW</span>
+            <h2>Everything you need before you move in.</h2>
             <p>
-              {property.description} Every detail has been considered to create
-              a home that feels effortlessly yours, from the first step through
-              the front door.
+              {property.description} Review the amenities, facilities, rental
+              terms, and support available before sending your enquiry.
             </p>
           </div>
           <div className="detail-feature-box">
-            <span className="section-kicker">HIGHLIGHTS</span>
-            {property.features.map((feature) => (
+            <span className="section-kicker">AMENITIES &amp; FACILITIES</span>
+            {[...property.amenities, ...property.facilities].map((feature) => (
               <div key={feature}>
                 <span className="detail-check">✓</span>
                 {feature}
@@ -113,14 +114,14 @@ export default async function PropertyDetailPage({
       <section className="contact-cta detail-cta">
         <div>
           <span className="section-kicker">TAKE THE NEXT STEP</span>
-          <h2>Could this be your next chapter?</h2>
+          <h2>Ready to make this your next stay?</h2>
           <p>
-            Our property team can answer your questions and arrange a private
-            viewing.
+            Our tenant enquiry team can answer your questions and help you
+            understand the booking process.
           </p>
         </div>
         <Link className="button button-primary" href="/contact">
-          Request a Viewing <ArrowIcon />
+          Submit Enquiry <ArrowIcon />
         </Link>
       </section>
     </main>

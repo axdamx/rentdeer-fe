@@ -11,14 +11,14 @@
 :root {
   --bg: #f7f7f5;
   --surface: #ffffff;
-  --surface-soft: #f1f0f4;
-  --surface-violet: #f0ecff;
+  --surface-soft: #f1f4f1;
+  --surface-violet: #edf5ee;
   --line: #e4e1e9;
   --muted: #6e6b76;
   --text: #1b1922;
-  --violet: #7138e9;
-  --violet-dark: #5d27cf;
-  --violet-soft: #a58cff;
+  --violet: #185519;
+  --violet-dark: #103b11;
+  --violet-soft: #84a787;
 }
 
 * {
@@ -97,6 +97,26 @@ a {
   height: auto;
   width: 148px;
 }
+.brand-wordmark {
+  align-items: center;
+  display: inline-flex;
+  font-size: 22px;
+  font-weight: 780;
+  letter-spacing: -0.06em;
+}
+.brand-symbol {
+  align-items: center;
+  background: var(--violet);
+  border-radius: 5px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 17px;
+  height: 28px;
+  justify-content: center;
+  letter-spacing: -0.08em;
+  margin-right: 6px;
+  width: 28px;
+}
 .main-nav {
   align-items: center;
   background: var(--surface);
@@ -122,7 +142,7 @@ a {
 .nav-link:hover,
 .nav-link.active {
   background: var(--surface-violet);
-  border-color: #dbd0ff;
+  border-color: #cfe2d0;
   color: var(--violet-dark);
 }
 .contact-button {
@@ -131,7 +151,7 @@ a {
 }
 .contact-button:hover,
 .button-secondary:hover {
-  border-color: #ae91f9;
+  border-color: #9cbd9e;
   color: var(--violet-dark);
 }
 .menu-toggle {
@@ -267,7 +287,7 @@ a {
 .orbit-badge {
   align-items: center;
   background: rgba(255, 255, 255, 0.86);
-  border: 1px solid #c7b6fc;
+  border: 1px solid #a9c8aa;
   border-radius: 50%;
   box-shadow: 0 14px 35px rgba(52, 28, 111, 0.18);
   color: var(--violet-dark);
@@ -325,7 +345,7 @@ a {
 .feature-icon {
   align-items: center;
   background: var(--surface-violet);
-  border: 1px solid #d3c7ff;
+  border: 1px solid #cfe2d0;
   border-radius: 50%;
   color: var(--violet);
   display: flex;
@@ -437,7 +457,7 @@ a {
 .property-tabs button.is-selected,
 .property-tabs button:hover {
   background: var(--surface-violet);
-  border-color: #c9b9ff;
+  border-color: #b8d1ba;
   color: var(--violet-dark);
 }
 .property-grid {
@@ -467,7 +487,7 @@ a {
 }
 .property-image span {
   background: rgba(255, 255, 255, 0.88);
-  border: 1px solid #ddd0ff;
+  border: 1px solid #d2e3d3;
   border-radius: 4px;
   bottom: 15px;
   color: var(--violet-dark);
@@ -547,8 +567,8 @@ a {
 .testimonial-section {
   align-items: center;
   background: var(--surface-violet);
-  border-bottom: 1px solid #ded4ff;
-  border-top: 1px solid #ded4ff;
+  border-bottom: 1px solid #d2e3d3;
+  border-top: 1px solid #d2e3d3;
   display: grid;
   gap: 70px;
   grid-template-columns: 160px 1fr;
@@ -612,8 +632,8 @@ blockquote {
 }
 .contact-cta {
   align-items: center;
-  background: linear-gradient(120deg, #f0ecff, #fff);
-  border: 1px solid #d8ccff;
+  background: linear-gradient(120deg, #edf5ee, #fff);
+  border: 1px solid #d2e3d3;
   display: flex;
   gap: 40px;
   justify-content: space-between;
@@ -880,6 +900,17 @@ blockquote {
   color: var(--violet);
   font-size: 12px;
   margin: 0;
+}
+.team-card-bio {
+  border-top: 1px solid var(--line);
+  margin-top: 17px;
+  padding-top: 15px;
+}
+.team-card-bio p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 0 10px;
 }
 .about-cta {
   margin-top: 120px;
@@ -1237,7 +1268,7 @@ blockquote {
   border-top: 1px solid var(--line);
   display: grid;
   gap: 10px;
-  grid-template-columns: 1.6fr 1fr 1fr auto;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr auto;
   padding: 15px 6px 6px;
 }
 .search-row label {
@@ -1266,7 +1297,7 @@ blockquote {
 .search-row select {
   appearance: none;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237138e9' stroke-width='2'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23185519' stroke-width='2'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E")
     right center / 13px no-repeat;
   padding-right: 16px;
 }
@@ -1326,7 +1357,7 @@ blockquote {
 .listing-filters button.is-selected,
 .listing-filters button:hover {
   background: var(--surface-violet);
-  border-color: #c9b9ff;
+  border-color: #b8d1ba;
   color: var(--violet-dark);
 }
 .listing-grid .property-image {
@@ -1504,7 +1535,7 @@ blockquote {
 }
 .services-hero-stat {
   background: var(--surface-violet);
-  border: 1px solid #dbd0ff;
+  border: 1px solid #cfe2d0;
   border-radius: 8px;
   display: flex;
   flex: 0 0 270px;
@@ -1577,8 +1608,8 @@ blockquote {
 .process-section {
   align-items: center;
   background: var(--surface-violet);
-  border-bottom: 1px solid #ded4ff;
-  border-top: 1px solid #ded4ff;
+  border-bottom: 1px solid #d2e3d3;
+  border-top: 1px solid #d2e3d3;
   display: grid;
   gap: 90px;
   grid-template-columns: 0.9fr 1.1fr;
@@ -1709,12 +1740,12 @@ blockquote {
 .contact-form select:focus,
 .contact-form textarea:focus {
   background: #fff;
-  border-color: #bfaaff;
-  box-shadow: 0 0 0 3px #f0ecff;
+  border-color: #9cbd9e;
+  box-shadow: 0 0 0 3px #edf5ee;
 }
 .contact-form select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237138e9' stroke-width='2'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23185519' stroke-width='2'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
   background-position: calc(100% - 14px) center;
   background-repeat: no-repeat;
 }
@@ -1746,10 +1777,119 @@ blockquote {
 .contact-bottom {
   margin-top: 0;
 }
+.faq-page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+.faq-page-hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 105px max(24px, 8.5vw) 118px;
+}
+.faq-page-hero h1 {
+  font-size: clamp(44px, 6vw, 79px);
+  font-weight: 550;
+  letter-spacing: -0.065em;
+  line-height: 0.99;
+  margin: 18px 0 23px;
+  max-width: 800px;
+}
+.faq-page-hero h1 span {
+  color: var(--violet);
+}
+.faq-page-hero p {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 640px;
+}
+.faq-page-content {
+  padding-top: 105px;
+}
+.faq-cta {
+  margin-top: 0;
+}
+.bulletin-page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+.bulletin-hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 105px max(24px, 8.5vw) 118px;
+}
+.bulletin-hero h1 {
+  font-size: clamp(44px, 6vw, 79px);
+  font-weight: 550;
+  letter-spacing: -0.065em;
+  line-height: 0.99;
+  margin: 18px 0 23px;
+  max-width: 800px;
+}
+.bulletin-hero h1 span {
+  color: var(--violet);
+}
+.bulletin-hero p {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 640px;
+}
+.bulletin-content {
+  padding-top: 105px;
+}
+.bulletin-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+}
+.bulletin-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 310px;
+  padding: 26px;
+}
+.bulletin-number {
+  color: var(--violet);
+  display: block;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  margin-bottom: 42px;
+}
+.bulletin-card h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 13px 0 12px;
+}
+.bulletin-card p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+.bulletin-card a {
+  align-items: center;
+  color: var(--violet-dark);
+  display: inline-flex;
+  font-size: 12px;
+  gap: 7px;
+  margin-top: 22px;
+}
+.bulletin-card svg {
+  height: 14px;
+  width: 14px;
+}
+.bulletin-cta {
+  margin-top: 0;
+}
 
 @media (max-width: 900px) {
   .search-row {
-    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
   }
   .search-submit {
     grid-column: 1 / -1;
@@ -1783,13 +1923,20 @@ blockquote {
   }
   .listing-hero h1,
   .contact-hero h1,
-  .services-hero h1 {
+  .services-hero h1,
+  .faq-page-hero h1 {
     font-size: 48px;
   }
   .listing-hero-copy p,
   .contact-hero p,
   .services-hero p {
     font-size: 14px;
+  }
+  .faq-page-hero {
+    padding: 75px 24px 85px;
+  }
+  .bulletin-hero {
+    padding: 75px 24px 85px;
   }
   .search-panel {
     margin-top: 55px;
@@ -1893,6 +2040,15 @@ blockquote {
   }
   .contact-hero {
     padding: 75px 24px 85px;
+  }
+  .faq-page-content {
+    padding-top: 78px;
+  }
+  .bulletin-content {
+    padding-top: 78px;
+  }
+  .bulletin-grid {
+    grid-template-columns: 1fr;
   }
   .contact-layout {
     display: flex;

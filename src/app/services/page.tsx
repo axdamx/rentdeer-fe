@@ -20,33 +20,57 @@ function ArrowIcon() {
 const services = [
   [
     "01",
-    "Valuation Mastery",
-    "Understand what your property is worth with market context, local expertise, and a clear plan for what comes next.",
+    "Find your next stay",
+    "Search by city, room type, and monthly budget, then review the details that matter before you enquire.",
   ],
   [
     "02",
-    "Strategic Marketing",
-    "Give your property the attention it deserves through thoughtful positioning, compelling storytelling, and the right audience.",
+    "Tenant support",
+    "Get help with viewing, booking, deposits, rental terms, maintenance, and the move-in journey.",
   ],
   [
     "03",
-    "Negotiation Wizardry",
-    "Protect your interests with a steady, experienced partner who knows how to move conversations forward.",
+    "Landlord management",
+    "List your property, keep it ready for tenants, and rely on a team that supports the day-to-day rental experience.",
   ],
   [
     "04",
-    "Property Management",
-    "Make ownership feel effortless with reliable support for the details that keep your investment moving.",
+    "Digital agreements",
+    "Enter property details, customise the agreement, secure CTC and stamp duty, then generate and share it.",
   ],
   [
     "05",
-    "Investment Advisory",
-    "Turn opportunity into strategy with practical guidance for building a property portfolio around your goals.",
+    "Property agent partnership",
+    "Register under your company, close deals, track commission management, and redeem points to cash.",
   ],
   [
     "06",
-    "Relocation Support",
-    "Settle into a new city with a local partner who understands the practical and personal side of moving.",
+    "Reliable aftercare",
+    "Keep communication moving with practical support for tenants, owners, and partners after the keys change hands.",
+  ],
+];
+
+const flows = [
+  [
+    "For tenants",
+    "Transparent & convenient",
+    "Simple & secure",
+    "Preview before signing",
+    "Digitally sign anywhere",
+  ],
+  [
+    "For landlords",
+    "Enter property details",
+    "Customise agreement",
+    "Secure CTC & stamp duty",
+    "Generate & share",
+  ],
+  [
+    "For property agents",
+    "Register under company",
+    "Close the deal",
+    "Manage commission",
+    "Redeem points to cash",
   ],
 ];
 
@@ -54,40 +78,41 @@ export default function ServicesPage() {
   return (
     <main className="services-page">
       <div className="announcement-bar">
-        <span>✨ Discover Your Dream Property with Estatein</span>
+        <span>✨ Rent smarter. Live better with RentDeer.</span>
         <Link href="/about">
-          Learn More <ArrowIcon />
+          Our Story <ArrowIcon />
         </Link>
       </div>
       <SiteHeader active="services" />
       <section className="services-hero">
         <div>
-          <span className="section-kicker">ESTATEIN SERVICES</span>
+          <span className="section-kicker">RENTDEER SERVICES</span>
           <h1>
-            More than a property search.{" "}
-            <span>A partner for what&apos;s next.</span>
+            One rental journey, with support for <span>everyone.</span>
           </h1>
           <p>
-            From your first question to the moment the keys are yours, our
-            services are designed to make real estate feel clearer, calmer, and
-            more rewarding.
+            RentDeer makes it easier for tenants to find a home, landlords to
+            manage a property, and agents to move deals forward.
           </p>
         </div>
         <div className="services-hero-stat">
-          <strong>360°</strong>
-          <span>Property support</span>
-          <small>One considered experience, built around you.</small>
+          <strong>3</strong>
+          <span>Connected rental flows</span>
+          <small>
+            Tenant, landlord, and agent support in one considered experience.
+          </small>
         </div>
       </section>
       <section className="about-section services-list">
         <div className="section-heading">
           <div>
             <span className="section-kicker">HOW WE HELP</span>
-            <h2>Expertise that meets you where you are.</h2>
+            <h2>Practical support for every side of renting.</h2>
           </div>
           <p>
-            Choose the support that fits your current chapter. Our services work
-            together, so you can move from an idea to a confident decision.
+            Choose the service that fits your current chapter. RentDeer keeps
+            the next step clear, from first search to signed agreement and
+            beyond.
           </p>
         </div>
         <div className="services-grid">
@@ -105,42 +130,36 @@ export default function ServicesPage() {
       </section>
       <section className="process-section">
         <div className="process-copy">
-          <span className="section-kicker">OUR APPROACH</span>
-          <h2>A process that feels as considered as the property.</h2>
+          <span className="section-kicker">ROLE-BASED FLOWS</span>
+          <h2>Clear steps make better rental decisions.</h2>
           <p>
-            We keep the experience focused, honest, and easy to navigate. That
-            means fewer surprises, better questions, and a plan you can trust.
+            Our flow is designed around what each participant needs to do next,
+            with useful information and fewer handoffs.
           </p>
         </div>
         <div className="process-steps">
-          <div>
-            <strong>01</strong>
-            <h3>Listen first</h3>
-            <p>We start with your goals, not a sales pitch.</p>
-          </div>
-          <div>
-            <strong>02</strong>
-            <h3>Make it clear</h3>
-            <p>We turn options and market details into useful direction.</p>
-          </div>
-          <div>
-            <strong>03</strong>
-            <h3>Move with you</h3>
-            <p>We stay close through every important decision.</p>
-          </div>
+          {flows.map(([role, first, second, third, fourth]) => (
+            <div key={role}>
+              <strong>{role}</strong>
+              <h3>{first}</h3>
+              <p>
+                {second} · {third} · {fourth}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
       <section className="contact-cta services-cta">
         <div>
           <span className="section-kicker">LET&apos;S TALK</span>
-          <h2>Have a property question?</h2>
+          <h2>Need help choosing your next step?</h2>
           <p>
-            Our team is ready to help you find the right service for your next
-            move.
+            Tell RentDeer whether you are looking for a stay, managing a
+            property, or exploring a partnership.
           </p>
         </div>
         <Link className="button button-primary" href="/contact">
-          Contact Estatein <ArrowIcon />
+          Contact RentDeer <ArrowIcon />
         </Link>
       </section>
     </main>

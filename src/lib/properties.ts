@@ -1,130 +1,182 @@
+export type RoomType =
+  | "Master Bedroom"
+  | "Medium Bedroom"
+  | "Single Bedroom"
+  | "Small Room"
+  | "Soho/Studio"
+  | "Whole Unit";
+
 export type Property = {
   slug: string;
   title: string;
   location: string;
-  type: "Villas" | "Apartments" | "Houses";
+  city: string;
+  roomType: RoomType;
   image: string;
-  price: number;
-  beds: number;
-  baths: number;
+  monthlyRent: number;
+  bedrooms: number;
+  toilets: number;
   area: string;
   description: string;
-  features: string[];
+  furnished: boolean;
+  amenities: string[];
+  facilities: string[];
 };
+
+export const cities = [
+  "Ara Damansara",
+  "Cheras",
+  "Damansara Damai",
+  "Kelana Jaya",
+  "Kepong",
+  "Kota Damansara",
+  "Kuala Lumpur",
+  "Petaling Jaya",
+  "Puchong",
+  "Sentul",
+  "Seri Kembangan",
+] as const;
+
+export const roomTypes: RoomType[] = [
+  "Master Bedroom",
+  "Medium Bedroom",
+  "Single Bedroom",
+  "Small Room",
+  "Soho/Studio",
+  "Whole Unit",
+];
 
 export const properties: Property[] = [
   {
-    slug: "seaside-serenity-villa",
-    title: "Seaside Serenity Villa",
-    location: "Malibu, California",
-    type: "Villas",
+    slug: "fully-furnished-master-room-damansara-damai",
+    title: "Fully Furnished Master Room",
+    location: "Seasons Square, Damansara Damai",
+    city: "Damansara Damai",
+    roomType: "Master Bedroom",
     image: "/estatein/property-villa.png",
-    price: 2850000,
-    beds: 4,
-    baths: 3,
-    area: "2,850 sq. ft.",
+    monthlyRent: 850,
+    bedrooms: 1,
+    toilets: 1,
+    area: "220 sq. ft.",
     description:
-      "A calm, light-filled retreat with open living spaces, a private pool, and uninterrupted views of the Pacific.",
-    features: [
-      "Ocean-facing terrace",
-      "Chef's kitchen",
-      "Private swimming pool",
-      "Smart home controls",
+      "A clean, move-in-ready master room in a well-connected community, with practical living spaces and a responsive support team.",
+    furnished: true,
+    amenities: [
+      "Bed and mattress",
+      "Wardrobe",
+      "Study table",
+      "Air conditioning",
+    ],
+    facilities: [
+      "Shared kitchen",
+      "Laundry area",
+      "24-hour security",
+      "Parking on request",
     ],
   },
   {
-    slug: "metropolitan-haven",
-    title: "Metropolitan Haven",
-    location: "New York, New York",
-    type: "Apartments",
+    slug: "medium-room-kota-damansara",
+    title: "Bright Medium Room",
+    location: "Kota Damansara, Petaling Jaya",
+    city: "Kota Damansara",
+    roomType: "Medium Bedroom",
     image: "/estatein/property-tower.png",
-    price: 1650000,
-    beds: 2,
-    baths: 2,
-    area: "1,480 sq. ft.",
+    monthlyRent: 700,
+    bedrooms: 1,
+    toilets: 1,
+    area: "180 sq. ft.",
     description:
-      "A polished city apartment designed around generous views, considered materials, and the energy of downtown living.",
-    features: [
-      "Floor-to-ceiling windows",
-      "Resident's lounge",
-      "Fitness studio access",
-      "24-hour concierge",
+      "A bright and comfortable room for renters who want a straightforward move-in experience close to daily essentials and transit.",
+    furnished: true,
+    amenities: ["Single bed", "Wardrobe", "Ceiling fan", "Natural light"],
+    facilities: [
+      "Shared kitchen",
+      "High-speed Wi-Fi",
+      "Common lounge",
+      "Visitor parking",
     ],
   },
   {
-    slug: "rustic-retreat-cottage",
-    title: "Rustic Retreat Cottage",
-    location: "Austin, Texas",
-    type: "Houses",
+    slug: "single-room-kelana-jaya",
+    title: "Ready Single Room",
+    location: "Kelana Jaya, Petaling Jaya",
+    city: "Kelana Jaya",
+    roomType: "Single Bedroom",
     image: "/estatein/property-campus.png",
-    price: 850000,
-    beds: 3,
-    baths: 2,
-    area: "2,120 sq. ft.",
+    monthlyRent: 550,
+    bedrooms: 1,
+    toilets: 1,
+    area: "140 sq. ft.",
     description:
-      "A warm, characterful home surrounded by open space, pairing quiet mornings with easy access to the city.",
-    features: [
-      "Mature garden",
-      "Outdoor entertaining deck",
-      "Dedicated home office",
-      "Two-car garage",
+      "An affordable, ready-to-rent room with simple comforts and a location that keeps work, food, and transport within easy reach.",
+    furnished: true,
+    amenities: ["Single bed", "Storage", "Desk", "Fan"],
+    facilities: [
+      "Shared kitchen",
+      "Laundry area",
+      "Gated access",
+      "Maintenance support",
     ],
   },
   {
-    slug: "skyline-residence",
-    title: "Skyline Residence",
-    location: "Chicago, Illinois",
-    type: "Apartments",
-    image: "/estatein/property-tower.png",
-    price: 1240000,
-    beds: 2,
-    baths: 2,
-    area: "1,260 sq. ft.",
-    description:
-      "An elevated residence with a flexible floor plan and a front-row seat to the city's changing skyline.",
-    features: [
-      "Private balcony",
-      "Parking included",
-      "Rooftop garden",
-      "Transit at the door",
-    ],
-  },
-  {
-    slug: "garden-house",
-    title: "The Garden House",
-    location: "Portland, Oregon",
-    type: "Houses",
+    slug: "soho-studio-ara-damansara",
+    title: "Private Soho Studio",
+    location: "Ara Damansara, Selangor",
+    city: "Ara Damansara",
+    roomType: "Soho/Studio",
     image: "/estatein/property-villa.png",
-    price: 975000,
-    beds: 3,
-    baths: 2,
-    area: "1,960 sq. ft.",
+    monthlyRent: 1500,
+    bedrooms: 1,
+    toilets: 1,
+    area: "480 sq. ft.",
     description:
-      "A modern garden home that balances clean architecture with a softer, slower way of living.",
-    features: [
-      "Glass garden room",
-      "Solar-ready roof",
-      "Natural stone finishes",
-      "Quiet cul-de-sac",
+      "A private studio for renters who want more room to work, rest, and make the space their own without the complexity of a full lease search.",
+    furnished: true,
+    amenities: ["Queen bed", "Kitchenette", "Work desk", "Built-in storage"],
+    facilities: ["Swimming pool", "Gym", "Covered parking", "24-hour security"],
+  },
+  {
+    slug: "whole-unit-cheras",
+    title: "Family Whole Unit",
+    location: "Cheras, Kuala Lumpur",
+    city: "Cheras",
+    roomType: "Whole Unit",
+    image: "/estatein/property-campus.png",
+    monthlyRent: 2200,
+    bedrooms: 3,
+    toilets: 2,
+    area: "980 sq. ft.",
+    description:
+      "A practical whole-unit home for families or housemates, with flexible rooms, shared facilities, and easy access to the city.",
+    furnished: true,
+    amenities: ["Three bedrooms", "Living room", "Dining area", "Kitchen"],
+    facilities: [
+      "Playground",
+      "Covered parking",
+      "Security patrol",
+      "Nearby transit",
     ],
   },
   {
-    slug: "blue-hour-estate",
-    title: "Blue Hour Estate",
-    location: "San Diego, California",
-    type: "Villas",
-    image: "/estatein/property-campus.png",
-    price: 3125000,
-    beds: 5,
-    baths: 4,
-    area: "3,420 sq. ft.",
+    slug: "small-room-sentul",
+    title: "Simple Small Room",
+    location: "Sentul, Kuala Lumpur",
+    city: "Sentul",
+    roomType: "Small Room",
+    image: "/estatein/property-tower.png",
+    monthlyRent: 450,
+    bedrooms: 1,
+    toilets: 1,
+    area: "110 sq. ft.",
     description:
-      "A generous coastal estate built for hosting, unwinding, and making the most of long California evenings.",
-    features: [
-      "Panoramic sunset views",
-      "Guest suite",
-      "Infinity-edge pool",
-      "Landscaped courtyard",
+      "A neat, budget-friendly room for renters who value simplicity, clear rental terms, and a home that is ready when they are.",
+    furnished: true,
+    amenities: ["Single bed", "Wardrobe", "Fan", "Window"],
+    facilities: [
+      "Shared kitchen",
+      "Laundry area",
+      "Gated access",
+      "Customer care",
     ],
   },
 ];
