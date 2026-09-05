@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
 function ArrowIcon() {
@@ -93,6 +94,7 @@ export default function BulletinPage() {
           View Properties <ArrowIcon />
         </Link>
       </section>
+      <SiteFooter />
     </main>
   );
 }

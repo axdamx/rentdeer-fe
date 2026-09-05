@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import PropertyGallery from "@/components/property-gallery";
 import SiteHeader from "@/components/site-header";
 import { cities, properties, roomTypes } from "@/lib/properties";
 
@@ -218,18 +218,12 @@ export default function PropertiesPage() {
           <div className="property-grid listing-grid">
             {filteredProperties.map((property) => (
               <article className="property-card" key={property.slug}>
-                <Link
+                <PropertyGallery
                   className="property-image"
-                  href={`/properties/${property.slug}`}
-                >
-                  <Image
-                    src={property.image}
-                    alt={property.title}
-                    fill
-                    sizes="(max-width: 760px) 100vw, 33vw"
-                  />
-                  <span>{property.roomType}</span>
-                </Link>
+                  images={[property.image]}
+                  alt={property.title}
+                  label={property.roomType}
+                />
                 <div className="property-content">
                   <span className="property-location">{property.city}</span>
                   <h3>{property.title}</h3>

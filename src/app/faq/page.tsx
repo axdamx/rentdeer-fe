@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
 function ArrowIcon() {
@@ -132,6 +133,7 @@ export default function FAQPage() {
           Contact Us <ArrowIcon />
         </Link>
       </section>
+      <SiteFooter />
     </main>
   );
 }

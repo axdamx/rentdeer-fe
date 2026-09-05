@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
 function ArrowIcon() {
@@ -253,38 +254,7 @@ export default function AboutPage() {
           Explore Properties <ArrowIcon />
         </Link>
       </section>
-      <footer className="site-footer about-footer">
-        <div>
-          <Link className="brand footer-brand" href="/">
-            <span className="brand-wordmark">
-              <span className="brand-symbol">R</span>RentDeer
-            </span>
-          </Link>
-          <p>Rent smarter. Live better.</p>
-        </div>
-        <div className="footer-links">
-          <div>
-            <strong>Explore</strong>
-            <Link href="/">Home</Link>
-            <Link href="/about">About Us</Link>
-            <Link href="/faq">FAQ</Link>
-          </div>
-          <div>
-            <strong>Discover</strong>
-            <Link href="/properties">Properties</Link>
-            <Link href="/services">Services</Link>
-          </div>
-          <div>
-            <strong>Connect</strong>
-            <a href="mailto:hello.rentdeer@gmail.com">Email Us</a>
-            <a href="/contact">Contact Us</a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>© 2026 RentDeer Sdn Bhd. All Rights Reserved.</span>
-          <span>Privacy Policy&nbsp;&nbsp; · &nbsp;&nbsp;Terms of Use</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

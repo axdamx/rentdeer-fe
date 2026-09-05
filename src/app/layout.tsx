@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
+import "yet-another-react-lightbox/styles.css";
 
 export const metadata: Metadata = {
   title: "RentDeer | Rent Smarter. Live Better.",

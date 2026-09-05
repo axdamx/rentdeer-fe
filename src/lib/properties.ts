@@ -21,6 +21,57 @@ export type Property = {
   furnished: boolean;
   amenities: string[];
   facilities: string[];
+  details: PropertyDetails;
+};
+
+export type PropertyDetails = {
+  highlights: string[];
+  houseRules: string[];
+  rentalTerms: { label: string; value: string }[];
+  availability: string;
+  responseTime: string;
+  nearby: { label: string; distance: string }[];
+  review: { quote: string; author: string; role: string; rating: string };
+  bookingSteps: string[];
+};
+
+const mockPropertyDetails: PropertyDetails = {
+  highlights: [
+    "Move-in-ready furnished room",
+    "Responsive RentDeer support",
+    "Shared spaces kept clean and managed",
+  ],
+  houseRules: [
+    "Minimum rental period: 6 months",
+    "No pets allowed",
+    "Cooking is allowed in the shared kitchen",
+    "Keep shared spaces clean and considerate",
+  ],
+  rentalTerms: [
+    { label: "Deposit", value: "Required upon booking confirmation" },
+    { label: "Utilities", value: "Included as stated during enquiry" },
+    { label: "Parking", value: "Available on request for a monthly fee" },
+    { label: "Availability", value: "Ready to enquire" },
+  ],
+  availability: "Ready to enquire",
+  responseTime: "Usually replies within 1 business day",
+  nearby: [
+    { label: "Nearest transit", distance: "8 min" },
+    { label: "Grocery & essentials", distance: "5 min" },
+    { label: "Kuala Lumpur city centre", distance: "25 min" },
+  ],
+  review: {
+    quote:
+      "The room was ready when I arrived, and the RentDeer team made the move-in process easy to understand.",
+    author: "Aisyah Rahman",
+    role: "RentDeer tenant",
+    rating: "4.8",
+  },
+  bookingSteps: [
+    "Send an enquiry with your preferred move-in date",
+    "Ask questions or arrange a viewing with the team",
+    "Confirm the booking and review the rental terms",
+  ],
 };
 
 export const cities = [
@@ -61,6 +112,7 @@ export const properties: Property[] = [
     description:
       "A clean, move-in-ready master room in a well-connected community, with practical living spaces and a responsive support team.",
     furnished: true,
+    details: mockPropertyDetails,
     amenities: [
       "Bed and mattress",
       "Wardrobe",
@@ -88,6 +140,7 @@ export const properties: Property[] = [
     description:
       "A bright and comfortable room for renters who want a straightforward move-in experience close to daily essentials and transit.",
     furnished: true,
+    details: mockPropertyDetails,
     amenities: ["Single bed", "Wardrobe", "Ceiling fan", "Natural light"],
     facilities: [
       "Shared kitchen",
@@ -110,6 +163,7 @@ export const properties: Property[] = [
     description:
       "An affordable, ready-to-rent room with simple comforts and a location that keeps work, food, and transport within easy reach.",
     furnished: true,
+    details: mockPropertyDetails,
     amenities: ["Single bed", "Storage", "Desk", "Fan"],
     facilities: [
       "Shared kitchen",
@@ -132,6 +186,7 @@ export const properties: Property[] = [
     description:
       "A private studio for renters who want more room to work, rest, and make the space their own without the complexity of a full lease search.",
     furnished: true,
+    details: mockPropertyDetails,
     amenities: ["Queen bed", "Kitchenette", "Work desk", "Built-in storage"],
     facilities: ["Swimming pool", "Gym", "Covered parking", "24-hour security"],
   },
@@ -149,6 +204,7 @@ export const properties: Property[] = [
     description:
       "A practical whole-unit home for families or housemates, with flexible rooms, shared facilities, and easy access to the city.",
     furnished: true,
+    details: mockPropertyDetails,
     amenities: ["Three bedrooms", "Living room", "Dining area", "Kitchen"],
     facilities: [
       "Playground",
@@ -171,6 +227,7 @@ export const properties: Property[] = [
     description:
       "A neat, budget-friendly room for renters who value simplicity, clear rental terms, and a home that is ready when they are.",
     furnished: true,
+    details: mockPropertyDetails,
     amenities: ["Single bed", "Wardrobe", "Fan", "Window"],
     facilities: [
       "Shared kitchen",

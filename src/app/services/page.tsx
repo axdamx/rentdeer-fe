@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
 function ArrowIcon() {
@@ -162,6 +163,7 @@ export default function ServicesPage() {
           Contact RentDeer <ArrowIcon />
         </Link>
       </section>
+      <SiteFooter />
     </main>
   );
 }

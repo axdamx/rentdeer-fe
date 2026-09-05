@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
+import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
 function ArrowIcon() {
@@ -140,6 +141,7 @@ export default function ContactPage() {
           View Listings <ArrowIcon />
         </Link>
       </section>
+      <SiteFooter />
     </main>
   );
 }

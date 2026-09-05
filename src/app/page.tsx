@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import SiteFooter from "@/components/site-footer";
 
 type IconName =
   | "arrow"
@@ -488,75 +489,15 @@ export default function Home() {
         <button
           type="button"
           className="button button-primary"
-          onClick={() => (window.location.href = "mailto:hello@estatein.com")}
+          onClick={() =>
+            (window.location.href = "mailto:hello.rentdeer@gmail.com")
+          }
         >
           Contact RentDeer <Icon name="arrow" />
         </button>
       </section>
 
-      <footer className="site-footer">
-        <div>
-          <button
-            type="button"
-            className="brand footer-brand"
-            onClick={() => scrollTo("home")}
-          >
-            <span className="brand-wordmark">
-              <span className="brand-symbol">R</span>RentDeer
-            </span>
-          </button>
-          <p>Rent smarter. Live better.</p>
-        </div>
-        <div className="footer-links">
-          <div>
-            <strong>Explore</strong>
-            <button type="button" onClick={() => scrollTo("about")}>
-              About Us
-            </button>
-            <button type="button" onClick={() => scrollTo("properties")}>
-              Properties
-            </button>
-            <Link href="/faq">FAQ</Link>
-            <Link href="/bulletin">Bulletin</Link>
-          </div>
-          <div>
-            <strong>Services</strong>
-            <button type="button" onClick={() => scrollTo("services")}>
-              Landlord Services
-            </button>
-            <button type="button" onClick={() => scrollTo("contact")}>
-              Contact Us
-            </button>
-          </div>
-          <div>
-            <strong>Connect</strong>
-            <button
-              type="button"
-              onClick={() =>
-                (window.location.href = "mailto:hello.rentdeer@gmail.com")
-              }
-            >
-              Email Us
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  "https://www.instagram.com",
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
-            >
-              Instagram
-            </button>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>© 2026 RentDeer Sdn Bhd. All Rights Reserved.</span>
-          <span>Privacy Policy&nbsp;&nbsp; · &nbsp;&nbsp;Terms of Use</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
