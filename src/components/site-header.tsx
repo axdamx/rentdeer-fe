@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -25,6 +26,7 @@ const navigation = [
 
 export default function SiteHeader({ active }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const MotionButton = motion.button;
 
   return (
     <header className="site-header">
@@ -60,14 +62,16 @@ export default function SiteHeader({ active }: SiteHeaderProps) {
       >
         Contact Us
       </Link>
-      <button
+      <MotionButton
         type="button"
         className="menu-toggle"
         aria-label={menuOpen ? "Close menu" : "Open menu"}
         onClick={() => setMenuOpen(!menuOpen)}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.94 }}
       >
         <span aria-hidden="true">{menuOpen ? "×" : "☰"}</span>
-      </button>
+      </MotionButton>
     </header>
   );
 }

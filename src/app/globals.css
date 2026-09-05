@@ -38,6 +38,25 @@ button {
   font: inherit;
   cursor: pointer;
 }
+button,
+.button,
+.property-button,
+.nav-link,
+.contact-button {
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s,
+    color 0.2s,
+    transform 0.2s;
+}
+button:active,
+.button:active,
+.property-button:active,
+.nav-link:active,
+.contact-button:active {
+  transform: translateY(1px) scale(0.985);
+}
 a {
   color: inherit;
   text-decoration: none;
@@ -137,7 +156,12 @@ a {
   transition:
     background 0.2s,
     border-color 0.2s,
-    color 0.2s;
+    color 0.2s,
+    transform 0.2s;
+}
+.nav-link:hover,
+.contact-button:hover {
+  transform: translateY(-1px);
 }
 .nav-link:hover,
 .nav-link.active {
