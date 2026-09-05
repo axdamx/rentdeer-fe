@@ -59,13 +59,18 @@ export default function PropertiesPage() {
     () =>
       properties.filter((property) => {
         const matchesQuery =
-          `${property.title} ${property.location} ${property.roomType}`
+          `${property.title} ${property.location} ${property.city} ${property.propertyType} ${property.units.map((unit) => `${unit.title} ${unit.roomType}`).join(" ")}`
             .toLowerCase()
             .includes(query.trim().toLowerCase());
-        const matchesType = type === "All" || property.roomType === type;
+        const matchesType =
+          type === "All" ||
+          property.units.some((unit) => unit.roomType === type);
         const matchesCity = city === "All locations" || property.city === city;
-        const matchesPrice = maxPrice === 0 || property.monthlyRent <= maxPrice;
-        const matchesFurnished = !furnishedOnly || property.furnished;
+        const matchesPrice =
+          maxPrice === 0 ||
+          property.units.some((unit) => unit.monthlyRent <= maxPrice);
+        const matchesFurnished =
+          !furnishedOnly || property.units.some((unit) => unit.furnished);
         return (
           matchesQuery &&
           matchesType &&
@@ -190,11 +195,11 @@ export default function PropertiesPage() {
         <div className="section-heading">
           <div>
             <span className="section-kicker">EXPLORE LISTINGS</span>
-            <h2>{filteredProperties.length} stays waiting for you</h2>
+            <h2>{filteredProperties.length} properties to explore</h2>
           </div>
           <p>
-            Refine by room type, city, and monthly budget. Every listing is
-            built around the details renters need to decide with confidence.
+            Explore each residence first, then choose the room or unit that fits
+            your budget and lifestyle.
           </p>
         </div>
         <div className="listing-toolbar">
@@ -220,26 +225,30 @@ export default function PropertiesPage() {
               <article className="property-card" key={property.slug}>
                 <PropertyGallery
                   className="property-image"
-                  images={[property.image]}
+                  images={property.gallery}
                   alt={property.title}
-                  label={property.roomType}
+                  label={`${property.units.length} rental options`}
                 />
                 <div className="property-content">
-                  <span className="property-location">{property.city}</span>
+                  <span className="property-location">{property.location}</span>
                   <h3>{property.title}</h3>
                   <p>{property.description}</p>
                   <div className="property-details">
-                    <span>{property.bedrooms} Bedroom</span>
-                    <span>{property.toilets} Toilet</span>
+                    <span>{property.propertyType}</span>
+                    <span>{property.facilities.length} facilities</span>
                     <strong>
-                      RM{property.monthlyRent.toLocaleString()} / month
+                      From RM
+                      {Math.min(
+                        ...property.units.map((unit) => unit.monthlyRent),
+                      ).toLocaleString()}{" "}
+                      / month
                     </strong>
                   </div>
                   <Link
                     className="property-button"
                     href={`/properties/${property.slug}`}
                   >
-                    View Rental Details <ArrowIcon />
+                    Explore Property <ArrowIcon />
                   </Link>
                 </div>
               </article>

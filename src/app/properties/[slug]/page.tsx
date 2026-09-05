@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PropertyGallery from "@/components/property-gallery";
@@ -33,7 +34,15 @@ export default async function PropertyDetailPage({
 }) {
   const { slug } = await params;
   const property = getProperty(slug);
-  if (!property) notFound();
+
+  if (!property) {
+    notFound();
+  }
+
+  const startingPrice = Math.min(
+    ...property.units.map((unit) => unit.monthlyRent),
+  );
+  const availableUnits = property.units.filter((unit) => unit.available);
 
   return (
     <main className="property-detail-page">
@@ -49,67 +58,148 @@ export default async function PropertyDetailPage({
         <span>/</span>
         <span>{property.title}</span>
       </div>
+
       <section className="detail-hero content-section">
         <PropertyGallery
           className="detail-image"
-          images={[property.image]}
+          images={property.gallery}
           alt={property.title}
+          label={`${property.units.length} rental options`}
           priority
         />
         <div className="detail-copy">
           <span className="property-location">
-            {property.city} · {property.roomType}
+            {property.city} · {property.propertyType}
           </span>
           <h1>{property.title}</h1>
           <p>{property.description}</p>
           <div className="detail-price">
-            <span>Monthly rent</span>
-            <strong>RM{property.monthlyRent.toLocaleString()} / month</strong>
+            <span>Rental options from</span>
+            <strong>RM{startingPrice.toLocaleString()} / month</strong>
+            <small>
+              {availableUnits.length} of {property.units.length} options
+              currently available
+            </small>
           </div>
-          <Link className="button button-primary" href="/contact">
-            Enquire About This Stay <ArrowIcon />
+          <div className="detail-managed-by">
+            <span>Managed by</span>
+            <strong>{property.managedBy}</strong>
+          </div>
+          <Link className="button button-primary" href="#rental-options">
+            Choose a Rental Option <ArrowIcon />
           </Link>
         </div>
       </section>
+
       <section className="detail-content content-section">
         <div className="detail-specs">
           <div>
-            <span>Bedrooms</span>
-            <strong>{property.bedrooms}</strong>
+            <span>Rental options</span>
+            <strong>{property.units.length}</strong>
           </div>
           <div>
-            <span>Toilets</span>
-            <strong>{property.toilets}</strong>
+            <span>Available now</span>
+            <strong>{availableUnits.length}</strong>
           </div>
           <div>
-            <span>Property size</span>
-            <strong>{property.area}</strong>
+            <span>Facilities</span>
+            <strong>{property.facilities.length}</strong>
           </div>
           <div>
-            <span>Room type</span>
-            <strong>{property.roomType}</strong>
+            <span>Area</span>
+            <strong>{property.city}</strong>
           </div>
         </div>
         <div className="detail-lower">
           <div>
-            <span className="section-kicker">RENTAL OVERVIEW</span>
+            <span className="section-kicker">ABOUT THIS PROPERTY</span>
             <h2>Everything you need before you move in.</h2>
             <p>
-              {property.description} Review the amenities, facilities, rental
-              terms, and support available before sending your enquiry.
+              {property.description} Explore the residence, compare the
+              available rooms or units, and review the rental terms before
+              sending your enquiry.
             </p>
           </div>
           <div className="detail-feature-box">
-            <span className="section-kicker">AMENITIES &amp; FACILITIES</span>
-            {[...property.amenities, ...property.facilities].map((feature) => (
-              <div key={feature}>
+            <span className="section-kicker">PROPERTY FACILITIES</span>
+            {property.facilities.map((facility) => (
+              <div key={facility}>
                 <span className="detail-check">✓</span>
-                {feature}
+                {facility}
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      <section
+        className="detail-units-section content-section"
+        id="rental-options"
+      >
+        <div className="section-heading">
+          <div>
+            <span className="section-kicker">RENTAL OPTIONS</span>
+            <h2>Choose the way you want to live here.</h2>
+          </div>
+          <p>
+            Compare the room or unit options within this residence. Availability
+            and pricing are mock data for now.
+          </p>
+        </div>
+        <div className="unit-grid">
+          {property.units.map((unit) => (
+            <article className="unit-card" key={unit.slug}>
+              <div className="unit-card-image">
+                <Image
+                  src={unit.image}
+                  alt={unit.title}
+                  fill
+                  sizes="(max-width: 700px) 100vw, 33vw"
+                />
+                <span
+                  className={
+                    unit.available
+                      ? "unit-status"
+                      : "unit-status is-unavailable"
+                  }
+                >
+                  {unit.available ? "Available" : "Currently rented"}
+                </span>
+              </div>
+              <div className="unit-card-content">
+                <span className="property-location">{unit.roomType}</span>
+                <h3>{unit.title}</h3>
+                <p>{unit.description}</p>
+                <div className="unit-card-meta">
+                  <span>{unit.bedrooms} bedroom</span>
+                  <span>{unit.toilets} toilet</span>
+                  <span>{unit.area}</span>
+                </div>
+                <div className="unit-card-bottom">
+                  <strong>
+                    RM{unit.monthlyRent.toLocaleString()} <small>/ month</small>
+                  </strong>
+                  <div className="unit-card-actions">
+                    <Link
+                      className="unit-card-view"
+                      href={`/properties/${property.slug}/units/${unit.slug}`}
+                    >
+                      View details <ArrowIcon />
+                    </Link>
+                    <Link
+                      className="button button-secondary"
+                      href={`/contact?property=${property.slug}&unit=${unit.slug}`}
+                    >
+                      Enquire <ArrowIcon />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="detail-discovery-grid content-section">
         <div className="detail-panel">
           <span className="section-kicker">GOOD TO KNOW</span>
@@ -136,6 +226,7 @@ export default async function PropertyDetailPage({
           </div>
         </div>
       </section>
+
       <section className="detail-discovery-grid detail-rules-grid content-section">
         <div className="detail-panel">
           <span className="section-kicker">HOUSE RULES</span>
@@ -163,6 +254,7 @@ export default async function PropertyDetailPage({
           </div>
         </div>
       </section>
+
       <section className="detail-review-section content-section">
         <div className="detail-review-copy">
           <span className="section-kicker">TENANT EXPERIENCE</span>
@@ -182,6 +274,7 @@ export default async function PropertyDetailPage({
           </p>
         </div>
       </section>
+
       <section className="detail-booking-section content-section">
         <div>
           <span className="section-kicker">HOW IT WORKS</span>
@@ -200,6 +293,7 @@ export default async function PropertyDetailPage({
           ))}
         </ol>
       </section>
+
       <section className="property-location-section content-section">
         <div className="section-heading">
           <div>
@@ -221,10 +315,10 @@ export default async function PropertyDetailPage({
       <section className="contact-cta detail-cta">
         <div>
           <span className="section-kicker">TAKE THE NEXT STEP</span>
-          <h2>Ready to make this your next stay?</h2>
+          <h2>Ready to find your room here?</h2>
           <p>
             Our tenant enquiry team can answer your questions and help you
-            understand the booking process.
+            compare the available rental options.
           </p>
         </div>
         <Link className="button button-primary" href="/contact">

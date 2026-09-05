@@ -83,31 +83,34 @@ function Icon({ name }: { name: IconName }) {
 
 const properties = [
   {
-    title: "Fully Furnished Master Room",
+    slug: "seasons-square-damansara-damai",
+    title: "Seasons Square Residence",
     location: "Damansara Damai",
-    type: "Master Bedroom",
+    type: "Managed apartment residence",
     image: "/estatein/property-villa.png",
-    price: "RM850 / month",
-    beds: "1",
-    baths: "1",
+    price: "From RM550 / month",
+    beds: "3 rental options",
+    baths: "5 facilities",
   },
   {
-    title: "Bright Medium Room",
+    slug: "kota-damansara-residences",
+    title: "Kota Damansara Residences",
     location: "Kota Damansara",
-    type: "Medium Bedroom",
+    type: "Managed residential community",
     image: "/estatein/property-tower.png",
-    price: "RM700 / month",
-    beds: "1",
-    baths: "1",
+    price: "From RM550 / month",
+    beds: "2 rental options",
+    baths: "5 facilities",
   },
   {
-    title: "Private Soho Studio",
+    slug: "ara-damansara-studio-living",
+    title: "Ara Damansara Studio Living",
     location: "Ara Damansara",
-    type: "Soho/Studio",
+    type: "Private studio residence",
     image: "/estatein/property-campus.png",
-    price: "RM1,500 / month",
-    beds: "1",
-    baths: "1",
+    price: "From RM1,500 / month",
+    beds: "2 rental options",
+    baths: "5 facilities",
   },
 ];
 
@@ -162,7 +165,7 @@ export default function Home() {
   const filteredProperties =
     propertyType === "All"
       ? properties
-      : properties.filter((property) => property.type === propertyType);
+      : properties.filter((property) => property.location === propertyType);
 
   return (
     <main className="estatein-shell">
@@ -364,8 +367,8 @@ export default function Home() {
       <section className="content-section properties-section" id="properties">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">FEATURED RENTALS</span>
-            <h2>Find your new stay</h2>
+            <span className="section-kicker">FEATURED PROPERTIES</span>
+            <h2>Explore your next residence</h2>
           </div>
           <Link
             className="button button-secondary desktop-only"
@@ -379,22 +382,18 @@ export default function Home() {
           role="tablist"
           aria-label="Filter properties"
         >
-          {[
-            "All",
-            "Master Bedroom",
-            "Medium Bedroom",
-            "Single Bedroom",
-            "Whole Unit",
-          ].map((type) => (
-            <button
-              type="button"
-              key={type}
-              className={propertyType === type ? "is-selected" : ""}
-              onClick={() => setPropertyType(type)}
-            >
-              {type}
-            </button>
-          ))}
+          {["All", "Damansara Damai", "Kota Damansara", "Ara Damansara"].map(
+            (type) => (
+              <button
+                type="button"
+                key={type}
+                className={propertyType === type ? "is-selected" : ""}
+                onClick={() => setPropertyType(type)}
+              >
+                {type}
+              </button>
+            ),
+          )}
         </div>
         <div className="property-grid">
           {filteredProperties.map((property) => (
@@ -412,19 +411,23 @@ export default function Home() {
                 <span className="property-location">{property.location}</span>
                 <h3>{property.title}</h3>
                 <p>
-                  {property.type} available in a well-managed RentDeer home.
+                  {property.type} with room and unit options for different
+                  budgets and lifestyles.
                 </p>
                 <div className="property-details">
                   <span>
-                    <Icon name="building" /> {property.beds} Bedroom
+                    <Icon name="building" /> {property.beds}
                   </span>
                   <span>
-                    <Icon name="spark" /> {property.baths} Toilet
+                    <Icon name="spark" /> {property.baths}
                   </span>
                   <strong>{property.price}</strong>
                 </div>
-                <Link className="property-button" href="/properties">
-                  View Rental Details <Icon name="arrow" />
+                <Link
+                  className="property-button"
+                  href={`/properties/${property.slug}`}
+                >
+                  Explore Property <Icon name="arrow" />
                 </Link>
               </div>
             </article>

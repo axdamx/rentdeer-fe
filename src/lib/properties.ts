@@ -6,11 +6,9 @@ export type RoomType =
   | "Soho/Studio"
   | "Whole Unit";
 
-export type Property = {
+export type RentalUnit = {
   slug: string;
   title: string;
-  location: string;
-  city: string;
   roomType: RoomType;
   image: string;
   monthlyRent: number;
@@ -19,9 +17,7 @@ export type Property = {
   area: string;
   description: string;
   furnished: boolean;
-  amenities: string[];
-  facilities: string[];
-  details: PropertyDetails;
+  available: boolean;
 };
 
 export type PropertyDetails = {
@@ -35,43 +31,19 @@ export type PropertyDetails = {
   bookingSteps: string[];
 };
 
-const mockPropertyDetails: PropertyDetails = {
-  highlights: [
-    "Move-in-ready furnished room",
-    "Responsive RentDeer support",
-    "Shared spaces kept clean and managed",
-  ],
-  houseRules: [
-    "Minimum rental period: 6 months",
-    "No pets allowed",
-    "Cooking is allowed in the shared kitchen",
-    "Keep shared spaces clean and considerate",
-  ],
-  rentalTerms: [
-    { label: "Deposit", value: "Required upon booking confirmation" },
-    { label: "Utilities", value: "Included as stated during enquiry" },
-    { label: "Parking", value: "Available on request for a monthly fee" },
-    { label: "Availability", value: "Ready to enquire" },
-  ],
-  availability: "Ready to enquire",
-  responseTime: "Usually replies within 1 business day",
-  nearby: [
-    { label: "Nearest transit", distance: "8 min" },
-    { label: "Grocery & essentials", distance: "5 min" },
-    { label: "Kuala Lumpur city centre", distance: "25 min" },
-  ],
-  review: {
-    quote:
-      "The room was ready when I arrived, and the RentDeer team made the move-in process easy to understand.",
-    author: "Aisyah Rahman",
-    role: "RentDeer tenant",
-    rating: "4.8",
-  },
-  bookingSteps: [
-    "Send an enquiry with your preferred move-in date",
-    "Ask questions or arrange a viewing with the team",
-    "Confirm the booking and review the rental terms",
-  ],
+export type Property = {
+  slug: string;
+  title: string;
+  location: string;
+  city: string;
+  propertyType: string;
+  image: string;
+  gallery: string[];
+  description: string;
+  managedBy: string;
+  facilities: string[];
+  details: PropertyDetails;
+  units: RentalUnit[];
 };
 
 export const cities = [
@@ -97,143 +69,235 @@ export const roomTypes: RoomType[] = [
   "Whole Unit",
 ];
 
+const sharedTerms = [
+  { label: "Deposit", value: "Required upon booking confirmation" },
+  { label: "Utilities", value: "Included as stated during enquiry" },
+  { label: "Parking", value: "Available on request for a monthly fee" },
+];
+
+const sharedRules = [
+  "Minimum rental period: 6 months",
+  "No pets allowed",
+  "Cooking is allowed in the shared kitchen",
+  "Keep shared spaces clean and considerate",
+];
+
+const sharedSteps = [
+  "Send an enquiry with your preferred move-in date",
+  "Ask questions or arrange a viewing with the team",
+  "Confirm the room and review the rental terms",
+];
+
+const baseDetails = (
+  nearby: { label: string; distance: string }[],
+): PropertyDetails => ({
+  highlights: [
+    "Move-in-ready rental options",
+    "Responsive RentDeer support",
+    "Shared spaces kept clean and managed",
+  ],
+  houseRules: sharedRules,
+  rentalTerms: sharedTerms,
+  availability: "Ready to enquire",
+  responseTime: "Usually replies within 1 business day",
+  nearby,
+  review: {
+    quote:
+      "The room was ready when I arrived, and the RentDeer team made the move-in process easy to understand.",
+    author: "Aisyah Rahman",
+    role: "RentDeer tenant",
+    rating: "4.8",
+  },
+  bookingSteps: sharedSteps,
+});
+
 export const properties: Property[] = [
   {
-    slug: "fully-furnished-master-room-damansara-damai",
-    title: "Fully Furnished Master Room",
+    slug: "seasons-square-damansara-damai",
+    title: "Seasons Square Residence",
     location: "Seasons Square, Damansara Damai",
     city: "Damansara Damai",
-    roomType: "Master Bedroom",
+    propertyType: "Managed apartment residence",
     image: "/estatein/property-villa.png",
-    monthlyRent: 850,
-    bedrooms: 1,
-    toilets: 1,
-    area: "220 sq. ft.",
-    description:
-      "A clean, move-in-ready master room in a well-connected community, with practical living spaces and a responsive support team.",
-    furnished: true,
-    details: mockPropertyDetails,
-    amenities: [
-      "Bed and mattress",
-      "Wardrobe",
-      "Study table",
-      "Air conditioning",
+    gallery: [
+      "/estatein/property-villa.png",
+      "/estatein/property-tower.png",
+      "/estatein/property-campus.png",
     ],
+    description:
+      "A well-managed residence with ready-to-move-in rooms, practical shared spaces, and a responsive team close to everyday essentials.",
+    managedBy: "RentDeer Property Management",
     facilities: [
       "Shared kitchen",
       "Laundry area",
       "24-hour security",
       "Parking on request",
+      "Common lounge",
+    ],
+    details: baseDetails([
+      { label: "Damansara Damai MRT", distance: "8 min" },
+      { label: "Grocery & essentials", distance: "5 min" },
+      { label: "Kuala Lumpur city centre", distance: "25 min" },
+    ]),
+    units: [
+      {
+        slug: "master-room",
+        title: "Fully Furnished Master Room",
+        roomType: "Master Bedroom",
+        image: "/estatein/property-villa.png",
+        monthlyRent: 850,
+        bedrooms: 1,
+        toilets: 1,
+        area: "220 sq. ft.",
+        description:
+          "A comfortable private room with practical storage and move-in-ready essentials.",
+        furnished: true,
+        available: true,
+      },
+      {
+        slug: "medium-room",
+        title: "Bright Medium Room",
+        roomType: "Medium Bedroom",
+        image: "/estatein/property-tower.png",
+        monthlyRent: 700,
+        bedrooms: 1,
+        toilets: 1,
+        area: "180 sq. ft.",
+        description:
+          "A bright room for renters who want a straightforward move-in experience.",
+        furnished: true,
+        available: true,
+      },
+      {
+        slug: "small-room",
+        title: "Simple Small Room",
+        roomType: "Small Room",
+        image: "/estatein/property-campus.png",
+        monthlyRent: 550,
+        bedrooms: 1,
+        toilets: 1,
+        area: "140 sq. ft.",
+        description:
+          "An affordable room with simple comforts for a clear, low-friction move.",
+        furnished: true,
+        available: false,
+      },
     ],
   },
   {
-    slug: "medium-room-kota-damansara",
-    title: "Bright Medium Room",
+    slug: "kota-damansara-residences",
+    title: "Kota Damansara Residences",
     location: "Kota Damansara, Petaling Jaya",
     city: "Kota Damansara",
-    roomType: "Medium Bedroom",
+    propertyType: "Managed residential community",
     image: "/estatein/property-tower.png",
-    monthlyRent: 700,
-    bedrooms: 1,
-    toilets: 1,
-    area: "180 sq. ft.",
+    gallery: [
+      "/estatein/property-tower.png",
+      "/estatein/property-campus.png",
+      "/estatein/property-villa.png",
+    ],
     description:
-      "A bright and comfortable room for renters who want a straightforward move-in experience close to daily essentials and transit.",
-    furnished: true,
-    details: mockPropertyDetails,
-    amenities: ["Single bed", "Wardrobe", "Ceiling fan", "Natural light"],
+      "A connected residential community for renters who want easy access to work, food, transit, and a home supported by a dependable team.",
+    managedBy: "RentDeer Property Management",
     facilities: [
       "Shared kitchen",
       "High-speed Wi-Fi",
       "Common lounge",
       "Visitor parking",
-    ],
-  },
-  {
-    slug: "single-room-kelana-jaya",
-    title: "Ready Single Room",
-    location: "Kelana Jaya, Petaling Jaya",
-    city: "Kelana Jaya",
-    roomType: "Single Bedroom",
-    image: "/estatein/property-campus.png",
-    monthlyRent: 550,
-    bedrooms: 1,
-    toilets: 1,
-    area: "140 sq. ft.",
-    description:
-      "An affordable, ready-to-rent room with simple comforts and a location that keeps work, food, and transport within easy reach.",
-    furnished: true,
-    details: mockPropertyDetails,
-    amenities: ["Single bed", "Storage", "Desk", "Fan"],
-    facilities: [
-      "Shared kitchen",
-      "Laundry area",
       "Gated access",
-      "Maintenance support",
+    ],
+    details: baseDetails([
+      { label: "Kota Damansara MRT", distance: "10 min" },
+      { label: "Mutiara Damansara", distance: "12 min" },
+      { label: "Petaling Jaya city centre", distance: "18 min" },
+    ]),
+    units: [
+      {
+        slug: "medium-room",
+        title: "Bright Medium Room",
+        roomType: "Medium Bedroom",
+        image: "/estatein/property-tower.png",
+        monthlyRent: 700,
+        bedrooms: 1,
+        toilets: 1,
+        area: "180 sq. ft.",
+        description:
+          "A bright and comfortable room close to daily essentials and transit.",
+        furnished: true,
+        available: true,
+      },
+      {
+        slug: "ready-single-room",
+        title: "Ready Single Room",
+        roomType: "Single Bedroom",
+        image: "/estatein/property-campus.png",
+        monthlyRent: 550,
+        bedrooms: 1,
+        toilets: 1,
+        area: "140 sq. ft.",
+        description:
+          "An affordable room with simple comforts and an easy move-in setup.",
+        furnished: true,
+        available: true,
+      },
     ],
   },
   {
-    slug: "soho-studio-ara-damansara",
-    title: "Private Soho Studio",
+    slug: "ara-damansara-studio-living",
+    title: "Ara Damansara Studio Living",
     location: "Ara Damansara, Selangor",
     city: "Ara Damansara",
-    roomType: "Soho/Studio",
-    image: "/estatein/property-villa.png",
-    monthlyRent: 1500,
-    bedrooms: 1,
-    toilets: 1,
-    area: "480 sq. ft.",
-    description:
-      "A private studio for renters who want more room to work, rest, and make the space their own without the complexity of a full lease search.",
-    furnished: true,
-    details: mockPropertyDetails,
-    amenities: ["Queen bed", "Kitchenette", "Work desk", "Built-in storage"],
-    facilities: ["Swimming pool", "Gym", "Covered parking", "24-hour security"],
-  },
-  {
-    slug: "whole-unit-cheras",
-    title: "Family Whole Unit",
-    location: "Cheras, Kuala Lumpur",
-    city: "Cheras",
-    roomType: "Whole Unit",
+    propertyType: "Private studio residence",
     image: "/estatein/property-campus.png",
-    monthlyRent: 2200,
-    bedrooms: 3,
-    toilets: 2,
-    area: "980 sq. ft.",
-    description:
-      "A practical whole-unit home for families or housemates, with flexible rooms, shared facilities, and easy access to the city.",
-    furnished: true,
-    details: mockPropertyDetails,
-    amenities: ["Three bedrooms", "Living room", "Dining area", "Kitchen"],
-    facilities: [
-      "Playground",
-      "Covered parking",
-      "Security patrol",
-      "Nearby transit",
+    gallery: [
+      "/estatein/property-campus.png",
+      "/estatein/property-villa.png",
+      "/estatein/property-tower.png",
     ],
-  },
-  {
-    slug: "small-room-sentul",
-    title: "Simple Small Room",
-    location: "Sentul, Kuala Lumpur",
-    city: "Sentul",
-    roomType: "Small Room",
-    image: "/estatein/property-tower.png",
-    monthlyRent: 450,
-    bedrooms: 1,
-    toilets: 1,
-    area: "110 sq. ft.",
     description:
-      "A neat, budget-friendly room for renters who value simplicity, clear rental terms, and a home that is ready when they are.",
-    furnished: true,
-    details: mockPropertyDetails,
-    amenities: ["Single bed", "Wardrobe", "Fan", "Window"],
+      "A private residence with flexible studio living for renters who want more room to work, rest, and make the space their own.",
+    managedBy: "RentDeer Property Management",
     facilities: [
-      "Shared kitchen",
-      "Laundry area",
-      "Gated access",
-      "Customer care",
+      "Swimming pool",
+      "Gym",
+      "Covered parking",
+      "24-hour security",
+      "Retail nearby",
+    ],
+    details: baseDetails([
+      { label: "Ara Damansara LRT", distance: "7 min" },
+      { label: "Subang airport", distance: "15 min" },
+      { label: "Petaling Jaya city centre", distance: "20 min" },
+    ]),
+    units: [
+      {
+        slug: "private-soho-studio",
+        title: "Private Soho Studio",
+        roomType: "Soho/Studio",
+        image: "/estatein/property-campus.png",
+        monthlyRent: 1500,
+        bedrooms: 1,
+        toilets: 1,
+        area: "480 sq. ft.",
+        description:
+          "A private studio with space to work, rest, and settle into a simpler routine.",
+        furnished: true,
+        available: true,
+      },
+      {
+        slug: "whole-unit",
+        title: "Flexible Whole Unit",
+        roomType: "Whole Unit",
+        image: "/estatein/property-villa.png",
+        monthlyRent: 2200,
+        bedrooms: 2,
+        toilets: 2,
+        area: "820 sq. ft.",
+        description:
+          "A practical whole unit for people who want privacy, flexibility, and shared living space.",
+        furnished: true,
+        available: false,
+      },
     ],
   },
 ];
