@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PropertyGallery from "@/components/property-gallery";
 import SiteHeader from "@/components/site-header";
 import { cities, properties, roomTypes } from "@/lib/properties";
@@ -40,20 +40,54 @@ function ArrowIcon() {
 }
 
 const prices = [
-  ["Any budget", 0],
-  ["Under RM600", 600],
-  ["Under RM1,000", 1000],
-  ["Under RM1,600", 1600],
-  ["Under RM2,200", 2200],
+  ["Any budget", 0, 0],
+  ["RM400 - RM699", 400, 699],
+  ["RM700 - RM899", 700, 899],
+  ["RM900 - RM1499", 900, 1499],
+  ["RM1500 - RM1999", 1500, 1999],
+  ["RM2000 - RM3000", 2000, 3000],
 ] as const;
+
+const regionCities: Record<string, string[]> = {
+  "Kuala Lumpur": ["Kuala Lumpur", "Cheras", "Kepong", "Sentul"],
+  "Petaling Jaya": [
+    "Petaling Jaya",
+    "Ara Damansara",
+    "Damansara Damai",
+    "Kelana Jaya",
+    "Kota Damansara",
+  ],
+  Puchong: ["Puchong", "Seri Kembangan"],
+};
 
 export default function PropertiesPage() {
   const [furnishedOnly, setFurnishedOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("All");
   const [city, setCity] = useState("All locations");
+  const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [searched, setSearched] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchQuery = params.get("query") ?? "";
+    const searchCity = params.get("city") ?? "All locations";
+    const budget = params.get("budget")?.split("-").map(Number) ?? [];
+
+    setQuery(searchQuery);
+    setCity(searchCity);
+    if (
+      budget.length === 2 &&
+      budget.every((value) => Number.isFinite(value))
+    ) {
+      setMinPrice(budget[0]);
+      setMaxPrice(budget[1]);
+    }
+    setSearched(
+      Boolean(searchQuery || params.get("city") || params.get("budget")),
+    );
+  }, []);
 
   const filteredProperties = useMemo(
     () =>
@@ -65,10 +99,21 @@ export default function PropertiesPage() {
         const matchesType =
           type === "All" ||
           property.units.some((unit) => unit.roomType === type);
-        const matchesCity = city === "All locations" || property.city === city;
+        const selectedRegionCities = regionCities[city] ?? [city];
+        const matchesCity =
+          city === "All locations" ||
+          selectedRegionCities.some(
+            (location) =>
+              property.city.includes(location) ||
+              property.location.includes(location),
+          ) ||
+          ["Kuala Lumpur", "Puchong"].includes(city);
         const matchesPrice =
-          maxPrice === 0 ||
-          property.units.some((unit) => unit.monthlyRent <= maxPrice);
+          (minPrice === 0 && maxPrice === 0) ||
+          property.units.some(
+            (unit) =>
+              unit.monthlyRent >= minPrice && unit.monthlyRent <= maxPrice,
+          );
         const matchesFurnished =
           !furnishedOnly || property.units.some((unit) => unit.furnished);
         return (
@@ -79,7 +124,7 @@ export default function PropertiesPage() {
           matchesFurnished
         );
       }),
-    [city, furnishedOnly, maxPrice, query, type],
+    [city, furnishedOnly, maxPrice, minPrice, query, type],
   );
 
   return (
@@ -143,6 +188,9 @@ export default function PropertiesPage() {
                 onChange={(event) => setCity(event.target.value)}
               >
                 <option>All locations</option>
+                <option>Kuala Lumpur</option>
+                <option>Petaling Jaya</option>
+                <option>Puchong</option>
                 {cities.map((location) => (
                   <option key={location}>{location}</option>
                 ))}
@@ -163,11 +211,17 @@ export default function PropertiesPage() {
             <label>
               <span>Monthly budget</span>
               <select
-                value={maxPrice}
-                onChange={(event) => setMaxPrice(Number(event.target.value))}
+                value={`${minPrice}-${maxPrice}`}
+                onChange={(event) => {
+                  const [minimum, maximum] = event.target.value
+                    .split("-")
+                    .map(Number);
+                  setMinPrice(minimum);
+                  setMaxPrice(maximum);
+                }}
               >
-                {prices.map(([label, value]) => (
-                  <option value={value} key={label}>
+                {prices.map(([label, minimum, maximum]) => (
+                  <option value={`${minimum}-${maximum}`} key={label}>
                     {label}
                   </option>
                 ))}
@@ -265,6 +319,7 @@ export default function PropertiesPage() {
                 setQuery("");
                 setType("All");
                 setCity("All locations");
+                setMinPrice(0);
                 setMaxPrice(0);
                 setFurnishedOnly(false);
               }}

@@ -271,6 +271,20 @@ export const properties: Property[] = [
     ]),
     units: [
       {
+        slug: "compact-soho-studio",
+        title: "Compact Soho Studio",
+        roomType: "Soho/Studio",
+        image: "/estatein/property-tower.png",
+        monthlyRent: 1200,
+        bedrooms: 1,
+        toilets: 1,
+        area: "360 sq. ft.",
+        description:
+          "A compact studio option for renters who want privacy and a flexible work-from-home setup.",
+        furnished: true,
+        available: true,
+      },
+      {
         slug: "private-soho-studio",
         title: "Private Soho Studio",
         roomType: "Soho/Studio",

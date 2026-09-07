@@ -5,31 +5,40 @@ import Link from "next/link";
 import { useState } from "react";
 
 type SiteHeaderProps = {
+  tone?: "default" | "dark";
   active?:
     | "home"
     | "about"
     | "properties"
     | "services"
+    | "story"
     | "faq"
     | "bulletin"
     | "contact";
 };
 
-const navigation = [
-  ["home", "Home", "/"],
-  ["about", "About Us", "/about"],
-  ["properties", "Properties", "/properties"],
-  ["services", "Services", "/services"],
-  ["faq", "FAQ", "/faq"],
-  ["bulletin", "Bulletin", "/bulletin"],
+const propertyLocations = [
+  ["Kuala Lumpur", ["Cheras", "Kepong", "Sentul"]],
+  [
+    "Petaling Jaya",
+    ["Ara Damansara", "Damansara Damai", "Kelana Jaya", "Kota Damansara"],
+  ],
+  ["Puchong", ["Seri Kembangan"]],
 ] as const;
 
-export default function SiteHeader({ active }: SiteHeaderProps) {
+export default function SiteHeader({
+  active,
+  tone = "default",
+}: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const MotionButton = motion.button;
 
   return (
-    <header className="site-header">
+    <header
+      className={
+        tone === "dark" ? "site-header site-header-dark" : "site-header"
+      }
+    >
       <Link
         className="brand"
         aria-label="RentDeer home"
@@ -44,16 +53,88 @@ export default function SiteHeader({ active }: SiteHeaderProps) {
         className={menuOpen ? "main-nav is-open" : "main-nav"}
         aria-label="Main navigation"
       >
-        {navigation.map(([key, label, href]) => (
-          <Link
-            className={active === key ? "nav-link active" : "nav-link"}
-            href={href}
-            key={key}
-            onClick={() => setMenuOpen(false)}
+        <Link
+          className={active === "home" ? "nav-link active" : "nav-link"}
+          href="/"
+          onClick={() => setMenuOpen(false)}
+        >
+          Home
+        </Link>
+        <Link
+          className={active === "about" ? "nav-link active" : "nav-link"}
+          href="/about"
+          onClick={() => setMenuOpen(false)}
+        >
+          About Us
+        </Link>
+        <details className="nav-menu">
+          <summary
+            className={active === "properties" ? "nav-link active" : "nav-link"}
           >
-            {label}
-          </Link>
-        ))}
+            Property <span aria-hidden="true">⌄</span>
+          </summary>
+          <div className="nav-menu-panel">
+            <Link href="/properties" onClick={() => setMenuOpen(false)}>
+              All properties
+            </Link>
+            {propertyLocations.map(([region, locations]) => (
+              <div key={region}>
+                <strong>{region}</strong>
+                {locations.map((location) => (
+                  <Link
+                    href={`/properties?city=${encodeURIComponent(location)}`}
+                    key={location}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {location}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </details>
+        <details className="nav-menu">
+          <summary
+            className={active === "services" ? "nav-link active" : "nav-link"}
+          >
+            Services <span aria-hidden="true">⌄</span>
+          </summary>
+          <div className="nav-menu-panel nav-menu-panel-compact">
+            <Link
+              href="/services?role=tenant"
+              onClick={() => setMenuOpen(false)}
+            >
+              For tenants
+            </Link>
+            <Link
+              href="/services?role=landlord"
+              onClick={() => setMenuOpen(false)}
+            >
+              For landlords
+            </Link>
+          </div>
+        </details>
+        <Link
+          className={active === "story" ? "nav-link active" : "nav-link"}
+          href="/about#story"
+          onClick={() => setMenuOpen(false)}
+        >
+          Our Story
+        </Link>
+        <Link
+          className={active === "faq" ? "nav-link active" : "nav-link"}
+          href="/faq"
+          onClick={() => setMenuOpen(false)}
+        >
+          FAQ
+        </Link>
+        <Link
+          className={active === "bulletin" ? "nav-link active" : "nav-link"}
+          href="/bulletin"
+          onClick={() => setMenuOpen(false)}
+        >
+          Bulletin
+        </Link>
       </nav>
       <Link
         className="contact-button"
