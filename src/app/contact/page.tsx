@@ -29,26 +29,22 @@ export default function ContactPage() {
   };
   return (
     <main className="contact-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href="/faq">
-          Read the FAQ <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="contact" />
       <section className="contact-hero">
-        <span className="section-kicker">CONTACT RENTDEER</span>
-        <h1>
-          Let&apos;s make your next move feel <span>simple.</span>
-        </h1>
-        <p>
-          Whether you are looking for a room, managing a property, or building a
-          partnership, our team is ready to help.
-        </p>
+        <SiteHeader active="contact" tone="dark" />
+        <div className="rd-page-hero-inner">
+          <span className="rd-script-label">Contact RentDeer</span>
+          <h1>
+            Let&apos;s make your next move feel <span>simple.</span>
+          </h1>
+          <p>
+            Whether you are looking for a room, managing a property, or building
+            a partnership, our team is ready to help.
+          </p>
+        </div>
       </section>
       <section className="contact-layout content-section">
         <div className="contact-details">
-          <span className="section-kicker">START A CONVERSATION</span>
+          <span className="rd-script-label">Start a conversation</span>
           <h2>We&apos;re here for your next rental step.</h2>
           <p>
             Choose the path that fits your enquiry and the RentDeer team will
@@ -122,7 +118,7 @@ export default function ContactPage() {
             <input required type="checkbox" />{" "}
             <span>I agree to the privacy policy and terms of use.</span>
           </label>
-          <button type="submit" className="button button-primary">
+          <button type="submit" className="rd-yellow-button">
             {submitted ? "Enquiry Ready" : "Send Enquiry"} <ArrowIcon />
           </button>
           {submitted && (
@@ -132,14 +128,16 @@ export default function ContactPage() {
           )}
         </form>
       </section>
-      <section className="contact-cta contact-bottom">
-        <div>
-          <span className="section-kicker">PREFER TO BROWSE?</span>
-          <h2>Explore current rental listings.</h2>
+      <section className="rd-page-cta-section">
+        <div className="about-cta contact-bottom">
+          <div>
+            <span className="rd-script-label">Prefer to browse?</span>
+            <h2>Explore current rental listings.</h2>
+          </div>
+          <Link className="rd-yellow-button" href="/properties">
+            View Listings <ArrowIcon />
+          </Link>
         </div>
-        <Link className="button button-secondary" href="/properties">
-          View Listings <ArrowIcon />
-        </Link>
       </section>
       <SiteFooter />
     </main>

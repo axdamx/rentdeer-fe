@@ -39,27 +39,23 @@ const updates = [
 export default function BulletinPage() {
   return (
     <main className="bulletin-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href="/properties">
-          Find a stay <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="bulletin" />
       <section className="bulletin-hero">
-        <span className="section-kicker">RENTDEER BULLETIN</span>
-        <h1>
-          Useful ideas for the <span>rental journey.</span>
-        </h1>
-        <p>
-          Guides, community notes, and practical updates for tenants, landlords,
-          and property agents.
-        </p>
+        <SiteHeader active="bulletin" tone="dark" />
+        <div className="rd-page-hero-inner">
+          <span className="rd-script-label">RentDeer bulletin</span>
+          <h1>
+            Useful ideas for the <span>rental journey.</span>
+          </h1>
+          <p>
+            Guides, community notes, and practical updates for tenants,
+            landlords, and property agents.
+          </p>
+        </div>
       </section>
       <section className="content-section bulletin-content">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">LATEST NOTES</span>
+            <span className="rd-script-label">Latest notes</span>
             <h2>Small details make moving easier.</h2>
           </div>
           <p>
@@ -81,18 +77,20 @@ export default function BulletinPage() {
           ))}
         </div>
       </section>
-      <section className="contact-cta bulletin-cta">
-        <div>
-          <span className="section-kicker">KEEP EXPLORING</span>
-          <h2>Ready to find your next stay?</h2>
-          <p>
-            Browse current listings and submit an enquiry when you find a good
-            fit.
-          </p>
+      <section className="rd-page-cta-section">
+        <div className="about-cta bulletin-cta">
+          <div>
+            <span className="rd-script-label">Keep exploring</span>
+            <h2>Ready to find your next stay?</h2>
+            <p>
+              Browse current listings and submit an enquiry when you find a good
+              fit.
+            </p>
+          </div>
+          <Link className="rd-yellow-button" href="/properties">
+            View Properties <ArrowIcon />
+          </Link>
         </div>
-        <Link className="button button-primary" href="/properties">
-          View Properties <ArrowIcon />
-        </Link>
       </section>
       <SiteFooter />
     </main>

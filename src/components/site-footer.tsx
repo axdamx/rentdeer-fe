@@ -4,7 +4,7 @@ type SiteFooterProps = {
   tone?: "default" | "dark";
 };
 
-export default function SiteFooter({ tone = "default" }: SiteFooterProps) {
+export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
   const socialLinks = [
     {
       label: "TikTok",

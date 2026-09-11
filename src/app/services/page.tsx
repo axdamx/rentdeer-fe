@@ -78,90 +78,92 @@ const flows = [
 export default function ServicesPage() {
   return (
     <main className="services-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href="/about">
-          Our Story <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="services" />
       <section className="services-hero">
-        <div>
-          <span className="section-kicker">RENTDEER SERVICES</span>
-          <h1>
-            One rental journey, with support for <span>everyone.</span>
-          </h1>
-          <p>
-            RentDeer makes it easier for tenants to find a home, landlords to
-            manage a property, and agents to move deals forward.
-          </p>
-        </div>
-        <div className="services-hero-stat">
-          <strong>3</strong>
-          <span>Connected rental flows</span>
-          <small>
-            Tenant, landlord, and agent support in one considered experience.
-          </small>
+        <SiteHeader active="services" tone="dark" />
+        <div className="rd-page-hero-inner services-hero-inner">
+          <div>
+            <span className="rd-script-label">RentDeer services</span>
+            <h1>
+              One rental journey, with support for <span>everyone.</span>
+            </h1>
+            <p>
+              RentDeer makes it easier for tenants to find a home, landlords to
+              manage a property, and agents to move deals forward.
+            </p>
+          </div>
+          <div className="services-hero-stat">
+            <strong>3</strong>
+            <span>Connected rental flows</span>
+            <small>
+              Tenant, landlord, and agent support in one considered experience.
+            </small>
+          </div>
         </div>
       </section>
       <section className="about-section services-list">
-        <div className="section-heading">
-          <div>
-            <span className="section-kicker">HOW WE HELP</span>
-            <h2>Practical support for every side of renting.</h2>
+        <div className="about-section-inner">
+          <div className="section-heading">
+            <div>
+              <span className="rd-script-label">How we help</span>
+              <h2>Practical support for every side of renting.</h2>
+            </div>
+            <p>
+              Choose the service that fits your current chapter. RentDeer keeps
+              the next step clear, from first search to signed agreement and
+              beyond.
+            </p>
           </div>
-          <p>
-            Choose the service that fits your current chapter. RentDeer keeps
-            the next step clear, from first search to signed agreement and
-            beyond.
-          </p>
-        </div>
-        <div className="services-grid">
-          {services.map(([number, title, text]) => (
-            <article className="service-card" key={number}>
-              <span>{number}</span>
-              <h3>{title}</h3>
-              <p>{text}</p>
-              <Link href="/contact">
-                Learn more <ArrowIcon />
-              </Link>
-            </article>
-          ))}
+          <div className="services-grid">
+            {services.map(([number, title, text]) => (
+              <article className="service-card" key={number}>
+                <span>{number}</span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+                <Link href="/contact">
+                  Learn more <ArrowIcon />
+                </Link>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
       <section className="process-section">
-        <div className="process-copy">
-          <span className="section-kicker">ROLE-BASED FLOWS</span>
-          <h2>Clear steps make better rental decisions.</h2>
-          <p>
-            Our flow is designed around what each participant needs to do next,
-            with useful information and fewer handoffs.
-          </p>
-        </div>
-        <div className="process-steps">
-          {flows.map(([role, first, second, third, fourth]) => (
-            <div key={role}>
-              <strong>{role}</strong>
-              <h3>{first}</h3>
-              <p>
-                {second} · {third} · {fourth}
-              </p>
-            </div>
-          ))}
+        <div className="process-inner">
+          <div className="process-copy">
+            <span className="rd-script-label">Role-based flows</span>
+            <h2>Clear steps make better rental decisions.</h2>
+            <p>
+              Our flow is designed around what each participant needs to do
+              next, with useful information and fewer handoffs.
+            </p>
+          </div>
+          <div className="process-steps">
+            {flows.map(([role, first, second, third, fourth]) => (
+              <div key={role}>
+                <strong>{role}</strong>
+                <h3>{first}</h3>
+                <p>
+                  {second} · {third} · {fourth}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
-      <section className="contact-cta services-cta">
-        <div>
-          <span className="section-kicker">LET&apos;S TALK</span>
-          <h2>Need help choosing your next step?</h2>
-          <p>
-            Tell RentDeer whether you are looking for a stay, managing a
-            property, or exploring a partnership.
-          </p>
+      <section className="rd-page-cta-section">
+        <div className="about-cta services-cta">
+          <div>
+            <span className="rd-script-label">Let&apos;s talk</span>
+            <h2>Need help choosing your next step?</h2>
+            <p>
+              Tell RentDeer whether you are looking for a stay, managing a
+              property, or exploring a partnership.
+            </p>
+          </div>
+          <Link className="rd-yellow-button" href="/contact">
+            Contact RentDeer <ArrowIcon />
+          </Link>
         </div>
-        <Link className="button button-primary" href="/contact">
-          Contact RentDeer <ArrowIcon />
-        </Link>
       </section>
       <SiteFooter />
     </main>

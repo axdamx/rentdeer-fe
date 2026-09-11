@@ -46,51 +46,47 @@ export default async function RentalUnitPage({
 
   return (
     <main className="property-detail-page unit-detail-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href={`/properties/${property.slug}`}>
-          Back to Property <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="properties" />
-      <div className="detail-breadcrumb">
-        <Link href="/properties">Properties</Link>
-        <span>/</span>
-        <Link href={`/properties/${property.slug}`}>{property.title}</Link>
-        <span>/</span>
-        <span>{unit.title}</span>
-      </div>
-
-      <section className="detail-hero content-section">
-        <PropertyGallery
-          className="detail-image"
-          images={[unit.image, ...property.gallery]}
-          alt={unit.title}
-          label={unit.roomType}
-          priority
-        />
-        <div className="detail-copy">
-          <span className="property-location">
-            {unit.roomType} · {property.city}
-          </span>
-          <h1>{unit.title}</h1>
-          <p>{unit.description}</p>
-          <div className="detail-price">
-            <span>Monthly rent</span>
-            <strong>RM{unit.monthlyRent.toLocaleString()} / month</strong>
-            <small>
-              {unit.available
-                ? "Available to enquire"
-                : "Currently rented — ask about similar options"}
-            </small>
-          </div>
-          <Link
-            className="button button-primary"
-            href={`/contact?property=${property.slug}&unit=${unit.slug}`}
-          >
-            Enquire About This Unit <ArrowIcon />
-          </Link>
+      <section className="detail-top-shell">
+        <SiteHeader active="properties" tone="dark" />
+        <div className="detail-breadcrumb">
+          <Link href="/properties">Properties</Link>
+          <span>/</span>
+          <Link href={`/properties/${property.slug}`}>{property.title}</Link>
+          <span>/</span>
+          <span>{unit.title}</span>
         </div>
+
+        <section className="detail-hero content-section">
+          <PropertyGallery
+            className="detail-image"
+            images={[unit.image, ...property.gallery]}
+            alt={unit.title}
+            label={unit.roomType}
+            priority
+          />
+          <div className="detail-copy">
+            <span className="property-location">
+              {unit.roomType} · {property.city}
+            </span>
+            <h1>{unit.title}</h1>
+            <p>{unit.description}</p>
+            <div className="detail-price">
+              <span>Monthly rent</span>
+              <strong>RM{unit.monthlyRent.toLocaleString()} / month</strong>
+              <small>
+                {unit.available
+                  ? "Available to enquire"
+                  : "Currently rented — ask about similar options"}
+              </small>
+            </div>
+            <Link
+              className="rd-yellow-button"
+              href={`/contact?property=${property.slug}&unit=${unit.slug}`}
+            >
+              Enquire About This Unit <ArrowIcon />
+            </Link>
+          </div>
+        </section>
       </section>
 
       <section className="detail-content content-section">
@@ -114,7 +110,7 @@ export default async function RentalUnitPage({
         </div>
         <div className="detail-lower">
           <div>
-            <span className="section-kicker">ABOUT THIS UNIT</span>
+            <span className="rd-script-label">About this unit</span>
             <h2>A clearer view before you decide.</h2>
             <p>
               {unit.description} This unit is part of{" "}
@@ -128,7 +124,7 @@ export default async function RentalUnitPage({
             </p>
           </div>
           <div className="detail-feature-box">
-            <span className="section-kicker">SHARED WITH THIS PROPERTY</span>
+            <span className="rd-script-label">Shared with this property</span>
             {property.facilities.map((facility) => (
               <div key={facility}>
                 <span className="detail-check">✓</span>
@@ -139,9 +135,9 @@ export default async function RentalUnitPage({
         </div>
       </section>
 
-      <section className="unit-detail-info-grid content-section">
+      <section className="unit-detail-info-grid rd-detail-green-section content-section">
         <div className="detail-panel">
-          <span className="section-kicker">RENTAL CHECKLIST</span>
+          <span className="rd-script-label">Rental checklist</span>
           <h2>What to expect next.</h2>
           <div className="detail-bullet-list">
             <div>
@@ -163,7 +159,7 @@ export default async function RentalUnitPage({
           </div>
         </div>
         <div className="detail-panel">
-          <span className="section-kicker">PART OF THE RESIDENCE</span>
+          <span className="rd-script-label">Part of the residence</span>
           <h2>See the other options.</h2>
           <p>
             Compare this unit with the other rooms and homes available at{" "}
@@ -181,7 +177,7 @@ export default async function RentalUnitPage({
       <section className="property-location-section content-section">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">LOCATION</span>
+            <span className="rd-script-label">Location</span>
             <h2>Understand the neighbourhood.</h2>
           </div>
           <p>
@@ -195,21 +191,23 @@ export default async function RentalUnitPage({
           coordinates={[3.1579, 101.7116]}
         />
       </section>
-      <section className="contact-cta detail-cta">
-        <div>
-          <span className="section-kicker">READY TO ASK?</span>
-          <h2>Make this unit your next step.</h2>
-          <p>
-            Send an enquiry with your preferred move-in date and the RentDeer
-            team will guide you from there.
-          </p>
+      <section className="rd-page-cta-section">
+        <div className="about-cta detail-cta">
+          <div>
+            <span className="rd-script-label">Ready to ask?</span>
+            <h2>Make this unit your next step.</h2>
+            <p>
+              Send an enquiry with your preferred move-in date and the RentDeer
+              team will guide you from there.
+            </p>
+          </div>
+          <Link
+            className="rd-yellow-button"
+            href={`/contact?property=${property.slug}&unit=${unit.slug}`}
+          >
+            Start Enquiry <ArrowIcon />
+          </Link>
         </div>
-        <Link
-          className="button button-primary"
-          href={`/contact?property=${property.slug}&unit=${unit.slug}`}
-        >
-          Start Enquiry <ArrowIcon />
-        </Link>
       </section>
       <SiteFooter />
     </main>

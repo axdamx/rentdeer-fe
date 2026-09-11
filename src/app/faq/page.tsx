@@ -73,27 +73,23 @@ export default function FAQPage() {
   const [openFaq, setOpenFaq] = useState(0);
   return (
     <main className="faq-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href="/properties">
-          Find a stay <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="faq" />
       <section className="faq-page-hero">
-        <span className="section-kicker">RENTDEER FAQ</span>
-        <h1>
-          Answers before you <span>move in.</span>
-        </h1>
-        <p>
-          Get quick answers about rooms, deposits, rental terms, shared living,
-          and the booking journey.
-        </p>
+        <SiteHeader active="faq" tone="dark" />
+        <div className="rd-page-hero-inner">
+          <span className="rd-script-label">RentDeer FAQ</span>
+          <h1>
+            Answers before you <span>move in.</span>
+          </h1>
+          <p>
+            Get quick answers about rooms, deposits, rental terms, shared
+            living, and the booking journey.
+          </p>
+        </div>
       </section>
       <section className="content-section faq-page-content">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">FREQUENTLY ASKED</span>
+            <span className="rd-script-label">Frequently asked</span>
             <h2>Good questions make better moves.</h2>
           </div>
           <p>
@@ -120,18 +116,20 @@ export default function FAQPage() {
           ))}
         </div>
       </section>
-      <section className="contact-cta faq-cta">
-        <div>
-          <span className="section-kicker">NEED MORE HELP?</span>
-          <h2>Talk to the RentDeer team.</h2>
-          <p>
-            We can help you find the right room or route your landlord and agent
-            enquiry.
-          </p>
+      <section className="rd-page-cta-section">
+        <div className="about-cta faq-cta">
+          <div>
+            <span className="rd-script-label">Need more help?</span>
+            <h2>Talk to the RentDeer team.</h2>
+            <p>
+              We can help you find the right room or route your landlord and
+              agent enquiry.
+            </p>
+          </div>
+          <Link className="rd-yellow-button" href="/contact">
+            Contact Us <ArrowIcon />
+          </Link>
         </div>
-        <Link className="button button-primary" href="/contact">
-          Contact Us <ArrowIcon />
-        </Link>
       </section>
       <SiteFooter />
     </main>

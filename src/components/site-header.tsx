@@ -26,10 +26,7 @@ const propertyLocations = [
   ["Puchong", ["Seri Kembangan"]],
 ] as const;
 
-export default function SiteHeader({
-  active,
-  tone = "default",
-}: SiteHeaderProps) {
+export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const MotionButton = motion.button;
 

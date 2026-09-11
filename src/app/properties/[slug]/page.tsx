@@ -46,49 +46,45 @@ export default async function PropertyDetailPage({
 
   return (
     <main className="property-detail-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href="/about">
-          Our Story <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="properties" />
-      <div className="detail-breadcrumb">
-        <Link href="/properties">Properties</Link>
-        <span>/</span>
-        <span>{property.title}</span>
-      </div>
-
-      <section className="detail-hero content-section">
-        <PropertyGallery
-          className="detail-image"
-          images={property.gallery}
-          alt={property.title}
-          label={`${property.units.length} rental options`}
-          priority
-        />
-        <div className="detail-copy">
-          <span className="property-location">
-            {property.city} · {property.propertyType}
-          </span>
-          <h1>{property.title}</h1>
-          <p>{property.description}</p>
-          <div className="detail-price">
-            <span>Rental options from</span>
-            <strong>RM{startingPrice.toLocaleString()} / month</strong>
-            <small>
-              {availableUnits.length} of {property.units.length} options
-              currently available
-            </small>
-          </div>
-          <div className="detail-managed-by">
-            <span>Managed by</span>
-            <strong>{property.managedBy}</strong>
-          </div>
-          <Link className="button button-primary" href="#rental-options">
-            Choose a Rental Option <ArrowIcon />
-          </Link>
+      <section className="detail-top-shell">
+        <SiteHeader active="properties" tone="dark" />
+        <div className="detail-breadcrumb">
+          <Link href="/properties">Properties</Link>
+          <span>/</span>
+          <span>{property.title}</span>
         </div>
+
+        <section className="detail-hero content-section">
+          <PropertyGallery
+            className="detail-image"
+            images={property.gallery}
+            alt={property.title}
+            label={`${property.units.length} rental options`}
+            priority
+          />
+          <div className="detail-copy">
+            <span className="property-location">
+              {property.city} · {property.propertyType}
+            </span>
+            <h1>{property.title}</h1>
+            <p>{property.description}</p>
+            <div className="detail-price">
+              <span>Rental options from</span>
+              <strong>RM{startingPrice.toLocaleString()} / month</strong>
+              <small>
+                {availableUnits.length} of {property.units.length} options
+                currently available
+              </small>
+            </div>
+            <div className="detail-managed-by">
+              <span>Managed by</span>
+              <strong>{property.managedBy}</strong>
+            </div>
+            <Link className="rd-yellow-button" href="#rental-options">
+              Choose a Rental Option <ArrowIcon />
+            </Link>
+          </div>
+        </section>
       </section>
 
       <section className="detail-content content-section">
@@ -112,7 +108,7 @@ export default async function PropertyDetailPage({
         </div>
         <div className="detail-lower">
           <div>
-            <span className="section-kicker">ABOUT THIS PROPERTY</span>
+            <span className="rd-script-label">About this property</span>
             <h2>Everything you need before you move in.</h2>
             <p>
               {property.description} Explore the residence, compare the
@@ -121,7 +117,7 @@ export default async function PropertyDetailPage({
             </p>
           </div>
           <div className="detail-feature-box">
-            <span className="section-kicker">PROPERTY FACILITIES</span>
+            <span className="rd-script-label">Property facilities</span>
             {property.facilities.map((facility) => (
               <div key={facility}>
                 <span className="detail-check">✓</span>
@@ -133,12 +129,12 @@ export default async function PropertyDetailPage({
       </section>
 
       <section
-        className="detail-units-section content-section"
+        className="detail-units-section rd-detail-green-section content-section"
         id="rental-options"
       >
         <div className="section-heading">
           <div>
-            <span className="section-kicker">RENTAL OPTIONS</span>
+            <span className="rd-script-label">Rental options</span>
             <h2>Choose the way you want to live here.</h2>
           </div>
           <p>
@@ -202,7 +198,7 @@ export default async function PropertyDetailPage({
 
       <section className="detail-discovery-grid content-section">
         <div className="detail-panel">
-          <span className="section-kicker">GOOD TO KNOW</span>
+          <span className="rd-script-label">Good to know</span>
           <h2>Highlights at a glance.</h2>
           <div className="detail-bullet-list">
             {property.details.highlights.map((highlight) => (
@@ -214,7 +210,7 @@ export default async function PropertyDetailPage({
           </div>
         </div>
         <div className="detail-panel">
-          <span className="section-kicker">RENTAL TERMS</span>
+          <span className="rd-script-label">Rental terms</span>
           <h2>Know the important details.</h2>
           <div className="detail-term-list">
             {property.details.rentalTerms.map(({ label, value }) => (
@@ -227,9 +223,9 @@ export default async function PropertyDetailPage({
         </div>
       </section>
 
-      <section className="detail-discovery-grid detail-rules-grid content-section">
+      <section className="detail-discovery-grid detail-rules-grid rd-detail-green-section content-section">
         <div className="detail-panel">
-          <span className="section-kicker">HOUSE RULES</span>
+          <span className="rd-script-label">House rules</span>
           <h2>Know what shared living feels like.</h2>
           <div className="detail-bullet-list">
             {property.details.houseRules.map((rule) => (
@@ -241,7 +237,7 @@ export default async function PropertyDetailPage({
           </div>
         </div>
         <div className="detail-panel detail-availability-panel">
-          <span className="section-kicker">AVAILABILITY</span>
+          <span className="rd-script-label">Availability</span>
           <h2>{property.details.availability}</h2>
           <p>{property.details.responseTime}</p>
           <div className="detail-nearby-list">
@@ -257,7 +253,7 @@ export default async function PropertyDetailPage({
 
       <section className="detail-review-section content-section">
         <div className="detail-review-copy">
-          <span className="section-kicker">TENANT EXPERIENCE</span>
+          <span className="rd-script-label">Tenant experience</span>
           <h2>What moving in can feel like.</h2>
           <p>
             Mock review data for now. Later, this can be connected to verified
@@ -275,9 +271,9 @@ export default async function PropertyDetailPage({
         </div>
       </section>
 
-      <section className="detail-booking-section content-section">
+      <section className="detail-booking-section rd-detail-green-section content-section">
         <div>
-          <span className="section-kicker">HOW IT WORKS</span>
+          <span className="rd-script-label">How it works</span>
           <h2>From enquiry to move-in.</h2>
           <p>
             Keep the next step visible so renters know what happens after they
@@ -297,7 +293,7 @@ export default async function PropertyDetailPage({
       <section className="property-location-section content-section">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">LOCATION</span>
+            <span className="rd-script-label">Location</span>
             <h2>See the area before you enquire.</h2>
           </div>
           <p>
@@ -312,18 +308,20 @@ export default async function PropertyDetailPage({
           coordinates={[3.1579, 101.7116]}
         />
       </section>
-      <section className="contact-cta detail-cta">
-        <div>
-          <span className="section-kicker">TAKE THE NEXT STEP</span>
-          <h2>Ready to find your room here?</h2>
-          <p>
-            Our tenant enquiry team can answer your questions and help you
-            compare the available rental options.
-          </p>
+      <section className="rd-page-cta-section">
+        <div className="about-cta detail-cta">
+          <div>
+            <span className="rd-script-label">Take the next step</span>
+            <h2>Ready to find your room here?</h2>
+            <p>
+              Our tenant enquiry team can answer your questions and help you
+              compare the available rental options.
+            </p>
+          </div>
+          <Link className="rd-yellow-button" href="/contact">
+            Submit Enquiry <ArrowIcon />
+          </Link>
         </div>
-        <Link className="button button-primary" href="/contact">
-          Submit Enquiry <ArrowIcon />
-        </Link>
       </section>
       <SiteFooter />
     </main>

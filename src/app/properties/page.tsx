@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PropertyGallery from "@/components/property-gallery";
+import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import { cities, properties, roomTypes } from "@/lib/properties";
 
@@ -129,126 +130,121 @@ export default function PropertiesPage() {
 
   return (
     <main className="listing-page">
-      <div className="announcement-bar">
-        <span>✨ Rent smarter. Live better with RentDeer.</span>
-        <Link href="/about">
-          Learn More <ArrowIcon />
-        </Link>
-      </div>
-      <SiteHeader active="properties" />
-
       <section className="listing-hero">
-        <div className="listing-hero-copy">
-          <span className="section-kicker">FIND YOUR NEW STAY</span>
-          <h1>
-            Find a room that feels like <span>home.</span>
-          </h1>
-          <p>
-            Browse clean, affordable, ready-to-move-in rooms and units across
-            Klang Valley, with the details you need before you enquire.
-          </p>
-        </div>
-        <search className="search-panel" aria-label="Search properties">
-          <div
-            className="search-tabs"
-            role="tablist"
-            aria-label="Listing filters"
-          >
-            <button
-              type="button"
-              className={!furnishedOnly ? "is-selected" : ""}
-              onClick={() => setFurnishedOnly(false)}
-            >
-              All stays
-            </button>
-            <button
-              type="button"
-              className={furnishedOnly ? "is-selected" : ""}
-              onClick={() => setFurnishedOnly(true)}
-            >
-              Fully furnished
-            </button>
-          </div>
-          <div className="search-row">
-            <label>
-              <span>Search keyword</span>
-              <div className="input-with-icon">
-                <SearchIcon />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="e.g. Damansara, master room"
-                />
-              </div>
-            </label>
-            <label>
-              <span>City</span>
-              <select
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
-              >
-                <option>All locations</option>
-                <option>Kuala Lumpur</option>
-                <option>Petaling Jaya</option>
-                <option>Puchong</option>
-                {cities.map((location) => (
-                  <option key={location}>{location}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Room type</span>
-              <select
-                value={type}
-                onChange={(event) => setType(event.target.value)}
-              >
-                <option>All</option>
-                {roomTypes.map((roomType) => (
-                  <option key={roomType}>{roomType}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Monthly budget</span>
-              <select
-                value={`${minPrice}-${maxPrice}`}
-                onChange={(event) => {
-                  const [minimum, maximum] = event.target.value
-                    .split("-")
-                    .map(Number);
-                  setMinPrice(minimum);
-                  setMaxPrice(maximum);
-                }}
-              >
-                {prices.map(([label, minimum, maximum]) => (
-                  <option value={`${minimum}-${maximum}`} key={label}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              className="button button-primary search-submit"
-              onClick={() => setSearched(true)}
-            >
-              Search <SearchIcon />
-            </button>
-          </div>
-          {searched && (
-            <p className="search-feedback" aria-live="polite">
-              Showing {filteredProperties.length} rental{" "}
-              {filteredProperties.length === 1 ? "property" : "properties"}{" "}
-              matching your search.
+        <SiteHeader active="properties" tone="dark" />
+        <div className="rd-page-hero-inner listing-hero-inner">
+          <div className="listing-hero-copy">
+            <span className="rd-script-label">Find your new stay</span>
+            <h1>
+              Find a room that feels like <span>home.</span>
+            </h1>
+            <p>
+              Browse clean, affordable, ready-to-move-in rooms and units across
+              Klang Valley, with the details you need before you enquire.
             </p>
-          )}
-        </search>
+          </div>
+          <search className="search-panel" aria-label="Search properties">
+            <div
+              className="search-tabs"
+              role="tablist"
+              aria-label="Listing filters"
+            >
+              <button
+                type="button"
+                className={!furnishedOnly ? "is-selected" : ""}
+                onClick={() => setFurnishedOnly(false)}
+              >
+                All stays
+              </button>
+              <button
+                type="button"
+                className={furnishedOnly ? "is-selected" : ""}
+                onClick={() => setFurnishedOnly(true)}
+              >
+                Fully furnished
+              </button>
+            </div>
+            <div className="search-row">
+              <label>
+                <span>Search keyword</span>
+                <div className="input-with-icon">
+                  <SearchIcon />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="e.g. Damansara, master room"
+                  />
+                </div>
+              </label>
+              <label>
+                <span>City</span>
+                <select
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                >
+                  <option>All locations</option>
+                  <option>Kuala Lumpur</option>
+                  <option>Petaling Jaya</option>
+                  <option>Puchong</option>
+                  {cities.map((location) => (
+                    <option key={location}>{location}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Room type</span>
+                <select
+                  value={type}
+                  onChange={(event) => setType(event.target.value)}
+                >
+                  <option>All</option>
+                  {roomTypes.map((roomType) => (
+                    <option key={roomType}>{roomType}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Monthly budget</span>
+                <select
+                  value={`${minPrice}-${maxPrice}`}
+                  onChange={(event) => {
+                    const [minimum, maximum] = event.target.value
+                      .split("-")
+                      .map(Number);
+                    setMinPrice(minimum);
+                    setMaxPrice(maximum);
+                  }}
+                >
+                  {prices.map(([label, minimum, maximum]) => (
+                    <option value={`${minimum}-${maximum}`} key={label}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="rd-yellow-button search-submit"
+                onClick={() => setSearched(true)}
+              >
+                Search <SearchIcon />
+              </button>
+            </div>
+            {searched && (
+              <p className="search-feedback" aria-live="polite">
+                Showing {filteredProperties.length} rental{" "}
+                {filteredProperties.length === 1 ? "property" : "properties"}{" "}
+                matching your search.
+              </p>
+            )}
+          </search>
+        </div>
       </section>
 
       <section className="listing-results content-section">
         <div className="section-heading">
           <div>
-            <span className="section-kicker">EXPLORE LISTINGS</span>
+            <span className="rd-script-label">Explore listings</span>
             <h2>{filteredProperties.length} properties to explore</h2>
           </div>
           <p>
@@ -330,19 +326,22 @@ export default function PropertiesPage() {
         )}
       </section>
 
-      <section className="contact-cta listing-cta">
-        <div>
-          <span className="section-kicker">NEED A LITTLE HELP?</span>
-          <h2>Let&apos;s find your next stay together.</h2>
-          <p>
-            Share what you are looking for and a RentDeer advisor will curate a
-            shortlist for you.
-          </p>
+      <section className="rd-page-cta-section">
+        <div className="about-cta listing-cta">
+          <div>
+            <span className="rd-script-label">Need a little help?</span>
+            <h2>Let&apos;s find your next stay together.</h2>
+            <p>
+              Share what you are looking for and a RentDeer advisor will curate
+              a shortlist for you.
+            </p>
+          </div>
+          <Link className="rd-yellow-button" href="/contact">
+            Talk to RentDeer <ArrowIcon />
+          </Link>
         </div>
-        <Link className="button button-primary" href="/contact">
-          Talk to RentDeer <ArrowIcon />
-        </Link>
       </section>
+      <SiteFooter />
     </main>
   );
 }
