@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PropertyGallery from "@/components/property-gallery";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
+import TransitPropertyExplorer from "@/components/transit-property-explorer";
 import { cities, properties, roomTypes } from "@/lib/properties";
 
 function SearchIcon() {
@@ -69,6 +70,19 @@ export default function PropertiesPage() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [searched, setSearched] = useState(false);
+  const resultsRef = useRef<HTMLElement>(null);
+
+  const showSearchResults = () => {
+    setSearched(true);
+    requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+    });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -225,7 +239,7 @@ export default function PropertiesPage() {
               <button
                 type="button"
                 className="rd-yellow-button search-submit"
-                onClick={() => setSearched(true)}
+                onClick={showSearchResults}
               >
                 Search <SearchIcon />
               </button>
@@ -241,7 +255,7 @@ export default function PropertiesPage() {
         </div>
       </section>
 
-      <section className="listing-results content-section">
+      <section className="listing-results content-section" ref={resultsRef}>
         <div className="section-heading">
           <div>
             <span className="rd-script-label">Explore listings</span>
@@ -325,6 +339,8 @@ export default function PropertiesPage() {
           </div>
         )}
       </section>
+
+      <TransitPropertyExplorer />
 
       <section className="rd-page-cta-section">
         <div className="about-cta listing-cta">

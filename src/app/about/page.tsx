@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AboutParallaxIntro from "@/components/about-parallax-intro";
+import RentalBeliefParallax from "@/components/rental-belief-parallax";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
@@ -93,32 +94,35 @@ export default function AboutPage() {
         className="about-section about-section-green rental-belief"
         id="rental-belief"
       >
-        <div className="about-section-inner about-belief-layout">
-          <div className="about-section-heading">
-            <span className="rd-script-label">Our belief</span>
-            <h2>We live and breathe rental.</h2>
+        <div className="about-section-inner">
+          <div className="about-belief-layout">
+            <div className="about-section-heading">
+              <span className="rd-script-label">Our belief</span>
+              <h2>We live and breathe rental.</h2>
+            </div>
+            <div className="about-belief-copy">
+              <p>
+                From the beginning, we have aimed to improve the standard of
+                rental living for both tenants and landlords. We believe that
+                better homes come from proper management, clear communication,
+                and sincere care for the people who live in our spaces.
+              </p>
+              <p>
+                For renters, this means rooms that are clean, move-in ready, and
+                supported by a responsive team. For landlords, this means
+                dependable tenants, consistent property upkeep, and a management
+                system that protects the value of their investment.
+              </p>
+              <p>
+                We continue to refine our services, enhance our processes, and
+                listen to feedback from both tenants and property owners. Our
+                goal is simple: to build a rental ecosystem where everyone
+                benefits—where renters feel truly at home, and landlords feel
+                confident with every unit they place under our care.
+              </p>
+            </div>
           </div>
-          <div className="about-belief-copy">
-            <p>
-              From the beginning, we have aimed to improve the standard of
-              rental living for both tenants and landlords. We believe that
-              better homes come from proper management, clear communication, and
-              sincere care for the people who live in our spaces.
-            </p>
-            <p>
-              For renters, this means rooms that are clean, move-in ready, and
-              supported by a responsive team. For landlords, this means
-              dependable tenants, consistent property upkeep, and a management
-              system that protects the value of their investment.
-            </p>
-            <p>
-              We continue to refine our services, enhance our processes, and
-              listen to feedback from both tenants and property owners. Our goal
-              is simple: to build a rental ecosystem where everyone
-              benefits—where renters feel truly at home, and landlords feel
-              confident with every unit they place under our care.
-            </p>
-          </div>
+          <RentalBeliefParallax />
         </div>
       </section>
       <section className="about-section" id="journey">
