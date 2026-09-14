@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import "@photo-sphere-viewer/core/index.css";
+import "@photo-sphere-viewer/video-plugin/index.css";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import "yet-another-react-lightbox/styles.css";

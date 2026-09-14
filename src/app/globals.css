@@ -2506,6 +2506,218 @@ blockquote {
   color: var(--violet-dark);
   font-size: 13px;
 }
+.unit-detail-actions {
+  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.listing-tour-trigger {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #bfd2bc;
+  border-radius: 7px;
+  color: #123218;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 48px;
+  padding: 7px 13px 7px 8px;
+  text-align: left;
+}
+.listing-tour-trigger:hover,
+.listing-tour-trigger:focus-visible {
+  border-color: #719b70;
+  box-shadow: 0 10px 24px rgba(16, 59, 17, 0.12);
+  outline: none;
+}
+.listing-tour-trigger-icon {
+  align-items: center;
+  background: #edf4ea;
+  border-radius: 6px;
+  color: #0a5f17;
+  display: flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+.listing-tour-trigger-icon svg {
+  height: 18px;
+  width: 18px;
+}
+.listing-tour-trigger > span:nth-child(2) {
+  display: grid;
+  font-size: 12px;
+  font-weight: 750;
+  gap: 1px;
+  white-space: nowrap;
+}
+.listing-tour-trigger small {
+  color: #68766a;
+  font-size: 9px;
+  font-weight: 550;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.listing-tour-trigger > svg {
+  color: #0a5f17;
+  height: 15px;
+  width: 15px;
+}
+.tour-dialog-content[data-slot="dialog-content"] {
+  background: #061a0b;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 35px 100px rgba(0, 12, 4, 0.55);
+  color: #fff;
+  display: grid;
+  gap: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: min(88dvh, 850px);
+  max-width: min(1180px, calc(100vw - 40px));
+  overflow: hidden;
+  padding: 0;
+  width: 100%;
+}
+.tour-dialog-header {
+  align-items: center;
+  background: #0d3216;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  min-height: 76px;
+  padding: 14px 18px 14px 22px;
+}
+.tour-dialog-header [data-slot="dialog-title"] {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 650;
+}
+.tour-dialog-header [data-slot="dialog-description"] {
+  color: #bed3bd;
+  font-size: 11px;
+}
+.tour-demo-badge {
+  background: rgba(245, 207, 63, 0.14);
+  border: 1px solid rgba(245, 207, 63, 0.42);
+  border-radius: 999px;
+  color: #f5cf3f;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+.tour-dialog-close {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  height: 38px;
+  justify-content: center;
+  padding: 0;
+  width: 38px;
+}
+.tour-dialog-close:hover,
+.tour-dialog-close:focus-visible {
+  background: #f5cf3f;
+  color: #123218;
+  outline: none;
+}
+.tour-dialog-close svg {
+  height: 17px;
+  width: 17px;
+}
+.tour-viewer-frame {
+  background: #020a04;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.sphere-video-viewer {
+  height: 100%;
+  min-height: 420px;
+  width: 100%;
+}
+.tour-viewer-loading {
+  align-items: center;
+  color: #d8ebd5;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 14px;
+  height: 100%;
+  justify-content: center;
+  min-height: 420px;
+}
+.tour-viewer-loading span {
+  animation: tour-loader-spin 900ms linear infinite;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  border-top-color: #f5cf3f;
+  height: 34px;
+  width: 34px;
+}
+.tour-viewer-instruction {
+  align-items: center;
+  background: rgba(5, 27, 11, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #fff;
+  display: flex;
+  font-size: 10px;
+  gap: 7px;
+  left: 16px;
+  padding: 8px 11px;
+  pointer-events: none;
+  position: absolute;
+  top: 16px;
+  z-index: 2;
+}
+.tour-viewer-instruction svg {
+  color: #f5cf3f;
+  height: 15px;
+  width: 15px;
+}
+.tour-dialog-content .psv-navbar {
+  background: rgba(4, 29, 10, 0.88);
+}
+.tour-dialog-content .psv-caption-content {
+  font-family: "Urbanist", Arial, sans-serif;
+}
+.tour-dialog-footer {
+  align-items: center;
+  background: #0d3216;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  min-height: 74px;
+  padding: 12px 18px 12px 22px;
+}
+.tour-dialog-footer p {
+  color: #bed3bd;
+  font-size: 10px;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 560px;
+}
+.tour-dialog-footer .rd-yellow-button {
+  flex: 0 0 auto;
+  min-height: 42px;
+}
+.tour-dialog-footer .rd-yellow-button svg {
+  height: 14px;
+  width: 14px;
+}
+@keyframes tour-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .detail-content {
   padding-top: 0;
 }
@@ -5582,9 +5794,13 @@ blockquote {
 .unit-card {
   border-color: #d8e1d5;
   box-shadow: 0 15px 30px rgba(2, 29, 10, 0.16);
+  color: #123218;
   transition:
     box-shadow 0.25s ease,
     transform 0.25s ease;
+}
+.unit-card .unit-card-bottom strong {
+  color: #123218;
 }
 .unit-card:hover {
   box-shadow: 0 22px 38px rgba(2, 29, 10, 0.25);
@@ -5753,6 +5969,56 @@ blockquote {
   }
   .detail-copy h1 {
     font-size: 48px;
+  }
+  .unit-detail-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .unit-detail-actions > .rd-yellow-button,
+  .listing-tour-trigger {
+    justify-content: center;
+    width: 100%;
+  }
+  .tour-dialog-content[data-slot="dialog-content"] {
+    border-radius: 13px;
+    height: calc(100dvh - 16px);
+    max-width: calc(100vw - 16px);
+  }
+  .tour-dialog-header {
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 68px;
+    padding: 12px 13px 12px 16px;
+  }
+  .tour-dialog-header [data-slot="dialog-description"] {
+    display: none;
+  }
+  .tour-demo-badge {
+    display: none;
+  }
+  .tour-dialog-close {
+    height: 36px;
+    width: 36px;
+  }
+  .sphere-video-viewer,
+  .tour-viewer-loading {
+    min-height: 300px;
+  }
+  .tour-viewer-instruction {
+    left: 10px;
+    top: 10px;
+  }
+  .tour-dialog-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+    padding: 11px 13px 13px;
+  }
+  .tour-dialog-footer p {
+    max-width: none;
+  }
+  .tour-dialog-footer .rd-yellow-button {
+    justify-content: center;
   }
   .detail-lower {
     padding-top: 66px;

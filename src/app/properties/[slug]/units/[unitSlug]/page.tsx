@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Listing360Tour from "@/components/listing-360-tour";
 import PropertyGallery from "@/components/property-gallery";
 import PropertyLocationMap from "@/components/property-location-map";
 import SiteFooter from "@/components/site-footer";
@@ -79,12 +80,21 @@ export default async function RentalUnitPage({
                   : "Currently rented — ask about similar options"}
               </small>
             </div>
-            <Link
-              className="rd-yellow-button"
-              href={`/contact?property=${property.slug}&unit=${unit.slug}`}
-            >
-              Enquire About This Unit <ArrowIcon />
-            </Link>
+            <div className="unit-detail-actions">
+              <Link
+                className="rd-yellow-button"
+                href={`/contact?property=${property.slug}&unit=${unit.slug}`}
+              >
+                Enquire About This Unit <ArrowIcon />
+              </Link>
+              {unit.virtualTour && (
+                <Listing360Tour
+                  contactHref={`/contact?property=${property.slug}&unit=${unit.slug}`}
+                  source={unit.virtualTour.source}
+                  title={unit.title}
+                />
+              )}
+            </div>
           </div>
         </section>
       </section>

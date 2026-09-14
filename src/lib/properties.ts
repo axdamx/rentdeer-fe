@@ -18,6 +18,9 @@ export type RentalUnit = {
   description: string;
   furnished: boolean;
   available: boolean;
+  virtualTour?: {
+    source: string;
+  };
 };
 
 export type PropertyDetails = {
@@ -88,6 +91,10 @@ const sharedSteps = [
   "Confirm the room and review the rental terms",
 ];
 
+const mockVirtualTour = {
+  source: "https://threejs.org/examples/textures/pano.mp4",
+};
+
 const baseDetails = (
   nearby: { label: string; distance: string }[],
 ): PropertyDetails => ({
@@ -153,6 +160,7 @@ export const properties: Property[] = [
           "A comfortable private room with practical storage and move-in-ready essentials.",
         furnished: true,
         available: true,
+        virtualTour: mockVirtualTour,
       },
       {
         slug: "medium-room",
@@ -167,6 +175,7 @@ export const properties: Property[] = [
           "A bright room for renters who want a straightforward move-in experience.",
         furnished: true,
         available: true,
+        virtualTour: mockVirtualTour,
       },
       {
         slug: "small-room",
@@ -181,6 +190,7 @@ export const properties: Property[] = [
           "An affordable room with simple comforts for a clear, low-friction move.",
         furnished: true,
         available: false,
+        virtualTour: mockVirtualTour,
       },
     ],
   },
@@ -225,6 +235,7 @@ export const properties: Property[] = [
           "A bright and comfortable room close to daily essentials and transit.",
         furnished: true,
         available: true,
+        virtualTour: mockVirtualTour,
       },
       {
         slug: "ready-single-room",
@@ -239,6 +250,7 @@ export const properties: Property[] = [
           "An affordable room with simple comforts and an easy move-in setup.",
         furnished: true,
         available: true,
+        virtualTour: mockVirtualTour,
       },
     ],
   },
@@ -283,6 +295,7 @@ export const properties: Property[] = [
           "A compact studio option for renters who want privacy and a flexible work-from-home setup.",
         furnished: true,
         available: true,
+        virtualTour: mockVirtualTour,
       },
       {
         slug: "private-soho-studio",
@@ -297,6 +310,7 @@ export const properties: Property[] = [
           "A private studio with space to work, rest, and settle into a simpler routine.",
         furnished: true,
         available: true,
+        virtualTour: mockVirtualTour,
       },
       {
         slug: "whole-unit",
@@ -311,6 +325,7 @@ export const properties: Property[] = [
           "A practical whole unit for people who want privacy, flexibility, and shared living space.",
         furnished: true,
         available: false,
+        virtualTour: mockVirtualTour,
       },
     ],
   },
