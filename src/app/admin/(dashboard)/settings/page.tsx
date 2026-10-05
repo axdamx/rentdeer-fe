@@ -1,14 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  ImagePlus,
-  Save,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, ImagePlus, Save, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AdminPageHeader from "@/components/admin/admin-page-header";
@@ -16,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import type { SiteSettingsInput } from "@/lib/listing-schema";
 
@@ -64,29 +58,37 @@ const initialSettings: SiteSettingsInput = {
 
 export default function AdminSettingsPage() {
   const queryClient = useQueryClient();
-  const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState<"logo" | number | null>(null);
-  const [mediaError, setMediaError] = useState("");
   const [form, setForm] = useState<SiteSettingsInput>(initialSettings);
   const settingsQuery = useQuery({
     queryKey: ["admin", "settings"],
     queryFn: () =>
-      apiRequest<{ data: SiteSettingsInput }>("/api/admin/settings"),
+      withAdminFeedback(
+        () => apiRequest<{ data: SiteSettingsInput }>("/api/admin/settings"),
+        { loadingMessage: "Loading site settings..." },
+      ),
+    retry: false,
   });
   useEffect(() => {
     if (settingsQuery.data?.data) setForm(settingsQuery.data.data);
   }, [settingsQuery.data]);
   const saveMutation = useMutation({
     mutationFn: () =>
-      apiRequest<{ data: SiteSettingsInput }>("/api/admin/settings", {
-        method: "PATCH",
-        body: JSON.stringify(form),
-      }),
+      withAdminFeedback(
+        () =>
+          apiRequest<{ data: SiteSettingsInput }>("/api/admin/settings", {
+            method: "PATCH",
+            body: JSON.stringify(form),
+          }),
+        {
+          loadingMessage: "Saving site settings...",
+          successMessage: "Site settings saved.",
+          errorMessage: "Unable to save site settings.",
+        },
+      ),
     onSuccess: async ({ data }) => {
       setForm(data);
-      setSaved(true);
       await queryClient.invalidateQueries({ queryKey: ["site-settings"] });
-      window.setTimeout(() => setSaved(false), 2400);
     },
   });
 
@@ -122,22 +124,35 @@ export default function AdminSettingsPage() {
   ) => {
     if (!file) return;
     setUploading(kind === "logo" ? "logo" : (slideIndex ?? 0));
-    setMediaError("");
     try {
-      const body = new FormData();
-      body.set("kind", kind);
-      body.set("file", file);
-      const response = await fetch("/api/admin/site-media", {
-        method: "POST",
-        body,
-      });
-      const result = (await response.json()) as {
-        data?: { path: string; url: string };
-        error?: string;
-      };
-      if (!response.ok || !result.data) {
-        throw new Error(result.error ?? "Upload failed.");
-      }
+      const result = await withAdminFeedback(
+        async () => {
+          const body = new FormData();
+          body.set("kind", kind);
+          body.set("file", file);
+          const response = await fetch("/api/admin/site-media", {
+            method: "POST",
+            body,
+          });
+          const uploadResult = (await response.json()) as {
+            data?: { path: string; url: string };
+            error?: string;
+          };
+          if (!response.ok || !uploadResult.data) {
+            throw new Error(uploadResult.error ?? "Upload failed.");
+          }
+          return uploadResult as {
+            data: { path: string; url: string };
+          };
+        },
+        {
+          loadingMessage:
+            kind === "logo" ? "Uploading logo..." : "Uploading hero image...",
+          successMessage:
+            kind === "logo" ? "Logo uploaded." : "Hero image uploaded.",
+          errorMessage: "Unable to upload the selected image.",
+        },
+      );
       const image = {
         ...result.data,
         alt: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
@@ -152,10 +167,8 @@ export default function AdminSettingsPage() {
           ),
         );
       }
-    } catch (reason) {
-      setMediaError(
-        reason instanceof Error ? reason.message : "Unable to upload image.",
-      );
+    } catch {
+      // The shared admin feedback layer presents the error toast.
     } finally {
       setUploading(null);
     }
@@ -190,22 +203,33 @@ export default function AdminSettingsPage() {
     if (!file || form.homepageHeroSlides.length >= 4) return;
     const slideIndex = form.homepageHeroSlides.length;
     setUploading(slideIndex);
-    setMediaError("");
     try {
-      const body = new FormData();
-      body.set("kind", "hero");
-      body.set("file", file);
-      const response = await fetch("/api/admin/site-media", {
-        method: "POST",
-        body,
-      });
-      const result = (await response.json()) as {
-        data?: { path: string; url: string };
-        error?: string;
-      };
-      if (!response.ok || !result.data) {
-        throw new Error(result.error ?? "Upload failed.");
-      }
+      const result = await withAdminFeedback(
+        async () => {
+          const body = new FormData();
+          body.set("kind", "hero");
+          body.set("file", file);
+          const response = await fetch("/api/admin/site-media", {
+            method: "POST",
+            body,
+          });
+          const uploadResult = (await response.json()) as {
+            data?: { path: string; url: string };
+            error?: string;
+          };
+          if (!response.ok || !uploadResult.data) {
+            throw new Error(uploadResult.error ?? "Upload failed.");
+          }
+          return uploadResult as {
+            data: { path: string; url: string };
+          };
+        },
+        {
+          loadingMessage: "Uploading hero image...",
+          successMessage: "Hero slide uploaded.",
+          errorMessage: "Unable to upload the selected image.",
+        },
+      );
       setField("homepageHeroSlides", [
         ...form.homepageHeroSlides,
         {
@@ -213,10 +237,8 @@ export default function AdminSettingsPage() {
           alt: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
         },
       ]);
-    } catch (reason) {
-      setMediaError(
-        reason instanceof Error ? reason.message : "Unable to upload image.",
-      );
+    } catch {
+      // The shared admin feedback layer presents the error toast.
     } finally {
       setUploading(null);
     }
@@ -239,16 +261,6 @@ export default function AdminSettingsPage() {
           </Button>
         }
       />
-      {saved && (
-        <output className="admin-save-notice">
-          <Check aria-hidden="true" /> Site settings saved.
-        </output>
-      )}
-      {(saveMutation.isError || mediaError) && (
-        <div className="admin-save-notice">
-          {mediaError || saveMutation.error?.message}
-        </div>
-      )}
       <div className="admin-settings-layout">
         <nav className="admin-settings-nav" aria-label="Settings sections">
           <button

@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { hasSupabaseEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
 
@@ -43,12 +44,24 @@ export default function AdminShell({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const signOut = async () => {
-    if (hasSupabaseEnv()) {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+    try {
+      await withAdminFeedback(
+        async () => {
+          if (!hasSupabaseEnv()) return;
+          const supabase = createClient();
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+        },
+        {
+          loadingMessage: "Signing you out...",
+          successMessage: "Signed out successfully.",
+        },
+      );
+      router.replace("/admin");
+      router.refresh();
+    } catch {
+      // The shared admin feedback layer presents the error toast.
     }
-    router.replace("/admin");
-    router.refresh();
   };
 
   return (

@@ -2,7 +2,6 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Check,
   Eye,
   GripVertical,
   ImagePlus,
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import type { ContentPageInput } from "@/lib/listing-schema";
 
@@ -40,23 +40,27 @@ export default function AdminPageConfigurator({
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
     "desktop",
   );
-  const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
   const selectedSection = draftPage.sections.find(
     (section) => section.id === activeSection,
   );
   const saveMutation = useMutation({
     mutationFn: () =>
-      apiRequest<{ data: ContentPageInput }>(
-        `/api/admin/content/${draftPage.slug}`,
-        { method: "PATCH", body: JSON.stringify(draftPage) },
+      withAdminFeedback(
+        () =>
+          apiRequest<{ data: ContentPageInput }>(
+            `/api/admin/content/${draftPage.slug}`,
+            { method: "PATCH", body: JSON.stringify(draftPage) },
+          ),
+        {
+          loadingMessage: `Saving ${draftPage.name}...`,
+          successMessage: `${draftPage.name} updated successfully.`,
+          errorMessage: `Unable to update ${draftPage.name}.`,
+        },
       ),
     onSuccess: async ({ data }) => {
       setDraftPage(data);
-      setSaved(true);
       await queryClient.invalidateQueries({ queryKey: ["admin", "content"] });
-      window.setTimeout(() => setSaved(false), 2400);
     },
   });
 
@@ -88,23 +92,32 @@ export default function AdminPageConfigurator({
   const uploadAssets = async (files: FileList | null) => {
     if (!files?.length || !selectedSection) return;
     setUploading(true);
-    setError("");
     try {
-      const body = new FormData();
-      body.set("ownerType", "contentSection");
-      body.set("ownerId", selectedSection.id);
-      for (const file of Array.from(files)) body.append("files", file);
-      const response = await fetch("/api/admin/media", {
-        method: "POST",
-        body,
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? "Upload failed.");
+      await withAdminFeedback(
+        async () => {
+          const body = new FormData();
+          body.set("ownerType", "contentSection");
+          body.set("ownerId", selectedSection.id);
+          for (const file of Array.from(files)) body.append("files", file);
+          const response = await fetch("/api/admin/media", {
+            method: "POST",
+            body,
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error ?? "Upload failed.");
+          return result;
+        },
+        {
+          loadingMessage: `Uploading ${files.length} asset${files.length === 1 ? "" : "s"}...`,
+          successMessage: `${files.length} asset${files.length === 1 ? "" : "s"} uploaded.`,
+          errorMessage: "Unable to upload the selected assets.",
+        },
+      );
       updateSelectedSection({
         assetCount: selectedSection.assetCount + files.length,
       });
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Upload failed.");
+    } catch {
+      // The shared admin feedback layer presents the error toast.
     } finally {
       setUploading(false);
     }
@@ -154,17 +167,6 @@ export default function AdminPageConfigurator({
           </Button>
         </div>
       </div>
-
-      {saved && (
-        <output className="admin-save-notice">
-          <Check aria-hidden="true" /> Mock changes saved locally.
-        </output>
-      )}
-      {(error || saveMutation.isError) && (
-        <div className="admin-save-notice">
-          {error || saveMutation.error?.message}
-        </div>
-      )}
 
       <div className="admin-configurator-layout">
         <aside className="admin-section-list">

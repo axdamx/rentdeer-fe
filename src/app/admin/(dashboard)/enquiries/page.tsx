@@ -5,6 +5,7 @@ import { Download, Search, SlidersHorizontal } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 
@@ -36,17 +37,30 @@ export default function AdminEnquiriesPage() {
     queryFn: () => {
       const params = new URLSearchParams({ status, page: "1", pageSize: "50" });
       if (deferredSearch) params.set("query", deferredSearch);
-      return apiRequest<{ data: AdminEnquiry[]; total: number }>(
-        `/api/admin/enquiries?${params}`,
+      return withAdminFeedback(
+        () =>
+          apiRequest<{ data: AdminEnquiry[]; total: number }>(
+            `/api/admin/enquiries?${params}`,
+          ),
+        { loadingMessage: "Loading enquiries..." },
       );
     },
+    retry: false,
   });
   const statusMutation = useMutation({
     mutationFn: ({ id, nextStatus }: { id: string; nextStatus: string }) =>
-      apiRequest(`/api/admin/enquiries/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: nextStatus }),
-      }),
+      withAdminFeedback(
+        () =>
+          apiRequest(`/api/admin/enquiries/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: nextStatus }),
+          }),
+        {
+          loadingMessage: "Updating enquiry status...",
+          successMessage: "Enquiry status updated.",
+          errorMessage: "Unable to update the enquiry status.",
+        },
+      ),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["admin", "enquiries"] }),
   });

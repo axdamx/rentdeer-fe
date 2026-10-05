@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import AdminFeedbackProvider from "@/components/admin/admin-feedback-provider";
 import "./admin.css";
 
 export const metadata: Metadata = {
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminRootLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <AdminFeedbackProvider>{children}</AdminFeedbackProvider>;
 }

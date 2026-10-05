@@ -6,6 +6,7 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { showAdminError, withAdminFeedback } from "@/lib/admin-feedback";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
@@ -13,65 +14,73 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
       const formData = new FormData(event.currentTarget);
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: String(formData.get("email")),
-        password: String(formData.get("password")),
-      });
-      if (signInError) throw signInError;
+      await withAdminFeedback(
+        async () => {
+          const supabase = createClient();
+          const { error: signInError } = await supabase.auth.signInWithPassword(
+            {
+              email: String(formData.get("email")),
+              password: String(formData.get("password")),
+            },
+          );
+          if (signInError) throw signInError;
 
-      const { data: profile } = await supabase
-        .from("admin_profiles")
-        .select("is_active")
-        .single();
-      if (!profile?.is_active) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This account does not have active administrator access.",
-        );
-      }
+          const { data: profile } = await supabase
+            .from("admin_profiles")
+            .select("is_active")
+            .single();
+          if (!profile?.is_active) {
+            await supabase.auth.signOut();
+            throw new Error(
+              "This account does not have active administrator access.",
+            );
+          }
+        },
+        {
+          loadingMessage: "Signing you in...",
+          successMessage: "Signed in successfully.",
+        },
+      );
 
       const nextPath = new URLSearchParams(window.location.search).get("next");
       router.replace(
         nextPath?.startsWith("/admin/") ? nextPath : "/admin/dashboard",
       );
       router.refresh();
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Unable to sign in.");
+    } catch {
       setLoading(false);
     }
   };
 
   const sendPasswordReset = async () => {
     if (!email) {
-      setError("Enter your email address first.");
+      showAdminError("Enter your email address first.");
       return;
     }
     try {
-      const supabase = createClient();
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        email,
+      await withAdminFeedback(
+        async () => {
+          const supabase = createClient();
+          const { error: resetError } =
+            await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/auth/callback?next=/admin/reset-password`,
+            });
+          if (resetError) throw resetError;
+        },
         {
-          redirectTo: `${window.location.origin}/auth/callback?next=/admin/reset-password`,
+          loadingMessage: "Sending password reset email...",
+          successMessage: "Password reset email sent.",
         },
       );
-      if (resetError) throw resetError;
-      setError("Password reset email sent.");
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : "Unable to send reset email.",
-      );
+    } catch {
+      // The shared admin feedback layer presents the error toast.
     }
   };
 
@@ -161,7 +170,6 @@ export default function AdminLoginPage() {
             {loading ? "Signing in..." : "Sign in"}
             <ArrowRight aria-hidden="true" />
           </Button>
-          {error && <output className="admin-login-help">{error}</output>}
           <p className="admin-login-help">
             Need access? Contact the RentDeer system administrator.
           </p>

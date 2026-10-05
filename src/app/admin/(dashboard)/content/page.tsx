@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Eye, ImageIcon, PanelsTopLeft } from "lucide-react";
 import Link from "next/link";
 import AdminPageHeader from "@/components/admin/admin-page-header";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import type { ContentPageInput } from "@/lib/listing-schema";
 
@@ -11,7 +12,11 @@ export default function AdminContentPage() {
   const pagesQuery = useQuery({
     queryKey: ["admin", "content"],
     queryFn: () =>
-      apiRequest<{ data: ContentPageInput[] }>("/api/admin/content"),
+      withAdminFeedback(
+        () => apiRequest<{ data: ContentPageInput[] }>("/api/admin/content"),
+        { loadingMessage: "Loading website content..." },
+      ),
+    retry: false,
   });
   const adminContentPages = pagesQuery.data?.data ?? [];
 

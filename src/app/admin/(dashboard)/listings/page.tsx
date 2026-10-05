@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useDeferredValue, useState } from "react";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import type { Property } from "@/lib/properties";
 import { queryKeys } from "@/lib/query-keys";
@@ -30,10 +31,15 @@ export default function AdminListingsPage() {
         status,
       });
       if (deferredSearch) params.set("query", deferredSearch);
-      return apiRequest<{ data: Property[]; total: number }>(
-        `/api/admin/properties?${params}`,
+      return withAdminFeedback(
+        () =>
+          apiRequest<{ data: Property[]; total: number }>(
+            `/api/admin/properties?${params}`,
+          ),
+        { loadingMessage: "Loading property listings..." },
       );
     },
+    retry: false,
   });
   const properties = propertiesQuery.data?.data ?? [];
 

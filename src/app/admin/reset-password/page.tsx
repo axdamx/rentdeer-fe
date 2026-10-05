@@ -5,28 +5,35 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setMessage("");
     const formData = new FormData(event.currentTarget);
     const password = String(formData.get("password"));
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      setMessage(error.message);
+    try {
+      await withAdminFeedback(
+        async () => {
+          const supabase = createClient();
+          const { error } = await supabase.auth.updateUser({ password });
+          if (error) throw error;
+        },
+        {
+          loadingMessage: "Updating your password...",
+          successMessage: "Password updated successfully.",
+        },
+      );
+      router.replace("/admin/dashboard");
+      router.refresh();
+    } catch {
       setLoading(false);
-      return;
     }
-    router.replace("/admin/dashboard");
-    router.refresh();
   };
 
   return (
@@ -55,7 +62,6 @@ export default function ResetPasswordPage() {
           >
             {loading ? "Updating..." : "Update password"}
           </Button>
-          {message && <p className="admin-login-help">{message}</p>}
         </form>
       </section>
     </main>

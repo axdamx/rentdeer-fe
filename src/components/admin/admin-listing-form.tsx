@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import { facilityOptions, transitStations } from "@/lib/listing-reference-data";
 import {
@@ -85,8 +86,6 @@ export default function AdminListingForm({
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<PropertyInput>(emptyProperty);
-  const [notice, setNotice] = useState("");
-  const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [customFacility, setCustomFacility] = useState("");
   const [locating, setLocating] = useState(false);
@@ -95,10 +94,15 @@ export default function AdminListingForm({
   const listingQuery = useQuery({
     queryKey: queryKeys.admin.property(initialSlug ?? "new"),
     queryFn: () =>
-      apiRequest<{ data: PropertyInput }>(
-        `/api/admin/properties/${initialSlug}`,
+      withAdminFeedback(
+        () =>
+          apiRequest<{ data: PropertyInput }>(
+            `/api/admin/properties/${initialSlug}`,
+          ),
+        { loadingMessage: "Loading listing..." },
       ),
     enabled: mode === "edit" && Boolean(initialSlug),
+    retry: false,
   });
 
   useEffect(() => {
@@ -107,33 +111,36 @@ export default function AdminListingForm({
 
   const saveMutation = useMutation({
     mutationFn: (payload: PropertyInput) =>
-      apiRequest<{ data: Property }>(
-        mode === "edit" && initialSlug
-          ? `/api/admin/properties/${initialSlug}`
-          : "/api/admin/properties",
+      withAdminFeedback(
+        () =>
+          apiRequest<{ data: Property }>(
+            mode === "edit" && initialSlug
+              ? `/api/admin/properties/${initialSlug}`
+              : "/api/admin/properties",
+            {
+              method: mode === "edit" ? "PATCH" : "POST",
+              body: JSON.stringify(payload),
+            },
+          ),
         {
-          method: mode === "edit" ? "PATCH" : "POST",
-          body: JSON.stringify(payload),
+          loadingMessage:
+            mode === "edit" ? "Updating listing..." : "Creating listing...",
+          successMessage:
+            mode === "edit"
+              ? "Listing updated successfully."
+              : "Listing created successfully.",
+          errorMessage: "Unable to save the listing.",
         },
       ),
     onSuccess: async ({ data }) => {
-      setError("");
-      setNotice("Listing saved successfully.");
       await queryClient.invalidateQueries({
         queryKey: ["admin", "properties"],
       });
       await queryClient.invalidateQueries({ queryKey: ["properties"] });
-      window.setTimeout(() => setNotice(""), 2600);
       if (mode === "create") {
         router.replace(`/admin/listings/${data.slug}`);
         router.refresh();
       }
-    },
-    onError: (reason) => {
-      setNotice("");
-      setError(
-        reason instanceof Error ? reason.message : "Unable to save listing.",
-      );
     },
   });
 
@@ -274,26 +281,32 @@ export default function AdminListingForm({
   const uploadMedia = async (files: FileList | null) => {
     if (!files?.length || !form.id) return;
     setUploading(true);
-    setError("");
     try {
-      const body = new FormData();
-      body.set("ownerType", "property");
-      body.set("ownerId", form.id);
-      for (const file of Array.from(files)) body.append("files", file);
-      const response = await fetch("/api/admin/media", {
-        method: "POST",
-        body,
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? "Upload failed.");
-      setNotice(
-        `${files.length} image${files.length === 1 ? "" : "s"} uploaded.`,
+      await withAdminFeedback(
+        async () => {
+          const body = new FormData();
+          body.set("ownerType", "property");
+          body.set("ownerId", form.id as string);
+          for (const file of Array.from(files)) body.append("files", file);
+          const response = await fetch("/api/admin/media", {
+            method: "POST",
+            body,
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error ?? "Upload failed.");
+          return result;
+        },
+        {
+          loadingMessage: `Uploading ${files.length} image${files.length === 1 ? "" : "s"}...`,
+          successMessage: `${files.length} image${files.length === 1 ? "" : "s"} uploaded.`,
+          errorMessage: "Unable to upload the selected images.",
+        },
       );
       await queryClient.invalidateQueries({
         queryKey: queryKeys.admin.property(initialSlug ?? "new"),
       });
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Upload failed.");
+    } catch {
+      // The shared admin feedback layer presents the error toast.
     } finally {
       setUploading(false);
     }
@@ -335,13 +348,6 @@ export default function AdminListingForm({
           </Button>
         </div>
       </div>
-
-      {notice && (
-        <output className="admin-save-notice">
-          <Check aria-hidden="true" /> {notice}
-        </output>
-      )}
-      {error && <div className="admin-save-notice">{error}</div>}
 
       <div className="admin-listing-stepper">
         {steps.map((label, index) => (
