@@ -9,7 +9,19 @@ import {
 import Image from "next/image";
 import { useRef } from "react";
 
-export default function RentalBeliefParallax() {
+type RentalBeliefParallaxProps = {
+  brand?: string;
+  heading?: string;
+  imageAlt?: string;
+  imageSrc?: string;
+};
+
+export default function RentalBeliefParallax({
+  brand = "RentDeer",
+  heading = "Striving For Change",
+  imageAlt = "The RentDeer team striving to improve rental living",
+  imageSrc = "/estatein/property-campus.png",
+}: RentalBeliefParallaxProps) {
   const imageRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -26,8 +38,8 @@ export default function RentalBeliefParallax() {
         style={{ y: reduceMotion ? 0 : imageY }}
       >
         <Image
-          src="/estatein/property-campus.png"
-          alt="The RentDeer team striving to improve rental living"
+          src={imageSrc}
+          alt={imageAlt}
           fill
           sizes="(max-width: 700px) 100vw, 1184px"
         />
@@ -37,10 +49,8 @@ export default function RentalBeliefParallax() {
         className="about-belief-feature-title"
         style={{ y: reduceMotion ? 0 : titleY }}
       >
-        <span>RentDeer</span>
-        <h3>
-          Striving <em>For Change</em>
-        </h3>
+        <span>{brand}</span>
+        <h3>{heading}</h3>
       </motion.div>
     </div>
   );

@@ -6,8 +6,11 @@ import {
   GripVertical,
   ImagePlus,
   Monitor,
+  Plus,
   Save,
   Smartphone,
+  Star,
+  Trash2,
   Upload,
 } from "lucide-react";
 import Image from "next/image";
@@ -21,10 +24,26 @@ import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
 import type { ContentPageInput } from "@/lib/listing-schema";
 
-const previewImages = [
-  "/estatein/property-villa.png",
-  "/estatein/property-tower.png",
-  "/estatein/property-campus.png",
+type TeamMemberInput =
+  ContentPageInput["sections"][number]["content"]["teamMembers"][number];
+
+const defaultTeamMembers: TeamMemberInput[] = [
+  {
+    id: "haziq",
+    name: "Mr. Haziq",
+    title: "CEO",
+    description:
+      "Helping shape RentDeer's journey through better living and smarter property solutions.",
+    imageAssetId: null,
+  },
+  {
+    id: "syafiq",
+    name: "Mr. Syafiq",
+    title: "CFO",
+    description:
+      "Building a stable and sustainable future for RentDeer's tenants and property partners.",
+    imageAssetId: null,
+  },
 ];
 
 export default function AdminPageConfigurator({
@@ -33,7 +52,17 @@ export default function AdminPageConfigurator({
   page: ContentPageInput;
 }) {
   const queryClient = useQueryClient();
-  const [draftPage, setDraftPage] = useState(page);
+  const [draftPage, setDraftPage] = useState(() => ({
+    ...page,
+    sections: page.sections.map((section) =>
+      section.sectionKey === "team" && !section.content.teamMembers.length
+        ? {
+            ...section,
+            content: { ...section.content, teamMembers: defaultTeamMembers },
+          }
+        : section,
+    ),
+  }));
   const [activeSection, setActiveSection] = useState(
     page.sections[0]?.id ?? "",
   );
@@ -44,6 +73,7 @@ export default function AdminPageConfigurator({
   const selectedSection = draftPage.sections.find(
     (section) => section.id === activeSection,
   );
+  const isTeamSection = selectedSection?.sectionKey === "team";
   const saveMutation = useMutation({
     mutationFn: () =>
       withAdminFeedback(
@@ -80,7 +110,7 @@ export default function AdminPageConfigurator({
   };
 
   const updateSelectedContent = (
-    key: keyof ContentPageInput["sections"][number]["content"],
+    key: "eyebrow" | "heading" | "description",
     value: string,
   ) => {
     if (!selectedSection) return;
@@ -89,11 +119,14 @@ export default function AdminPageConfigurator({
     });
   };
 
-  const uploadAssets = async (files: FileList | null) => {
+  const uploadAssets = async (
+    files: FileList | null,
+    teamMemberId?: string,
+  ) => {
     if (!files?.length || !selectedSection) return;
     setUploading(true);
     try {
-      await withAdminFeedback(
+      const result = await withAdminFeedback(
         async () => {
           const body = new FormData();
           body.set("ownerType", "contentSection");
@@ -105,7 +138,9 @@ export default function AdminPageConfigurator({
           });
           const result = await response.json();
           if (!response.ok) throw new Error(result.error ?? "Upload failed.");
-          return result;
+          return result as {
+            data: ContentPageInput["sections"][number]["assets"];
+          };
         },
         {
           loadingMessage: `Uploading ${files.length} asset${files.length === 1 ? "" : "s"}...`,
@@ -113,14 +148,129 @@ export default function AdminPageConfigurator({
           errorMessage: "Unable to upload the selected assets.",
         },
       );
+      const firstAsset = result.data[0];
+      const teamMembers = teamMemberId
+        ? selectedSection.content.teamMembers.map((member) =>
+            member.id === teamMemberId && firstAsset
+              ? { ...member, imageAssetId: firstAsset.id }
+              : member,
+          )
+        : selectedSection.content.teamMembers;
       updateSelectedSection({
+        assets: [...selectedSection.assets, ...result.data],
         assetCount: selectedSection.assetCount + files.length,
+        content: { ...selectedSection.content, teamMembers },
       });
     } catch {
       // The shared admin feedback layer presents the error toast.
     } finally {
       setUploading(false);
     }
+  };
+
+  const removeAsset = async (assetId: string) => {
+    if (!selectedSection) return;
+    try {
+      await withAdminFeedback(
+        () =>
+          apiRequest<{ success: boolean }>(`/api/admin/media/${assetId}`, {
+            method: "DELETE",
+          }),
+        {
+          loadingMessage: "Removing image...",
+          successMessage: "Image removed.",
+          errorMessage: "Unable to remove this image.",
+        },
+      );
+      const assets = selectedSection.assets.filter(
+        (asset) => asset.id !== assetId,
+      );
+      updateSelectedSection({
+        assets,
+        assetCount: assets.length,
+        content: {
+          ...selectedSection.content,
+          teamMembers: selectedSection.content.teamMembers.map((member) =>
+            member.imageAssetId === assetId
+              ? { ...member, imageAssetId: null }
+              : member,
+          ),
+        },
+      });
+    } catch {
+      // The shared admin feedback layer presents the error toast.
+    }
+  };
+
+  const updateAsset = (
+    assetId: string,
+    update: Partial<ContentPageInput["sections"][number]["assets"][number]>,
+  ) => {
+    if (!selectedSection) return;
+    updateSelectedSection({
+      assets: selectedSection.assets.map((asset) =>
+        asset.id === assetId ? { ...asset, ...update } : asset,
+      ),
+    });
+  };
+
+  const makeCover = (assetId: string) => {
+    if (!selectedSection) return;
+    updateSelectedSection({
+      assets: selectedSection.assets.map((asset) => ({
+        ...asset,
+        isCover: asset.id === assetId,
+      })),
+    });
+  };
+
+  const updateTeamMember = (
+    memberId: string,
+    update: Partial<TeamMemberInput>,
+  ) => {
+    if (!selectedSection) return;
+    updateSelectedSection({
+      content: {
+        ...selectedSection.content,
+        teamMembers: selectedSection.content.teamMembers.map((member) =>
+          member.id === memberId ? { ...member, ...update } : member,
+        ),
+      },
+    });
+  };
+
+  const addTeamMember = () => {
+    if (!selectedSection || selectedSection.content.teamMembers.length >= 3)
+      return;
+    const nextNumber = selectedSection.content.teamMembers.length + 1;
+    updateSelectedSection({
+      content: {
+        ...selectedSection.content,
+        teamMembers: [
+          ...selectedSection.content.teamMembers,
+          {
+            id: crypto.randomUUID(),
+            name: `Team member ${nextNumber}`,
+            title: "Title",
+            description: "",
+            imageAssetId: null,
+          },
+        ],
+      },
+    });
+  };
+
+  const removeTeamMember = (memberId: string) => {
+    if (!selectedSection || selectedSection.content.teamMembers.length <= 1)
+      return;
+    updateSelectedSection({
+      content: {
+        ...selectedSection.content,
+        teamMembers: selectedSection.content.teamMembers.filter(
+          (member) => member.id !== memberId,
+        ),
+      },
+    });
   };
 
   return (
@@ -252,12 +402,151 @@ export default function AdminPageConfigurator({
             </div>
           </div>
 
+          {isTeamSection && selectedSection && (
+            <div className="admin-form-section">
+              <div className="admin-form-section-heading admin-team-heading">
+                <div>
+                  <h3>Team profiles</h3>
+                  <p>
+                    Configure up to three people. Their order controls the
+                    animation sequence.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="admin-team-add"
+                  onClick={addTeamMember}
+                  disabled={selectedSection.content.teamMembers.length >= 3}
+                >
+                  <Plus aria-hidden="true" /> Add person
+                </button>
+              </div>
+              <div className="admin-team-profiles">
+                {selectedSection.content.teamMembers.map((member, index) => {
+                  const portrait = selectedSection.assets.find(
+                    (asset) => asset.id === member.imageAssetId,
+                  );
+
+                  return (
+                    <article className="admin-team-profile" key={member.id}>
+                      <div className="admin-team-profile-top">
+                        <strong>Person {index + 1}</strong>
+                        <button
+                          type="button"
+                          onClick={() => removeTeamMember(member.id)}
+                          aria-label={`Remove ${member.name}`}
+                          disabled={
+                            selectedSection.content.teamMembers.length <= 1
+                          }
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </button>
+                      </div>
+                      <div className="admin-team-portrait-row">
+                        <div className="admin-team-portrait">
+                          {portrait ? (
+                            <Image
+                              src={portrait.url}
+                              alt={portrait.alt}
+                              fill
+                              sizes="100px"
+                            />
+                          ) : (
+                            <ImagePlus aria-hidden="true" />
+                          )}
+                        </div>
+                        <div>
+                          <Label htmlFor={`team-image-${member.id}`}>
+                            Portrait image
+                          </Label>
+                          <select
+                            id={`team-image-${member.id}`}
+                            value={member.imageAssetId ?? ""}
+                            onChange={(event) =>
+                              updateTeamMember(member.id, {
+                                imageAssetId: event.target.value || null,
+                              })
+                            }
+                          >
+                            <option value="">Use fallback image</option>
+                            {selectedSection.assets.map((asset, assetIndex) => (
+                              <option value={asset.id} key={asset.id}>
+                                {asset.alt ||
+                                  `Uploaded image ${assetIndex + 1}`}
+                              </option>
+                            ))}
+                          </select>
+                          <label className="admin-team-upload">
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/avif"
+                              disabled={uploading}
+                              onChange={(event) =>
+                                uploadAssets(event.target.files, member.id)
+                              }
+                            />
+                            <Upload aria-hidden="true" />
+                            {uploading ? "Uploading..." : "Upload portrait"}
+                          </label>
+                        </div>
+                      </div>
+                      <div className="admin-form-grid">
+                        <div>
+                          <Label htmlFor={`team-name-${member.id}`}>Name</Label>
+                          <Input
+                            id={`team-name-${member.id}`}
+                            value={member.name}
+                            onChange={(event) =>
+                              updateTeamMember(member.id, {
+                                name: event.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`team-title-${member.id}`}>
+                            Title
+                          </Label>
+                          <Input
+                            id={`team-title-${member.id}`}
+                            value={member.title}
+                            onChange={(event) =>
+                              updateTeamMember(member.id, {
+                                title: event.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="admin-form-full">
+                          <Label htmlFor={`team-description-${member.id}`}>
+                            Description
+                          </Label>
+                          <Textarea
+                            id={`team-description-${member.id}`}
+                            rows={4}
+                            value={member.description}
+                            onChange={(event) =>
+                              updateTeamMember(member.id, {
+                                description: event.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="admin-form-section">
             <div className="admin-form-section-heading">
-              <h3>Section assets</h3>
+              <h3>{isTeamSection ? "Portrait library" : "Section assets"}</h3>
               <p>
-                Upload, reorder and describe images used by this section. Files
-                will connect to cloud storage later.
+                {isTeamSection
+                  ? "Uploaded portraits are available to every team profile above."
+                  : "Upload and describe images used by this section. The cover image is displayed first on the public page."}
               </p>
             </div>
             <label className="admin-upload-zone">
@@ -278,24 +567,53 @@ export default function AdminPageConfigurator({
               </span>
             </label>
             <div className="admin-asset-grid">
-              {previewImages.map((image, index) => (
-                <article key={image}>
+              {selectedSection?.assets.map((asset, index) => (
+                <article key={asset.id}>
                   <div>
                     <Image
-                      src={image}
-                      alt="Mock page asset"
+                      src={asset.url}
+                      alt={asset.alt}
                       fill
                       sizes="(max-width: 700px) 50vw, 180px"
                     />
-                    <span>{index === 0 ? "Cover" : `0${index + 1}`}</span>
+                    <span>{asset.isCover ? "Cover" : `0${index + 1}`}</span>
+                    <div className="admin-asset-actions">
+                      {!asset.isCover && (
+                        <button
+                          type="button"
+                          onClick={() => makeCover(asset.id)}
+                          aria-label="Use as cover image"
+                          title="Use as cover image"
+                        >
+                          <Star aria-hidden="true" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeAsset(asset.id)}
+                        aria-label="Remove image"
+                        title="Remove image"
+                      >
+                        <Trash2 aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
                   <Input
                     aria-label={`Alt text for asset ${index + 1}`}
-                    defaultValue={`RentDeer ${selectedSection?.name.toLowerCase()} image`}
+                    value={asset.alt}
+                    onChange={(event) =>
+                      updateAsset(asset.id, { alt: event.target.value })
+                    }
                   />
                 </article>
               ))}
             </div>
+            {selectedSection?.assets.length === 0 && (
+              <p className="admin-empty-assets">
+                No uploaded images yet. The public page will use its default
+                image until one is added.
+              </p>
+            )}
           </div>
         </section>
       </div>

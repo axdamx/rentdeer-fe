@@ -69,6 +69,13 @@ export const adminContentPages: AdminContentPage[] = [
         assetCount: 9,
       },
       {
+        id: "belief-feature",
+        name: "Striving For Change feature",
+        description:
+          "The centered RentDeer message and background feature image.",
+        assetCount: 1,
+      },
+      {
         id: "journey",
         name: "Our journey",
         description: "Company milestones and supporting copy.",

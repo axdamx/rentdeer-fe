@@ -140,6 +140,132 @@
       "lineColor": "#087947",
       "lineTextColor": "#ffffff",
       "position": { "left": "86.3%", "top": "61.3%" }
+    },
+    {
+      "id": "sungai-buloh-mrt",
+      "station": "Sungai Buloh MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "31.2%", "top": "28.4%" }
+    },
+    {
+      "id": "kepong-mrt",
+      "station": "Kepong MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "40.8%", "top": "20.25%" }
+    },
+    {
+      "id": "jinjang-mrt",
+      "station": "Jinjang MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "47.15%", "top": "20.25%" }
+    },
+    {
+      "id": "salak-selatan-lrt",
+      "station": "Salak Selatan LRT",
+      "line": "Sri Petaling Line",
+      "lineCode": "SP",
+      "lineColor": "#e87523",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "70.2%", "top": "57.2%" }
+    },
+    {
+      "id": "salak-selatan-ktm",
+      "station": "Salak Selatan KTM",
+      "line": "KTM Seremban Line",
+      "lineCode": "KTM",
+      "lineColor": "#255ca8",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "67.9%", "top": "57.2%" }
+    },
+    {
+      "id": "glenmarie-lrt",
+      "station": "Glenmarie LRT",
+      "line": "Kelana Jaya Line",
+      "lineCode": "KJ",
+      "lineColor": "#d50032",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "24.5%", "top": "58.1%" }
+    },
+    {
+      "id": "taman-bahagia-lrt",
+      "station": "Taman Bahagia LRT",
+      "line": "Kelana Jaya Line",
+      "lineCode": "KJ",
+      "lineColor": "#d50032",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "34.1%", "top": "58.1%" }
+    },
+    {
+      "id": "kwasa-sentral-mrt",
+      "station": "Kwasa Sentral MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "29.2%", "top": "32.7%" }
+    },
+    {
+      "id": "putra-permai-mrt",
+      "station": "Putra Permai MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "73.3%", "top": "72.4%" }
+    },
+    {
+      "id": "equine-mrt",
+      "station": "Equine MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "75.8%", "top": "70.1%" }
+    },
+    {
+      "id": "sentul-barat-mrt",
+      "station": "Sentul Barat MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "56.2%", "top": "31.2%" }
+    },
+    {
+      "id": "sentul-ktm",
+      "station": "Sentul KTM",
+      "line": "KTM Seremban Line",
+      "lineCode": "KTM",
+      "lineColor": "#255ca8",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "58.7%", "top": "27.6%" }
+    },
+    {
+      "id": "raja-uda-mrt",
+      "station": "Raja Uda MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "58.7%", "top": "37.4%" }
+    },
+    {
+      "id": "damai-lrt",
+      "station": "Damai LRT",
+      "line": "Kelana Jaya Line",
+      "lineCode": "KJ",
+      "lineColor": "#d50032",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "65.2%", "top": "44.2%" }
     }
   ]
 }

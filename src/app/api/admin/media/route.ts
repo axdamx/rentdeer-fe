@@ -96,10 +96,19 @@ export async function POST(request: Request) {
       .from("media_assets")
       .select("id", { count: "exact", head: true })
       .eq(ownerColumn, ownerId);
-    const uploaded: Array<{ id: string; path: string }> = [];
+    const uploaded: Array<{
+      id: string;
+      url: string;
+      alt: string;
+      isCover: boolean;
+      sortOrder: number;
+    }> = [];
 
     for (const [index, file] of files.entries()) {
       const path = `${folder}/${ownerId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+      const alt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
+      const isCover = (count ?? 0) === 0 && index === 0;
+      const sortOrder = (count ?? 0) + index;
       const { error: uploadError } = await supabase.storage
         .from("listing-media")
         .upload(path, file, { contentType: file.type, upsert: false });
@@ -111,10 +120,10 @@ export async function POST(request: Request) {
           [ownerColumn]: ownerId,
           bucket: "listing-media",
           object_path: path,
-          alt_text: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
+          alt_text: alt,
           mime_type: file.type,
-          is_cover: (count ?? 0) === 0 && index === 0,
-          sort_order: (count ?? 0) + index,
+          is_cover: isCover,
+          sort_order: sortOrder,
           created_by: admin.id,
         })
         .select("id")
@@ -123,7 +132,16 @@ export async function POST(request: Request) {
         await supabase.storage.from("listing-media").remove([path]);
         throw mediaError;
       }
-      uploaded.push({ id: media.id, path });
+      const { data: publicUrl } = supabase.storage
+        .from("listing-media")
+        .getPublicUrl(path);
+      uploaded.push({
+        id: media.id,
+        url: publicUrl.publicUrl,
+        alt,
+        isCover,
+        sortOrder,
+      });
     }
 
     return NextResponse.json({ data: uploaded }, { status: 201 });

@@ -1291,10 +1291,13 @@ blockquote {
   position: absolute;
 }
 .about-belief-feature-title {
-  bottom: clamp(30px, 5vw, 64px);
-  left: clamp(24px, 6vw, 76px);
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  justify-content: center;
   position: absolute;
-  right: 24px;
+  text-align: center;
   z-index: 1;
 }
 .about-belief-feature-title > span {
@@ -1306,17 +1309,12 @@ blockquote {
 }
 .about-belief-feature-title h3 {
   color: #fff;
-  font-size: clamp(52px, 7vw, 94px);
+  font-size: clamp(30px, 6.6vw, 84px);
   font-weight: 600;
-  letter-spacing: -0.08em;
+  letter-spacing: -0.065em;
   line-height: 0.9;
   margin: 10px 0 0;
-  max-width: 780px;
-}
-.about-belief-feature-title h3 em {
-  color: #f5cf3f;
-  display: block;
-  font-style: normal;
+  white-space: nowrap;
 }
 .journey-grid {
   display: grid;
@@ -1365,62 +1363,246 @@ blockquote {
   line-height: 1.6;
   margin: 0;
 }
-.about-team {
-  margin-bottom: 46px;
-}
-.team-grid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(3, 1fr);
-}
-.team-card {
-  background: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 8px;
-  box-shadow: 0 18px 34px rgba(2, 29, 10, 0.2);
-  overflow: hidden;
-  transition: transform 0.28s ease;
-}
-.team-card:hover {
-  transform: translateY(-6px);
-}
-.team-card-image {
-  aspect-ratio: 1.15;
+.about-team-section {
+  background:
+    radial-gradient(circle at 78% 26%, rgba(59, 133, 68, 0.2), transparent 31%),
+    #062f12;
+  color: #fff;
   overflow: hidden;
   position: relative;
 }
-.team-card-image img {
+.about-team-section::before,
+.about-team-section::after {
+  border: clamp(36px, 6vw, 90px) solid rgba(255, 255, 255, 0.035);
+  border-radius: 50%;
+  content: "";
+  height: 480px;
+  left: -180px;
+  position: absolute;
+  top: -120px;
+  width: 480px;
+}
+.about-team-section::after {
+  bottom: -250px;
+  left: 22%;
+  top: auto;
+}
+.team-showcase {
+  display: grid;
+  gap: 32px clamp(46px, 6vw, 94px);
+  grid-template-columns: minmax(300px, 0.74fr) minmax(0, 1.65fr);
+  margin: 0 auto;
+  max-width: 1420px;
+  min-height: 760px;
+  padding: 126px 34px 110px;
+  position: relative;
+  z-index: 1;
+}
+.team-showcase-intro {
+  align-self: center;
+  position: relative;
+  z-index: 2;
+}
+.team-showcase-intro > span {
+  color: #fff;
+  display: block;
+  font-size: clamp(42px, 4.7vw, 68px);
+  font-weight: 450;
+  letter-spacing: -0.065em;
+  line-height: 0.82;
+  max-width: 330px;
+  text-transform: uppercase;
+}
+.team-showcase-intro h2 {
+  color: #f5cf3f;
+  font-family: "Freestyle Script", "Brush Script MT", cursive;
+  font-size: clamp(32px, 3.4vw, 48px);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1;
+  margin: 14px 0 20px;
+}
+.team-showcase-intro p {
+  color: #d7e7d7;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 340px;
+}
+.team-showcase-stage {
+  min-height: 520px;
+  position: relative;
+  z-index: 2;
+}
+.team-person {
+  background: transparent;
+  border: 1px solid rgba(245, 207, 63, 0.3);
+  border-radius: 18px;
+  bottom: 0;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 42%;
+  z-index: 2;
+}
+.team-person:focus-visible {
+  outline: 2px solid #f5cf3f;
+  outline-offset: 4px;
+}
+.team-person-image {
+  inset: 0;
+  position: absolute;
+}
+.team-person-image::after {
+  background: linear-gradient(180deg, transparent 70%, rgba(6, 47, 18, 0.62));
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+.team-person-image img {
+  filter: saturate(0.86) contrast(1.04);
   object-fit: cover;
-  transition: transform 0.35s ease;
+  object-position: center bottom;
 }
-.team-card:hover .team-card-image img {
-  transform: scale(1.035);
+.team-person-label {
+  position: absolute;
+  max-width: calc(100% - 28px);
+  right: 14px;
+  text-align: right;
+  text-shadow: 0 1px 5px rgba(0, 28, 8, 0.72);
+  top: 20px;
+  z-index: 2;
 }
-.team-card-content {
-  padding: 22px;
+.team-person-label strong,
+.team-person-label small {
+  display: block;
+  text-transform: uppercase;
 }
-.team-card-content h3 {
-  color: #172018;
-  font-size: 20px;
-  margin: 0 0 4px;
+.team-person-label strong {
+  color: #fff;
+  font-size: 17px;
+  line-height: 1;
 }
-.team-card-content p {
-  color: #0a5f17;
-  font-size: 12px;
-  font-weight: 700;
+.team-person-label small {
+  color: #f5cf3f;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+.team-showcase-stage.is-overview.team-count-1 .team-person {
+  left: 29%;
+}
+.team-showcase-stage.is-overview.team-count-2 .team-person-1 {
+  left: 3%;
+}
+.team-showcase-stage.is-overview.team-count-2 .team-person-2 {
+  right: 3%;
+}
+.team-showcase-stage.is-overview.team-count-3 .team-person {
+  width: 31%;
+}
+.team-showcase-stage.is-overview.team-count-3 .team-person-1 {
+  left: 0;
+}
+.team-showcase-stage.is-overview.team-count-3 .team-person-2 {
+  left: 34.5%;
+}
+.team-showcase-stage.is-overview.team-count-3 .team-person-3 {
+  right: 0;
+}
+.team-showcase-stage.is-profile .team-person.is-active {
+  bottom: 18px;
+  height: auto;
+  left: 6%;
+  width: 42%;
+  z-index: 3;
+}
+.team-showcase-stage.is-profile .team-person.is-inactive {
+  border-radius: 12px;
+  height: auto;
+  left: auto;
+  opacity: 0.62;
+  right: 0;
+  top: 32px;
+  width: 19%;
+  z-index: 2;
+}
+.team-showcase-stage.is-profile .team-person-1.is-inactive {
+  right: 0;
+}
+.team-showcase-stage.is-profile .team-person-2.is-inactive {
+  right: 15%;
+}
+.team-showcase-stage.is-profile .team-person-3.is-inactive {
+  right: 30%;
+}
+.team-showcase-stage.is-profile .team-person.is-inactive .team-person-label {
+  right: 7px;
+  top: 8px;
+  transform: scale(0.72);
+  transform-origin: right top;
+}
+.team-active-description {
+  bottom: 58px;
+  position: absolute;
+  right: 0;
+  width: 39%;
+  z-index: 4;
+}
+.team-active-description > strong {
+  color: #f5cf3f;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.team-active-description h3 {
+  color: #fff;
+  font-size: 29px;
+  line-height: 1;
+  margin: 8px 0 14px;
+}
+.team-active-description p {
+  color: #d7e7d7;
+  font-size: 11px;
+  line-height: 1.6;
   margin: 0;
 }
-.team-card-bio {
-  border-top: 1px solid #d8e1d5;
-  margin-top: 17px;
-  padding-top: 15px;
+.team-state-indicator {
+  bottom: 48px;
+  display: flex;
+  gap: 7px;
+  left: 28px;
+  position: absolute;
+  z-index: 4;
 }
-.team-card-bio p {
-  color: #5c675d;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.6;
-  margin: 0 0 10px;
+.team-state-indicator span {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 99px;
+  height: 3px;
+  transition: width 0.25s ease;
+  width: 16px;
+}
+.team-state-indicator span.is-active {
+  background: #f5cf3f;
+  width: 32px;
+}
+@media (max-width: 900px) {
+  .team-showcase {
+    grid-template-columns: 1fr;
+    min-height: 920px;
+    padding-top: 76px;
+  }
+  .team-showcase-intro p {
+    max-width: 600px;
+  }
+  .team-showcase-stage {
+    min-height: 520px;
+  }
 }
 .about-cta-section {
   background: #fff;
@@ -1838,10 +2020,9 @@ blockquote {
     inset-block: -16%;
   }
   .about-belief-feature-title h3 {
-    font-size: 52px;
+    font-size: clamp(24px, 8.5vw, 52px);
   }
-  .journey-grid,
-  .team-grid {
+  .journey-grid {
     grid-template-columns: 1fr;
   }
   .journey-item {
@@ -1850,8 +2031,124 @@ blockquote {
   .journey-item h3 {
     margin-top: 32px;
   }
-  .about-team {
-    margin-bottom: 34px;
+  .team-showcase {
+    gap: 28px;
+    min-height: 790px;
+    padding: 64px 20px 54px;
+  }
+  .team-showcase-intro > span {
+    font-size: 45px;
+    max-width: 250px;
+  }
+  .team-showcase-intro h2 {
+    font-size: 34px;
+  }
+  .team-showcase-stage {
+    min-height: 460px;
+  }
+  .team-person {
+    height: auto;
+  }
+  .team-showcase-stage.is-overview.team-count-2 .team-person {
+    width: 47%;
+  }
+  .team-showcase-stage.is-overview.team-count-2 .team-person-1 {
+    left: 0;
+  }
+  .team-showcase-stage.is-overview.team-count-2 .team-person-2 {
+    left: auto;
+    right: 0;
+  }
+  .team-showcase-stage.is-overview.team-count-3 .team-person {
+    width: 33%;
+  }
+  .team-showcase-stage.is-overview.team-count-3 .team-person-1 {
+    left: -2%;
+  }
+  .team-showcase-stage.is-overview.team-count-3 .team-person-2 {
+    left: 33.5%;
+    right: auto;
+  }
+  .team-showcase-stage.is-overview.team-count-3 .team-person-3 {
+    left: auto;
+    right: -2%;
+  }
+  .team-person-label {
+    right: 8px;
+    top: 10px;
+  }
+  .team-person-label small {
+    font-size: 7px;
+  }
+  .team-person-label strong {
+    font-size: 12px;
+  }
+  .team-showcase-stage.is-profile .team-person.is-active {
+    height: auto;
+    left: 0;
+    width: 62%;
+  }
+  .team-showcase-stage.is-profile .team-person.is-inactive {
+    height: auto;
+    right: 0;
+    width: 25%;
+  }
+  .team-showcase-stage.is-profile .team-person-2.is-inactive {
+    right: 20%;
+  }
+  .team-showcase-stage.is-profile .team-person-3.is-inactive {
+    right: 40%;
+  }
+  .team-active-description {
+    bottom: 10px;
+    width: 43%;
+  }
+  .team-active-description h3 {
+    font-size: 24px;
+  }
+  .team-state-indicator {
+    bottom: 24px;
+    left: 20px;
+  }
+  .team-showcase-stage.is-overview.team-count-1 .team-person {
+    left: 19%;
+    width: 62%;
+  }
+  .team-showcase-stage.is-profile .team-person.is-inactive .team-person-label {
+    display: none;
+  }
+  .team-showcase-stage.is-profile .team-person.is-active .team-person-label {
+    right: 10px;
+    top: 12px;
+  }
+  .team-showcase-stage.is-profile
+    .team-person.is-active
+    .team-person-label
+    small {
+    font-size: 8px;
+  }
+  .team-showcase-stage.is-profile
+    .team-person.is-active
+    .team-person-label
+    strong {
+    font-size: 14px;
+  }
+  .team-showcase-stage.is-profile
+    .team-person.is-active
+    .team-person-image::after {
+    background: linear-gradient(180deg, transparent 65%, rgba(6, 47, 18, 0.72));
+  }
+  .team-showcase-stage.is-overview .team-person-image::after {
+    background: linear-gradient(180deg, transparent 72%, rgba(6, 47, 18, 0.55));
+  }
+  .team-showcase-stage.is-overview .team-person {
+    border-radius: 12px;
+  }
+  .team-showcase-stage.is-profile .team-person.is-active {
+    border-radius: 14px;
+  }
+  .team-showcase-stage.is-profile .team-person.is-inactive {
+    border-radius: 9px;
   }
   .about-cta-section {
     padding: 70px 20px;

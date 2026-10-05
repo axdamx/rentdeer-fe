@@ -128,6 +128,14 @@ export const siteImageSchema = z.object({
   alt: z.string().trim().max(300),
 });
 
+export const teamMemberInputSchema = z.object({
+  id: z.string().trim().min(1).max(100),
+  name: z.string().trim().min(1).max(120),
+  title: z.string().trim().min(1).max(120),
+  description: z.string().trim().max(1500),
+  imageAssetId: z.uuid().nullable().default(null),
+});
+
 export const siteSettingsInputSchema = z.object({
   siteName: z.string().trim().min(1).max(100),
   tagline: z.string().trim().max(200),
@@ -166,7 +174,19 @@ export const contentPageInputSchema = z.object({
         eyebrow: z.string().max(200).default(""),
         heading: z.string().max(500).default(""),
         description: z.string().max(3000).default(""),
+        teamMembers: z.array(teamMemberInputSchema).max(3).default([]),
       }),
+      assets: z
+        .array(
+          z.object({
+            id: z.uuid(),
+            url: z.string().trim().min(1).max(3000),
+            alt: z.string().trim().max(300),
+            isCover: z.boolean(),
+            sortOrder: z.number().int().min(0),
+          }),
+        )
+        .default([]),
       isVisible: z.boolean(),
       sortOrder: z.number().int().min(0),
       assetCount: z.number().int().min(0).default(0),

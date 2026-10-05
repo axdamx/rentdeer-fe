@@ -1,9 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import AboutParallaxIntro from "@/components/about-parallax-intro";
+import AnimatedTeamShowcase, {
+  type TeamMember,
+} from "@/components/animated-team-showcase";
 import RentalBeliefParallax from "@/components/rental-belief-parallax";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
+import { getContentPage } from "@/lib/content-repository";
 
 function ArrowIcon() {
   return (
@@ -44,31 +48,59 @@ const milestones = [
   ],
 ];
 
-const team = [
-  [
-    "Dr. Irfan",
-    "Chief Executive Officer",
-    "/estatein/property-villa.png",
-    "At RentDeer, Dr. Irfan is realising a vision in which rental living and property ownership in Malaysia become simple, secure, and attainable for every individual who aspires to a stable home or a sustainable investment.",
-    "He is committed to shaping a future where young Malaysians can build wealth with confidence, and where tenants can live with dignity, stability, and peace of mind.",
-  ],
-  [
-    "En Haziq",
-    "Chief Operating Officer",
-    "/estatein/property-tower.png",
-    "At RentDeer, En Haziq is helping realise a vision in which rental living and property ownership in Malaysia become simple, secure, and attainable for every individual who aspires to a stable home or a sustainable investment.",
-    "He is committed to shaping a future where young Malaysians can build wealth with confidence, and where tenants can live with dignity, stability, and peace of mind.",
-  ],
-  [
-    "En Syafiq",
-    "Chief Financial Officer",
-    "/estatein/property-campus.png",
-    "At RentDeer, Syafiq is realising a vision in which rental living and property ownership in Malaysia become simple, secure, and attainable for every individual who aspires to a stable home or a sustainable investment.",
-    "He is committed to shaping a future where young Malaysians can build wealth with confidence, and where tenants can live with dignity, stability, and peace of mind.",
-  ],
+const team: TeamMember[] = [
+  {
+    id: "haziq",
+    name: "Mr. Haziq",
+    title: "CEO",
+    description:
+      "Helping shape RentDeer's journey through better living and smarter property solutions.",
+    image: "/estatein/property-tower.png",
+    imageAlt: "Mr. Haziq, CEO at RentDeer",
+  },
+  {
+    id: "syafiq",
+    name: "Mr. Syafiq",
+    title: "CFO",
+    description:
+      "Building a stable and sustainable future for RentDeer's tenants and property partners.",
+    image: "/estatein/property-campus.png",
+    imageAlt: "Mr. Syafiq, CFO at RentDeer",
+  },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const contentPage = await getContentPage("about");
+  const beliefFeature = contentPage?.sections.find(
+    (section) => section.sectionKey === "belief-feature",
+  );
+  const beliefImage = beliefFeature?.assets[0];
+  const teamSection = contentPage?.sections.find(
+    (section) => section.sectionKey === "team",
+  );
+  const configuredTeam = teamSection?.content.teamMembers.length
+    ? teamSection.content.teamMembers
+    : team;
+  const teamMembers = configuredTeam.map((member, index) => {
+    const asset =
+      "imageAssetId" in member && member.imageAssetId
+        ? teamSection?.assets.find((item) => item.id === member.imageAssetId)
+        : teamSection?.assets[index];
+    const fallback = team[index] ?? team[0];
+    return {
+      ...member,
+      image: asset?.url || ("image" in member ? member.image : fallback.image),
+      imageAlt:
+        asset?.alt ||
+        ("imageAlt" in member
+          ? member.imageAlt
+          : `${member.name}, ${member.title} at RentDeer`),
+    };
+  });
+  const teamEyebrow = teamSection?.content.eyebrow.trim();
+  const teamHeading = teamSection?.content.heading.trim();
+  const teamDescription = teamSection?.content.description.trim();
+
   return (
     <main className="about-page">
       <section className="about-hero" id="about-hero">
@@ -122,7 +154,18 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
-          <RentalBeliefParallax />
+          {beliefFeature?.isVisible !== false && (
+            <RentalBeliefParallax
+              brand={beliefFeature?.content.eyebrow || "RentDeer"}
+              heading={beliefFeature?.content.heading || "Striving For Change"}
+              imageSrc={beliefImage?.url || "/estatein/property-campus.png"}
+              imageAlt={
+                beliefImage?.alt ||
+                beliefFeature?.content.description ||
+                "The RentDeer team striving to improve rental living"
+              }
+            />
+          )}
         </div>
       </section>
       <section className="about-section" id="journey">
@@ -146,37 +189,28 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-      <section className="about-section about-section-green" id="team">
-        <div className="about-section-inner">
-          <div className="about-team">
-            <div className="about-section-heading">
-              <span className="rd-script-label">Our team</span>
-              <h2>People behind a better rental experience.</h2>
-            </div>
-          </div>
-          <div className="team-grid">
-            {team.map(([name, role, image, firstBio, secondBio]) => (
-              <article className="team-card" key={name}>
-                <div className="team-card-image">
-                  <Image
-                    src={image}
-                    alt={name}
-                    fill
-                    sizes="(max-width: 700px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="team-card-content">
-                  <h3>{name}</h3>
-                  <p>{role}</p>
-                  <div className="team-card-bio">
-                    <p>{firstBio}</p>
-                    <p>{secondBio}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
+      <section className="about-team-section" id="team">
+        {teamSection?.isVisible !== false && (
+          <AnimatedTeamShowcase
+            eyebrow={
+              teamEyebrow && teamEyebrow !== "Our team"
+                ? teamEyebrow
+                : undefined
+            }
+            heading={
+              teamHeading && teamHeading !== "Our team"
+                ? teamHeading
+                : undefined
+            }
+            description={
+              teamDescription &&
+              !teamDescription.startsWith("Leadership profiles")
+                ? teamDescription
+                : undefined
+            }
+            members={teamMembers}
+          />
+        )}
       </section>
       <section className="about-cta-section" id="about-contact">
         <div className="about-cta">

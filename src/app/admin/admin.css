@@ -1262,10 +1262,162 @@
   top: 7px;
   z-index: 1;
 }
+.admin-asset-actions {
+  display: flex;
+  gap: 5px;
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  z-index: 2;
+}
+.admin-asset-actions button {
+  align-items: center;
+  background: rgba(8, 49, 14, 0.86);
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  height: 25px;
+  justify-content: center;
+  width: 25px;
+}
+.admin-asset-actions button:hover {
+  background: var(--admin-green);
+}
+.admin-asset-actions svg {
+  height: 12px;
+  width: 12px;
+}
 .admin-asset-grid [data-slot="input"] {
   font-size: 9px;
   height: 34px;
   margin-top: 7px;
+}
+.admin-empty-assets {
+  color: var(--admin-muted);
+  font-size: 11px;
+  margin: 14px 0 0;
+}
+.admin-team-heading {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+.admin-team-heading p {
+  color: var(--admin-muted);
+  font-size: 10px;
+  margin: 0;
+}
+.admin-team-add,
+.admin-team-upload {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  color: var(--admin-green);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 750;
+  gap: 6px;
+  padding: 8px 11px;
+}
+.admin-team-add:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.admin-team-add svg,
+.admin-team-upload svg {
+  height: 13px;
+  width: 13px;
+}
+.admin-team-profiles {
+  display: grid;
+  gap: 14px;
+}
+.admin-team-profile {
+  background: #f8faf7;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  padding: 14px;
+}
+.admin-team-profile-top {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.admin-team-profile-top strong {
+  color: var(--admin-green);
+  font-size: 11px;
+}
+.admin-team-profile-top button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ead9d5;
+  border-radius: 5px;
+  color: #a33b2f;
+  display: flex;
+  height: 29px;
+  justify-content: center;
+  width: 29px;
+}
+.admin-team-profile-top button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.admin-team-profile-top button svg {
+  height: 13px;
+  width: 13px;
+}
+.admin-team-portrait-row {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 100px minmax(0, 1fr);
+  margin-bottom: 16px;
+}
+.admin-team-portrait {
+  align-items: center;
+  aspect-ratio: 1;
+  background: #edf2eb;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  color: var(--admin-green);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.admin-team-portrait img {
+  object-fit: cover;
+}
+.admin-team-portrait > svg {
+  height: 24px;
+  width: 24px;
+}
+.admin-team-portrait-row > div:last-child {
+  display: grid;
+  gap: 8px;
+}
+.admin-team-portrait-row select {
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  color: var(--admin-text);
+  font: inherit;
+  font-size: 10px;
+  min-height: 36px;
+  padding: 7px 9px;
+  width: 100%;
+}
+.admin-team-upload {
+  justify-self: start;
+}
+.admin-team-upload input {
+  display: none;
 }
 
 .admin-listings-panel,
