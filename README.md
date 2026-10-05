@@ -16,6 +16,16 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Supabase and admin setup
+
+The admin workspace uses Supabase Auth, Postgres, Storage, and Row Level
+Security. Copy `.env.example` to `.env.local`, then follow
+[`docs/supabase-setup.md`](docs/supabase-setup.md) to apply migrations and
+activate the first administrator.
+
+Listings use a main-property model with one or more rental-option sub-listings.
+TanStack Query powers the interactive public catalogue and admin CRUD screens.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

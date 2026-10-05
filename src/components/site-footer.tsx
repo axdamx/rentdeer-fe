@@ -1,11 +1,17 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
+import { apiRequest } from "@/lib/api-client";
+import type { SiteSettingsInput } from "@/lib/listing-schema";
 
 type SiteFooterProps = {
   tone?: "default" | "dark";
 };
 
 export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
-  const socialLinks = [
+  const fallbackSocialLinks = [
     {
       label: "TikTok",
       href: "https://www.tiktok.com/@rentdeer.com",
@@ -32,6 +38,29 @@ export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
       mark: "@",
     },
   ];
+  const settingsQuery = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => apiRequest<{ data: SiteSettingsInput }>("/api/settings"),
+    staleTime: 5 * 60_000,
+  });
+  const settings = settingsQuery.data?.data;
+  const socialMarks = Object.fromEntries(
+    fallbackSocialLinks.map((link) => [link.label, link.mark]),
+  );
+  const socialLinks = settings?.socialLinks.length
+    ? settings.socialLinks
+        .filter((link) => link.isVisible && link.url)
+        .map((link) => ({
+          label: link.platform,
+          href: link.url,
+          mark: socialMarks[link.platform] ?? "↗",
+        }))
+    : fallbackSocialLinks;
+  const tenantPhone = settings?.tenantPhone || "+6019 252 3804";
+  const companyEmail = settings?.companyEmail || "hello.rentdeer@gmail.com";
+  const companyAddress =
+    settings?.companyAddress ||
+    "S-036 & S-042, Seasons Square, Jalan PJU 10/3C, Damansara Damai, 47830 Petaling Jaya, Selangor, Malaysia";
 
   return (
     <footer
@@ -42,26 +71,29 @@ export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
       <div className="site-footer-inner">
         <div className="footer-find-us">
           <Link className="brand footer-brand" href="/">
-            <span className="brand-wordmark">
-              <span className="brand-symbol">R</span>RentDeer
-            </span>
+            {settings?.logo ? (
+              <Image
+                className="brand-logo-image"
+                src={settings.logo.url}
+                alt={settings.logo.alt || `${settings.siteName} logo`}
+                width={180}
+                height={54}
+                unoptimized
+              />
+            ) : (
+              <span className="brand-wordmark">
+                <span className="brand-symbol">R</span>RentDeer
+              </span>
+            )}
           </Link>
           <strong className="footer-column-label">Find Us</strong>
-          <p>
-            S-036 &amp; S-042, Seasons Square,
-            <br />
-            Jalan PJU 10/3C, Damansara Damai,
-            <br />
-            47830 Petaling Jaya, Selangor,
-            <br />
-            Malaysia
-          </p>
+          <p>{companyAddress}</p>
           <div className="footer-contact-list">
-            <a href="tel:+60192523804">
+            <a href={`tel:${tenantPhone.replace(/\s/g, "")}`}>
               <span aria-hidden="true">⌕</span> Contact Us
             </a>
-            <a href="mailto:hello.rentdeer@gmail.com">
-              <span aria-hidden="true">✉</span> hello.rentdeer@gmail.com
+            <a href={`mailto:${companyEmail}`}>
+              <span aria-hidden="true">✉</span> {companyEmail}
             </a>
           </div>
         </div>

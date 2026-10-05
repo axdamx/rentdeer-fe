@@ -1,9 +1,12 @@
 "use client";
 
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import type { FormEvent } from "react";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
+import { apiRequest } from "@/lib/api-client";
+import type { EnquiryInput, SiteSettingsInput } from "@/lib/listing-schema";
 
 function ArrowIcon() {
   return (
@@ -22,11 +25,47 @@ function ArrowIcon() {
 }
 
 export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false);
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const params = new URLSearchParams(window.location.search);
+    enquiryMutation.mutate(
+      {
+        propertySlug: params.get("property") ?? "",
+        rentalOptionSlug: params.get("unit") ?? "",
+        firstName: String(formData.get("firstName") ?? ""),
+        lastName: String(formData.get("lastName") ?? ""),
+        email: String(formData.get("email") ?? ""),
+        phone: String(formData.get("phone") ?? ""),
+        topic: String(formData.get("topic") ?? ""),
+        message: String(formData.get("message") ?? ""),
+        consent: true,
+        sourceUrl: window.location.href,
+        utmSource: params.get("utm_source") ?? "",
+        utmMedium: params.get("utm_medium") ?? "",
+        utmCampaign: params.get("utm_campaign") ?? "",
+      },
+      { onSuccess: () => form.reset() },
+    );
   };
+  const enquiryMutation = useMutation({
+    mutationFn: (input: EnquiryInput) =>
+      apiRequest<{ success: true }>("/api/enquiries", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+  });
+  const settingsQuery = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => apiRequest<{ data: SiteSettingsInput }>("/api/settings"),
+    staleTime: 5 * 60_000,
+  });
+  const settings = settingsQuery.data?.data;
+  const email = settings?.companyEmail || "hello.rentdeer@gmail.com";
+  const tenantPhone = settings?.tenantPhone || "+6019 252 3804";
+  const tenantWhatsapp = settings?.tenantWhatsapp || "+6019 343 3804";
+  const landlordWhatsapp = settings?.landlordWhatsapp || "+6011 3928 2804";
   return (
     <main className="contact-page">
       <section className="contact-hero">
@@ -51,23 +90,25 @@ export default function ContactPage() {
             get back to you.
           </p>
           <div className="contact-detail-list">
-            <a href="mailto:hello.rentdeer@gmail.com">
+            <a href={`mailto:${email}`}>
               <strong>Email us</strong>
-              <span>hello.rentdeer@gmail.com</span>
+              <span>{email}</span>
             </a>
-            <a href="tel:+60192523804">
+            <a href={`tel:${tenantPhone.replace(/\s/g, "")}`}>
               <strong>Tenant enquiries</strong>
-              <span>+6019 252 3804 · WhatsApp +6019 343 3804</span>
+              <span>
+                {tenantPhone} · WhatsApp {tenantWhatsapp}
+              </span>
             </a>
-            <a href="tel:+601139282804">
+            <a href={`tel:${landlordWhatsapp.replace(/\s/g, "")}`}>
               <strong>Landlord enquiries</strong>
-              <span>WhatsApp +6011 3928 2804</span>
+              <span>WhatsApp {landlordWhatsapp}</span>
             </a>
             <div>
               <strong>Visit us</strong>
               <span>
-                S-036 &amp; S-042, Seasons Square, Jalan PJU 10/3C, Damansara
-                Damai, 47380 Petaling Jaya, Selangor, Malaysia
+                {settings?.companyAddress ||
+                  "Damansara Damai, Selangor, Malaysia"}
               </span>
             </div>
           </div>
@@ -93,6 +134,10 @@ export default function ContactPage() {
             />
           </label>
           <label>
+            Phone or WhatsApp
+            <input name="phone" type="tel" placeholder="+60..." />
+          </label>
+          <label>
             What can we help with?
             <select name="topic" defaultValue="">
               <option value="" disabled>
@@ -115,15 +160,25 @@ export default function ContactPage() {
             />
           </label>
           <label className="checkbox-label">
-            <input required type="checkbox" />{" "}
+            <input required type="checkbox" name="consent" />{" "}
             <span>I agree to the privacy policy and terms of use.</span>
           </label>
-          <button type="submit" className="rd-yellow-button">
-            {submitted ? "Enquiry Ready" : "Send Enquiry"} <ArrowIcon />
+          <button
+            type="submit"
+            className="rd-yellow-button"
+            disabled={enquiryMutation.isPending}
+          >
+            {enquiryMutation.isPending ? "Sending..." : "Send Enquiry"}{" "}
+            <ArrowIcon />
           </button>
-          {submitted && (
+          {enquiryMutation.isSuccess && (
             <p className="form-success" aria-live="polite">
-              Thanks — your enquiry is ready for the RentDeer team.
+              Thanks — your enquiry has been sent to the RentDeer team.
+            </p>
+          )}
+          {enquiryMutation.isError && (
+            <p className="form-success" role="alert">
+              {enquiryMutation.error.message}
             </p>
           )}
         </form>

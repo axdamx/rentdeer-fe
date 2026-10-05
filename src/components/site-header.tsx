@@ -1,8 +1,12 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { apiRequest } from "@/lib/api-client";
+import type { SiteSettingsInput } from "@/lib/listing-schema";
 
 type SiteHeaderProps = {
   tone?: "default" | "dark";
@@ -27,6 +31,12 @@ const propertyLocations = [
 ] as const;
 
 export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
+  const settingsQuery = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => apiRequest<{ data: SiteSettingsInput }>("/api/settings"),
+    staleTime: 5 * 60_000,
+  });
+  const settings = settingsQuery.data?.data;
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<
     "properties" | "services" | null
@@ -105,9 +115,20 @@ export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
         href="/"
         onClick={closeNavigation}
       >
-        <span className="brand-wordmark">
-          <span className="brand-symbol">R</span>RentDeer
-        </span>
+        {settings?.logo ? (
+          <Image
+            className="brand-logo-image"
+            src={settings.logo.url}
+            alt={settings.logo.alt || `${settings.siteName} logo`}
+            width={180}
+            height={54}
+            unoptimized
+          />
+        ) : (
+          <span className="brand-wordmark">
+            <span className="brand-symbol">R</span>RentDeer
+          </span>
+        )}
       </Link>
       <nav
         className={menuOpen ? "main-nav is-open" : "main-nav"}

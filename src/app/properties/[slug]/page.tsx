@@ -5,7 +5,8 @@ import PropertyGallery from "@/components/property-gallery";
 import PropertyLocationMap from "@/components/property-location-map";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
-import { getProperty, properties } from "@/lib/properties";
+import { transitStationById } from "@/lib/listing-reference-data";
+import { getPropertyBySlug } from "@/lib/property-repository";
 
 function ArrowIcon() {
   return (
@@ -23,17 +24,13 @@ function ArrowIcon() {
   );
 }
 
-export function generateStaticParams() {
-  return properties.map((property) => ({ slug: property.slug }));
-}
-
 export default async function PropertyDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = getProperty(slug);
+  const property = await getPropertyBySlug(slug);
 
   if (!property) {
     notFound();
@@ -43,6 +40,25 @@ export default async function PropertyDetailPage({
     ...property.units.map((unit) => unit.monthlyRent),
   );
   const availableUnits = property.units.filter((unit) => unit.available);
+  const transitConnections = property.transitConnections.flatMap(
+    (connection) => {
+      const station = transitStationById.get(connection.stationId);
+      return station ? [{ ...connection, station }] : [];
+    },
+  );
+  const propertyAddress = [
+    property.addressLine,
+    property.postcode,
+    property.area,
+    property.city,
+    property.state,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const coordinates: [number, number] | null =
+    property.latitude != null && property.longitude != null
+      ? [property.latitude, property.longitude]
+      : null;
 
   return (
     <main className="property-detail-page">
@@ -173,7 +189,11 @@ export default async function PropertyDetailPage({
                 </div>
                 <div className="unit-card-bottom">
                   <strong>
-                    RM{unit.monthlyRent.toLocaleString()} <small>/ month</small>
+                    RM{unit.monthlyRent.toLocaleString()}
+                    {unit.maximumRent && unit.maximumRent !== unit.monthlyRent
+                      ? ` - RM${unit.maximumRent.toLocaleString()}`
+                      : ""}{" "}
+                    <small>/ month</small>
                   </strong>
                   <div className="unit-card-actions">
                     <Link
@@ -248,6 +268,29 @@ export default async function PropertyDetailPage({
               </div>
             ))}
           </div>
+          {transitConnections.length > 0 && (
+            <div className="detail-transit-connections">
+              <strong>Nearby public transport</strong>
+              {transitConnections.map((connection) => (
+                <div key={connection.stationId}>
+                  <span
+                    style={{
+                      background: connection.station.lineColor,
+                      color: connection.station.lineTextColor,
+                    }}
+                  >
+                    {connection.station.lineCode}
+                  </span>
+                  <div>
+                    <strong>{connection.station.station}</strong>
+                    <small>
+                      {connection.accessMinutes} min {connection.accessMode}
+                    </small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -297,16 +340,23 @@ export default async function PropertyDetailPage({
             <h2>See the area before you enquire.</h2>
           </div>
           <p>
-            This is a temporary viewing point near KLCC. We can replace it with
-            the property&apos;s real address or latitude and longitude when the
-            listing data is ready.
+            {coordinates
+              ? propertyAddress
+              : "Map coordinates have not been added for this property yet."}
           </p>
         </div>
-        <PropertyLocationMap
-          propertyTitle={property.title}
-          address="Mock RentDeer viewing point near KLCC, Kuala Lumpur"
-          coordinates={[3.1579, 101.7116]}
-        />
+        {coordinates ? (
+          <PropertyLocationMap
+            propertyTitle={property.title}
+            address={propertyAddress || property.location}
+            coordinates={coordinates}
+          />
+        ) : (
+          <div className="property-map-empty">
+            Add the property coordinates in Admin to display its exact map
+            location.
+          </div>
+        )}
       </section>
       <section className="rd-page-cta-section">
         <div className="about-cta detail-cta">

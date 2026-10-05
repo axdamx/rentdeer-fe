@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
   Eye,
@@ -17,7 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { AdminContentPage } from "@/lib/admin-mock-data";
+import { apiRequest } from "@/lib/api-client";
+import type { ContentPageInput } from "@/lib/listing-schema";
 
 const previewImages = [
   "/estatein/property-villa.png",
@@ -28,8 +30,10 @@ const previewImages = [
 export default function AdminPageConfigurator({
   page,
 }: {
-  page: AdminContentPage;
+  page: ContentPageInput;
 }) {
+  const queryClient = useQueryClient();
+  const [draftPage, setDraftPage] = useState(page);
   const [activeSection, setActiveSection] = useState(
     page.sections[0]?.id ?? "",
   );
@@ -37,13 +41,73 @@ export default function AdminPageConfigurator({
     "desktop",
   );
   const [saved, setSaved] = useState(false);
-  const selectedSection = page.sections.find(
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const selectedSection = draftPage.sections.find(
     (section) => section.id === activeSection,
   );
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      apiRequest<{ data: ContentPageInput }>(
+        `/api/admin/content/${draftPage.slug}`,
+        { method: "PATCH", body: JSON.stringify(draftPage) },
+      ),
+    onSuccess: async ({ data }) => {
+      setDraftPage(data);
+      setSaved(true);
+      await queryClient.invalidateQueries({ queryKey: ["admin", "content"] });
+      window.setTimeout(() => setSaved(false), 2400);
+    },
+  });
 
   const saveDraft = () => {
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2400);
+    saveMutation.mutate();
+  };
+
+  const updateSelectedSection = (
+    update: Partial<ContentPageInput["sections"][number]>,
+  ) => {
+    setDraftPage((current) => ({
+      ...current,
+      sections: current.sections.map((section) =>
+        section.id === activeSection ? { ...section, ...update } : section,
+      ),
+    }));
+  };
+
+  const updateSelectedContent = (
+    key: keyof ContentPageInput["sections"][number]["content"],
+    value: string,
+  ) => {
+    if (!selectedSection) return;
+    updateSelectedSection({
+      content: { ...selectedSection.content, [key]: value },
+    });
+  };
+
+  const uploadAssets = async (files: FileList | null) => {
+    if (!files?.length || !selectedSection) return;
+    setUploading(true);
+    setError("");
+    try {
+      const body = new FormData();
+      body.set("ownerType", "contentSection");
+      body.set("ownerId", selectedSection.id);
+      for (const file of Array.from(files)) body.append("files", file);
+      const response = await fetch("/api/admin/media", {
+        method: "POST",
+        body,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Upload failed.");
+      updateSelectedSection({
+        assetCount: selectedSection.assetCount + files.length,
+      });
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -52,7 +116,7 @@ export default function AdminPageConfigurator({
         <div>
           <Link href="/admin/content">Website Content</Link>
           <span>/</span>
-          <strong>{page.name}</strong>
+          <strong>{draftPage.name}</strong>
         </div>
         <div>
           <div className="admin-preview-toggle">
@@ -76,12 +140,17 @@ export default function AdminPageConfigurator({
           <Button
             variant="outline"
             nativeButton={false}
-            render={<Link href={page.route} target="_blank" />}
+            render={<Link href={draftPage.route} target="_blank" />}
           >
             <Eye aria-hidden="true" /> Preview
           </Button>
-          <Button className="admin-primary-button" onClick={saveDraft}>
-            <Save aria-hidden="true" /> Save draft
+          <Button
+            className="admin-primary-button"
+            onClick={saveDraft}
+            disabled={saveMutation.isPending}
+          >
+            <Save aria-hidden="true" />
+            {saveMutation.isPending ? "Saving..." : "Save changes"}
           </Button>
         </div>
       </div>
@@ -91,14 +160,19 @@ export default function AdminPageConfigurator({
           <Check aria-hidden="true" /> Mock changes saved locally.
         </output>
       )}
+      {(error || saveMutation.isError) && (
+        <div className="admin-save-notice">
+          {error || saveMutation.error?.message}
+        </div>
+      )}
 
       <div className="admin-configurator-layout">
         <aside className="admin-section-list">
           <div>
             <span>Page sections</span>
-            <small>{page.sections.length} sections</small>
+            <small>{draftPage.sections.length} sections</small>
           </div>
-          {page.sections.map((section) => (
+          {draftPage.sections.map((section) => (
             <button
               type="button"
               className={activeSection === section.id ? "is-active" : ""}
@@ -122,10 +196,16 @@ export default function AdminPageConfigurator({
             <div>
               <span>Editing section</span>
               <h2>{selectedSection?.name}</h2>
-              <p>{selectedSection?.description}</p>
+              <p>{selectedSection?.content.description}</p>
             </div>
             <label className="admin-switch-row">
-              <input type="checkbox" defaultChecked />
+              <input
+                type="checkbox"
+                checked={selectedSection?.isVisible ?? false}
+                onChange={(event) =>
+                  updateSelectedSection({ isVisible: event.target.checked })
+                }
+              />
               <span>Visible</span>
             </label>
           </div>
@@ -138,16 +218,21 @@ export default function AdminPageConfigurator({
             <div className="admin-form-grid">
               <div>
                 <Label htmlFor="eyebrow">Eyebrow label</Label>
-                <Input id="eyebrow" defaultValue={selectedSection?.name} />
+                <Input
+                  id="eyebrow"
+                  value={selectedSection?.content.eyebrow ?? ""}
+                  onChange={(event) =>
+                    updateSelectedContent("eyebrow", event.target.value)
+                  }
+                />
               </div>
               <div>
                 <Label htmlFor="heading">Section heading</Label>
                 <Input
                   id="heading"
-                  defaultValue={
-                    page.slug === "about"
-                      ? "Comfortable, quality living should be accessible to everyone."
-                      : `A better ${page.name.toLowerCase()} experience.`
+                  value={selectedSection?.content.heading ?? ""}
+                  onChange={(event) =>
+                    updateSelectedContent("heading", event.target.value)
                   }
                 />
               </div>
@@ -156,7 +241,10 @@ export default function AdminPageConfigurator({
                 <Textarea
                   id="description"
                   rows={4}
-                  defaultValue={selectedSection?.description}
+                  value={selectedSection?.content.description ?? ""}
+                  onChange={(event) =>
+                    updateSelectedContent("description", event.target.value)
+                  }
                 />
               </div>
             </div>
@@ -171,9 +259,17 @@ export default function AdminPageConfigurator({
               </p>
             </div>
             <label className="admin-upload-zone">
-              <input type="file" accept="image/*" multiple />
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                multiple
+                disabled={uploading}
+                onChange={(event) => uploadAssets(event.target.files)}
+              />
               <ImagePlus aria-hidden="true" />
-              <strong>Drop images here or browse</strong>
+              <strong>
+                {uploading ? "Uploading..." : "Drop images here or browse"}
+              </strong>
               <span>PNG, JPG or WebP · up to 10MB each</span>
               <span className="admin-upload-action">
                 <Upload aria-hidden="true" /> Choose files

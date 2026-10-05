@@ -1,9 +1,87 @@
-import { Download, Mail, Search, SlidersHorizontal } from "lucide-react";
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Download, Search, SlidersHorizontal } from "lucide-react";
+import { useDeferredValue, useState } from "react";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
-import { adminEnquiries } from "@/lib/admin-mock-data";
+import { apiRequest } from "@/lib/api-client";
+import { queryKeys } from "@/lib/query-keys";
+
+type AdminEnquiry = {
+  id: string;
+  reference: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  topic: string;
+  message: string;
+  status: "new" | "in_progress" | "replied" | "closed";
+  created_at: string;
+  properties: { title: string; slug: string } | null;
+  rental_options: { title: string; slug: string } | null;
+};
+
+const statuses = ["all", "new", "in_progress", "replied", "closed"] as const;
 
 export default function AdminEnquiriesPage() {
+  const queryClient = useQueryClient();
+  const [status, setStatus] = useState<(typeof statuses)[number]>("all");
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+  const filters = { status, query: deferredSearch, page: 1 };
+  const enquiriesQuery = useQuery({
+    queryKey: queryKeys.admin.enquiries(filters),
+    queryFn: () => {
+      const params = new URLSearchParams({ status, page: "1", pageSize: "50" });
+      if (deferredSearch) params.set("query", deferredSearch);
+      return apiRequest<{ data: AdminEnquiry[]; total: number }>(
+        `/api/admin/enquiries?${params}`,
+      );
+    },
+  });
+  const statusMutation = useMutation({
+    mutationFn: ({ id, nextStatus }: { id: string; nextStatus: string }) =>
+      apiRequest(`/api/admin/enquiries/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: nextStatus }),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["admin", "enquiries"] }),
+  });
+  const enquiries = enquiriesQuery.data?.data ?? [];
+
+  const exportCsv = () => {
+    const header = [
+      "Reference",
+      "Name",
+      "Email",
+      "Topic",
+      "Property",
+      "Status",
+      "Received",
+    ];
+    const rows = enquiries.map((enquiry) => [
+      enquiry.reference,
+      `${enquiry.first_name} ${enquiry.last_name}`,
+      enquiry.email,
+      enquiry.topic,
+      enquiry.properties?.title ?? "",
+      enquiry.status,
+      enquiry.created_at,
+    ]);
+    const csv = [header, ...rows]
+      .map((row) => row.map((cell) => JSON.stringify(cell)).join(","))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "rentdeer-enquiries.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <AdminPageHeader
@@ -11,21 +89,30 @@ export default function AdminEnquiriesPage() {
         title="Contact enquiries"
         description="Review messages submitted through the RentDeer contact form."
         actions={
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={exportCsv}
+            disabled={!enquiries.length}
+          >
             <Download aria-hidden="true" /> Export CSV
           </Button>
         }
       />
       <section className="admin-panel admin-enquiries-panel">
         <div className="admin-enquiry-tabs">
-          <button type="button" className="is-active">
-            All <span>{adminEnquiries.length}</span>
-          </button>
-          <button type="button">
-            New <span>2</span>
-          </button>
-          <button type="button">In progress</button>
-          <button type="button">Closed</button>
+          {statuses.map((value) => (
+            <button
+              type="button"
+              className={status === value ? "is-active" : ""}
+              onClick={() => setStatus(value)}
+              key={value}
+            >
+              {value.replace("_", " ")}
+              {value === "all" && (
+                <span>{enquiriesQuery.data?.total ?? 0}</span>
+              )}
+            </button>
+          ))}
         </div>
         <div className="admin-listing-filters">
           <div>
@@ -33,14 +120,10 @@ export default function AdminEnquiriesPage() {
             <input
               placeholder="Search enquiries..."
               aria-label="Search enquiries"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <select aria-label="Filter enquiry type" defaultValue="all">
-            <option value="all">All enquiry types</option>
-            <option value="tenant">Tenant</option>
-            <option value="landlord">Landlord</option>
-            <option value="agent">Property agent</option>
-          </select>
           <Button variant="outline">
             <SlidersHorizontal aria-hidden="true" /> Filters
           </Button>
@@ -55,35 +138,58 @@ export default function AdminEnquiriesPage() {
                 <th>Property</th>
                 <th>Received</th>
                 <th>Status</th>
-                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
-              {adminEnquiries.map((enquiry) => (
+              {enquiriesQuery.isPending && (
+                <tr>
+                  <td colSpan={6}>Loading enquiries...</td>
+                </tr>
+              )}
+              {enquiriesQuery.isError && (
+                <tr>
+                  <td colSpan={6}>Unable to load enquiries.</td>
+                </tr>
+              )}
+              {enquiries.map((enquiry) => (
                 <tr key={enquiry.id}>
-                  <td>{enquiry.id}</td>
+                  <td>{enquiry.reference}</td>
                   <td>
-                    <strong>{enquiry.name}</strong>
+                    <strong>
+                      {enquiry.first_name} {enquiry.last_name}
+                    </strong>
                     <span>{enquiry.email}</span>
                   </td>
-                  <td>{enquiry.topic}</td>
-                  <td>{enquiry.property}</td>
-                  <td>{enquiry.received}</td>
+                  <td title={enquiry.message}>{enquiry.topic}</td>
                   <td>
-                    <span
-                      className={`admin-status admin-status-${enquiry.status.toLowerCase().replace(" ", "-")}`}
-                    >
-                      {enquiry.status}
-                    </span>
+                    {enquiry.properties?.title ?? "—"}
+                    {enquiry.rental_options && (
+                      <span>{enquiry.rental_options.title}</span>
+                    )}
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="admin-icon-button"
-                      aria-label={`Open ${enquiry.id}`}
+                    {new Intl.DateTimeFormat("en-MY", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(new Date(enquiry.created_at))}
+                  </td>
+                  <td>
+                    <select
+                      aria-label={`Status for ${enquiry.reference}`}
+                      value={enquiry.status}
+                      disabled={statusMutation.isPending}
+                      onChange={(event) =>
+                        statusMutation.mutate({
+                          id: enquiry.id,
+                          nextStatus: event.target.value,
+                        })
+                      }
                     >
-                      <Mail aria-hidden="true" />
-                    </button>
+                      <option value="new">New</option>
+                      <option value="in_progress">In progress</option>
+                      <option value="replied">Replied</option>
+                      <option value="closed">Closed</option>
+                    </select>
                   </td>
                 </tr>
               ))}
@@ -91,18 +197,10 @@ export default function AdminEnquiriesPage() {
           </table>
         </div>
         <div className="admin-table-footer">
-          <span>Showing {adminEnquiries.length} enquiries</span>
-          <div>
-            <button type="button" disabled>
-              Previous
-            </button>
-            <button type="button" className="is-active">
-              1
-            </button>
-            <button type="button" disabled>
-              Next
-            </button>
-          </div>
+          <span>
+            Showing {enquiries.length} of {enquiriesQuery.data?.total ?? 0}{" "}
+            enquiries
+          </span>
         </div>
       </section>
     </>

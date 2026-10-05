@@ -14,8 +14,10 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
+import { hasSupabaseEnv } from "@/lib/env";
+import { createClient } from "@/lib/supabase/client";
 
 const navigation = [
   ["Dashboard", "/admin/dashboard", LayoutDashboard],
@@ -25,9 +27,29 @@ const navigation = [
   ["Site Settings", "/admin/settings", Settings],
 ] as const;
 
-export default function AdminShell({ children }: { children: ReactNode }) {
+export default function AdminShell({
+  children,
+  user,
+}: {
+  children: ReactNode;
+  user?: {
+    displayName: string | null;
+    email: string | null;
+    role: string;
+  } | null;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const signOut = async () => {
+    if (hasSupabaseEnv()) {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    }
+    router.replace("/admin");
+    router.refresh();
+  };
 
   return (
     <div className="admin-shell">
@@ -70,10 +92,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             <ExternalLink aria-hidden="true" />
             View website
           </Link>
-          <Link href="/admin">
+          <button type="button" onClick={signOut}>
             <LogOut aria-hidden="true" />
             Sign out
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -108,8 +130,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             <div className="admin-user">
               <span>MA</span>
               <div>
-                <strong>Mohd Adam</strong>
-                <small>Administrator</small>
+                <strong>
+                  {user?.displayName || user?.email || "Administrator"}
+                </strong>
+                <small>{user?.role || "Administrator"}</small>
               </div>
             </div>
           </div>

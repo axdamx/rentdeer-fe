@@ -6,16 +6,73 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    window.setTimeout(() => router.push("/admin/dashboard"), 500);
+    setError("");
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: String(formData.get("email")),
+        password: String(formData.get("password")),
+      });
+      if (signInError) throw signInError;
+
+      const { data: profile } = await supabase
+        .from("admin_profiles")
+        .select("is_active")
+        .single();
+      if (!profile?.is_active) {
+        await supabase.auth.signOut();
+        throw new Error(
+          "This account does not have active administrator access.",
+        );
+      }
+
+      const nextPath = new URLSearchParams(window.location.search).get("next");
+      router.replace(
+        nextPath?.startsWith("/admin/") ? nextPath : "/admin/dashboard",
+      );
+      router.refresh();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to sign in.");
+      setLoading(false);
+    }
+  };
+
+  const sendPasswordReset = async () => {
+    if (!email) {
+      setError("Enter your email address first.");
+      return;
+    }
+    try {
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo: `${window.location.origin}/auth/callback?next=/admin/reset-password`,
+        },
+      );
+      if (resetError) throw resetError;
+      setError("Password reset email sent.");
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Unable to send reset email.",
+      );
+    }
   };
 
   return (
@@ -35,7 +92,9 @@ export default function AdminLoginPage() {
         </div>
         <div className="admin-login-footnote">
           <strong>Secure administrator access</strong>
-          <span>Mock authentication flow for UI review.</span>
+          <span>
+            Protected by Supabase authentication and database policies.
+          </span>
         </div>
       </section>
 
@@ -52,9 +111,11 @@ export default function AdminLoginPage() {
               <Mail aria-hidden="true" />
               <Input
                 id="admin-email"
+                name="email"
                 type="email"
                 placeholder="admin@rentdeer.com"
-                defaultValue="admin@rentdeer.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
             </div>
@@ -62,15 +123,17 @@ export default function AdminLoginPage() {
           <div className="admin-login-field">
             <div className="admin-login-label-row">
               <Label htmlFor="admin-password">Password</Label>
-              <button type="button">Forgot password?</button>
+              <button type="button" onClick={sendPasswordReset}>
+                Forgot password?
+              </button>
             </div>
             <div>
               <LockKeyhole aria-hidden="true" />
               <Input
                 id="admin-password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                defaultValue="rentdeer-admin"
                 required
               />
               <button
@@ -98,6 +161,7 @@ export default function AdminLoginPage() {
             {loading ? "Signing in..." : "Sign in"}
             <ArrowRight aria-hidden="true" />
           </Button>
+          {error && <output className="admin-login-help">{error}</output>}
           <p className="admin-login-help">
             Need access? Contact the RentDeer system administrator.
           </p>

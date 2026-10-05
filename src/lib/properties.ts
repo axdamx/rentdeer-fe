@@ -7,17 +7,33 @@ export type RoomType =
   | "Whole Unit";
 
 export type RentalUnit = {
+  id?: string;
   slug: string;
   title: string;
+  internalCode?: string;
+  variant?: string;
   roomType: RoomType;
   image: string;
   monthlyRent: number;
+  maximumRent?: number;
+  priceNote?: string;
   bedrooms: number;
   toilets: number;
   area: string;
+  areaSqft?: number;
   description: string;
   furnished: boolean;
+  bedType?: string;
+  bathroomType?: "private" | "shared" | "unspecified";
+  quantityAvailable?: number;
   available: boolean;
+  availability?:
+    | "available"
+    | "reserved"
+    | "occupied"
+    | "unavailable"
+    | "coming_soon";
+  status?: "draft" | "published" | "archived";
   virtualTour?: {
     source: string;
   };
@@ -34,19 +50,36 @@ export type PropertyDetails = {
   bookingSteps: string[];
 };
 
+export type TransitConnection = {
+  stationId: string;
+  accessMinutes: number;
+  accessMode: "walk" | "drive" | "shuttle";
+};
+
 export type Property = {
+  id?: string;
   slug: string;
   title: string;
   location: string;
   city: string;
+  addressLine?: string;
+  area?: string;
+  postcode?: string;
+  state?: string;
+  latitude?: number;
+  longitude?: number;
   propertyType: string;
   image: string;
   gallery: string[];
   description: string;
   managedBy: string;
   facilities: string[];
+  transitConnections: TransitConnection[];
   details: PropertyDetails;
   units: RentalUnit[];
+  status?: "draft" | "published" | "archived";
+  isFeatured?: boolean;
+  updatedAt?: string;
 };
 
 export const cities = [
@@ -141,6 +174,13 @@ export const properties: Property[] = [
       "Parking on request",
       "Common lounge",
     ],
+    transitConnections: [
+      {
+        stationId: "damansara-damai-mrt",
+        accessMinutes: 8,
+        accessMode: "walk",
+      },
+    ],
     details: baseDetails([
       { label: "Damansara Damai MRT", distance: "8 min" },
       { label: "Grocery & essentials", distance: "5 min" },
@@ -216,6 +256,13 @@ export const properties: Property[] = [
       "Visitor parking",
       "Gated access",
     ],
+    transitConnections: [
+      {
+        stationId: "kota-damansara-mrt",
+        accessMinutes: 10,
+        accessMode: "walk",
+      },
+    ],
     details: baseDetails([
       { label: "Kota Damansara MRT", distance: "10 min" },
       { label: "Mutiara Damansara", distance: "12 min" },
@@ -275,6 +322,13 @@ export const properties: Property[] = [
       "Covered parking",
       "24-hour security",
       "Retail nearby",
+    ],
+    transitConnections: [
+      {
+        stationId: "ara-damansara-lrt",
+        accessMinutes: 7,
+        accessMode: "walk",
+      },
     ],
     details: baseDetails([
       { label: "Ara Damansara LRT", distance: "7 min" },

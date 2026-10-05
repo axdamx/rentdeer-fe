@@ -4,6 +4,7 @@ import "@photo-sphere-viewer/video-plugin/index.css";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import "yet-another-react-lightbox/styles.css";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "RentDeer | Rent Smarter. Live Better.",
@@ -16,7 +17,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

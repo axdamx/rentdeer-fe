@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AnimatePresence,
   type MotionValue,
   motion,
   useMotionValueEvent,
@@ -9,7 +8,6 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,8 +21,6 @@ const stories = [
     detail:
       "We bring renters and landlords together with well-managed homes, clearer communication, and support that continues after move-in.",
     href: "/about#story",
-    image: "/estatein/property-campus.png",
-    alt: "A landscaped RentDeer residence",
   },
   {
     eyebrow: "Striving For Change",
@@ -34,8 +30,6 @@ const stories = [
     detail:
       "For renters, that means clean, move-in-ready rooms. For landlords, it means dependable tenants, consistent upkeep, and a team they can trust.",
     href: "/about#rental-belief",
-    image: "/estatein/property-tower.png",
-    alt: "A modern residential tower",
   },
   {
     eyebrow: "Who Are We",
@@ -45,8 +39,6 @@ const stories = [
     detail:
       "At RentDeer, we are not just managing properties; we are building a legacy of accessible, quality living for all. Join us as we continue to redefine the standards of property management in Klang Valley and beyond.",
     href: "/about#story",
-    image: "/estatein/property-villa.png",
-    alt: "A RentDeer residence representing the company history",
   },
   {
     eyebrow: "Our Next Chapter",
@@ -56,55 +48,73 @@ const stories = [
     detail:
       "Our goal is not just to grow as a company, but to better serve our clients and contribute positively to our community. We remain committed to creating a new standard of living that is both high-quality and affordable.",
     href: "/contact",
-    image: "/estatein/property-campus.png",
-    alt: "A connected residential community representing RentDeer's future",
   },
 ] as const;
 
 type Story = (typeof stories)[number];
 
-function StoryStep({
+function StoryContent({
+  isActive,
   index,
   progress,
   story,
 }: {
+  isActive: boolean;
   index: number;
   progress: MotionValue<number>;
   story: Story;
 }) {
   const start = index / stories.length;
   const end = (index + 1) / stories.length;
-  const fadeStart = index === 0 ? 0 : start;
-  const fadeEnd = index === stories.length - 1 ? 1 : end;
-  const opacity = useTransform(
-    progress,
-    [fadeStart, start + 0.05, end - 0.05, fadeEnd],
-    [index === 0 ? 1 : 0, 1, 1, index === stories.length - 1 ? 1 : 0],
-  );
-  const y = useTransform(
-    progress,
-    [fadeStart, start + 0.05, end - 0.05, fadeEnd],
-    [index === 0 ? 0 : 50, 0, 0, index === stories.length - 1 ? 0 : -50],
-  );
+  const transition = 0.035;
+  const opacityInput =
+    index === 0
+      ? [0, end - transition, end + transition]
+      : index === stories.length - 1
+        ? [start - transition, start + transition, 1]
+        : [
+            start - transition,
+            start + transition,
+            end - transition,
+            end + transition,
+          ];
+  const opacityOutput =
+    index === 0
+      ? [1, 1, 0]
+      : index === stories.length - 1
+        ? [0, 1, 1]
+        : [0, 1, 1, 0];
+  const yOutput =
+    index === 0
+      ? [0, 0, -28]
+      : index === stories.length - 1
+        ? [28, 0, 0]
+        : [28, 0, 0, -28];
+  const opacity = useTransform(progress, opacityInput, opacityOutput);
+  const y = useTransform(progress, opacityInput, yOutput);
 
   return (
-    <div className="rd-story-scroll-step">
-      <motion.div className="rd-story-scroll-copy" style={{ opacity, y }}>
-        <Card className="rd-story-card-shell">
-          <CardHeader className="rd-story-card-header">
-            <span className="rd-script-label">{story.eyebrow}</span>
-            <CardTitle>{story.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="rd-story-card-content">
-            <p>{story.description}</p>
-            <p>{story.detail}</p>
-            <Link href={story.href} className="rd-yellow-button">
-              More Info <span aria-hidden="true">→</span>
-            </Link>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+    <motion.div
+      aria-hidden={!isActive}
+      className={`rd-story-scroll-copy${isActive ? " is-active" : ""}`}
+      style={{ opacity, y }}
+    >
+      <CardHeader className="rd-story-card-header">
+        <span className="rd-script-label">{story.eyebrow}</span>
+        <CardTitle>{story.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="rd-story-card-content">
+        <p>{story.description}</p>
+        <p>{story.detail}</p>
+        <Link
+          href={story.href}
+          className="rd-yellow-button"
+          tabIndex={isActive ? 0 : -1}
+        >
+          More Info <span aria-hidden="true">→</span>
+        </Link>
+      </CardContent>
+    </motion.div>
   );
 }
 
@@ -131,38 +141,47 @@ export default function StoryScrollSection() {
     setActiveIndex(nextIndex);
   });
 
-  const activeStory = stories[activeIndex] ?? stories[0];
-
   return (
     <section className="rd-story-scroll-section" id="about">
-      <div className="rd-container rd-story-scroll-heading">
-        <span className="rd-script-label">Who are we</span>
-        <h2>Renting should feel more connected.</h2>
-        <p>
-          Scroll through the story behind RentDeer and the change we are working
-          towards for renters and landlords.
-        </p>
-      </div>
       <div ref={stageRef} className="rd-story-scroll-stage">
         <div className="rd-story-scroll-visual">
           <div className="rd-story-scroll-frame">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeStory.image}
-                className="rd-story-scroll-image"
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-              >
-                <Image
-                  src={activeStory.image}
-                  alt={activeStory.alt}
-                  fill
-                  sizes="(max-width: 700px) 100vw, 46vw"
+            <video
+              autoPlay
+              className="rd-story-scroll-video"
+              loop
+              muted
+              playsInline
+              poster="/estatein/property-villa.png"
+              preload="metadata"
+            >
+              <source
+                media="(max-width: 700px)"
+                src="/estatein/rentdeer-story-mobile.mp4"
+                type="video/mp4"
+              />
+              <source src="/estatein/rentdeer-story.mp4" type="video/mp4" />
+            </video>
+            <div className="rd-story-scroll-scrim" />
+            <div className="rd-story-scroll-intro">
+              <span className="rd-script-label">Who are we</span>
+              <h2>Renting should feel more connected.</h2>
+              <p>
+                Scroll through the story behind RentDeer and the change we are
+                working towards for renters and landlords.
+              </p>
+            </div>
+            <Card className="rd-story-card-shell">
+              {stories.map((story, index) => (
+                <StoryContent
+                  index={index}
+                  isActive={activeIndex === index}
+                  key={story.eyebrow}
+                  progress={smoothProgress}
+                  story={story}
                 />
-              </motion.div>
-            </AnimatePresence>
+              ))}
+            </Card>
             <div className="rd-story-scroll-image-label">
               <span>RentDeer</span>
               <strong>
@@ -170,16 +189,6 @@ export default function StoryScrollSection() {
               </strong>
             </div>
           </div>
-        </div>
-        <div className="rd-story-scroll-steps">
-          {stories.map((story, index) => (
-            <StoryStep
-              index={index}
-              key={story.eyebrow}
-              progress={smoothProgress}
-              story={story}
-            />
-          ))}
         </div>
       </div>
     </section>

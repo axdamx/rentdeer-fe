@@ -1,9 +1,20 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Eye, ImageIcon, PanelsTopLeft } from "lucide-react";
 import Link from "next/link";
 import AdminPageHeader from "@/components/admin/admin-page-header";
-import { adminContentPages } from "@/lib/admin-mock-data";
+import { apiRequest } from "@/lib/api-client";
+import type { ContentPageInput } from "@/lib/listing-schema";
 
 export default function AdminContentPage() {
+  const pagesQuery = useQuery({
+    queryKey: ["admin", "content"],
+    queryFn: () =>
+      apiRequest<{ data: ContentPageInput[] }>("/api/admin/content"),
+  });
+  const adminContentPages = pagesQuery.data?.data ?? [];
+
   return (
     <>
       <AdminPageHeader
@@ -28,6 +39,8 @@ export default function AdminContentPage() {
         </div>
       </section>
       <section className="admin-content-grid">
+        {pagesQuery.isPending && <p>Loading website content...</p>}
+        {pagesQuery.isError && <p>Unable to load website content.</p>}
         {adminContentPages.map((page) => {
           const assetCount = page.sections.reduce(
             (total, section) => total + section.assetCount,
@@ -37,10 +50,8 @@ export default function AdminContentPage() {
           return (
             <article className="admin-content-card" key={page.slug}>
               <div className="admin-content-card-top">
-                <span
-                  className={`admin-status admin-status-${page.status.toLowerCase()}`}
-                >
-                  {page.status}
+                <span className={`admin-status admin-status-${page.status}`}>
+                  {page.status.charAt(0).toUpperCase() + page.status.slice(1)}
                 </span>
                 <Link
                   href={page.route}
@@ -55,7 +66,7 @@ export default function AdminContentPage() {
               <div className="admin-content-meta">
                 <span>{page.sections.length} sections</span>
                 <span>{assetCount} assets</span>
-                <span>Updated {page.lastUpdated}</span>
+                <span>Stored in Supabase</span>
               </div>
               <Link
                 className="admin-content-edit"

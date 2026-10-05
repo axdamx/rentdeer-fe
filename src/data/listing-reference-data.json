@@ -1,0 +1,145 @@
+{
+  "facilities": [
+    "Swimming pool",
+    "Wading pool",
+    "Infinity pool",
+    "Gym centre",
+    "Outdoor gym",
+    "BBQ area",
+    "Surau",
+    "24-hour security",
+    "Playground",
+    "Multi-purpose hall",
+    "Tennis court",
+    "Badminton court",
+    "Basketball court",
+    "Multi-sport court",
+    "Yoga deck",
+    "Jogging track",
+    "Lounge",
+    "Sky lounge",
+    "Business centre",
+    "Reading room",
+    "Sauna",
+    "Jacuzzi",
+    "Mini mart",
+    "Laundry room",
+    "Rooftop terrace",
+    "Trampoline park",
+    "Bank"
+  ],
+  "transitMap": {
+    "imageUrl": "https://paultan.org/image/2023/07/klang-valley-integrated-transit-map-1260x1817.jpg",
+    "sourceUrl": "https://myrapid.com.my/bus-train/rapid-kl/rapid-kl-integrated-transit-map/"
+  },
+  "transitStations": [
+    {
+      "id": "damansara-damai-mrt",
+      "station": "Damansara Damai MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "27.25%", "top": "24.45%" }
+    },
+    {
+      "id": "kota-damansara-mrt",
+      "station": "Kota Damansara MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "27.25%", "top": "36.2%" }
+    },
+    {
+      "id": "ara-damansara-lrt",
+      "station": "Ara Damansara LRT",
+      "line": "Kelana Jaya Line",
+      "lineCode": "KJ",
+      "lineColor": "#d50032",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "20.6%", "top": "58.1%" }
+    },
+    {
+      "id": "metro-prima-mrt",
+      "station": "Metro Prima MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "39.55%", "top": "20.25%" }
+    },
+    {
+      "id": "kepong-baru-mrt",
+      "station": "Kepong Baru MRT",
+      "line": "Putrajaya Line",
+      "lineCode": "PY",
+      "lineColor": "#e6bd00",
+      "lineTextColor": "#233016",
+      "position": { "left": "44.35%", "top": "20.25%" }
+    },
+    {
+      "id": "sentul-timur-lrt",
+      "station": "Sentul Timur LRT",
+      "line": "Ampang / Sri Petaling Line",
+      "lineCode": "AG",
+      "lineColor": "#e87523",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "59.35%", "top": "25.95%" }
+    },
+    {
+      "id": "taman-midah-mrt",
+      "station": "Taman Midah MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "93.25%", "top": "42.9%" }
+    },
+    {
+      "id": "taman-mutiara-mrt",
+      "station": "Taman Mutiara MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "93.25%", "top": "44.7%" }
+    },
+    {
+      "id": "taman-connaught-mrt",
+      "station": "Taman Connaught MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "93.25%", "top": "46.6%" }
+    },
+    {
+      "id": "sri-raya-mrt",
+      "station": "Sri Raya MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "93.25%", "top": "50%" }
+    },
+    {
+      "id": "bandar-tun-hussein-onn-mrt",
+      "station": "Bandar Tun Hussein Onn MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "93.25%", "top": "51.7%" }
+    },
+    {
+      "id": "kajang-mrt",
+      "station": "Kajang MRT",
+      "line": "Kajang Line",
+      "lineCode": "KG",
+      "lineColor": "#087947",
+      "lineTextColor": "#ffffff",
+      "position": { "left": "86.3%", "top": "61.3%" }
+    }
+  ]
+}

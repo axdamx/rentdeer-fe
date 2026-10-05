@@ -10,69 +10,62 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { properties } from "@/lib/properties";
+import { useEffect, useMemo, useState } from "react";
+import { transitMap, transitStations } from "@/lib/listing-reference-data";
+import type { Property, TransitConnection } from "@/lib/properties";
 
-const TRANSIT_MAP_URL =
-  "https://paultan.org/image/2023/07/klang-valley-integrated-transit-map-1260x1817.jpg";
+function accessLabel(connection: TransitConnection) {
+  const mode =
+    connection.accessMode === "walk"
+      ? "walk"
+      : connection.accessMode === "drive"
+        ? "drive"
+        : "shuttle ride";
+  return `${connection.accessMinutes} min ${mode} to station`;
+}
 
-const transitStops = [
-  {
-    id: "damansara-damai",
-    propertySlugs: [
-      "seasons-square-damansara-damai",
-      "kota-damansara-residences",
-    ],
-    station: "Damansara Damai MRT",
-    line: "Putrajaya Line",
-    lineCode: "PY",
-    access: "8 min to station",
-    position: { left: "27.25%", top: "24.45%" },
-  },
-  {
-    id: "kota-damansara",
-    propertySlugs: ["kota-damansara-residences"],
-    station: "Kota Damansara MRT",
-    line: "Kajang Line",
-    lineCode: "KG",
-    access: "10 min to station",
-    position: { left: "27.25%", top: "36.2%" },
-  },
-  {
-    id: "ara-damansara",
-    propertySlugs: ["ara-damansara-studio-living"],
-    station: "Ara Damansara LRT",
-    line: "Kelana Jaya Line",
-    lineCode: "KJ",
-    access: "7 min to station",
-    position: { left: "20.6%", top: "58.1%" },
-  },
-] as const;
-
-const stationGroups = transitStops.map((stop) => ({
-  ...stop,
-  properties: stop.propertySlugs.flatMap((propertySlug) => {
-    const property = properties.find(
-      (propertyItem) => propertyItem.slug === propertySlug,
-    );
-
-    return property ? [property] : [];
-  }),
-}));
-
-const connectedPropertyCount = new Set(
-  stationGroups.flatMap((station) =>
-    station.properties.map((property) => property.slug),
-  ),
-).size;
-
-export default function TransitPropertyExplorer() {
+export default function TransitPropertyExplorer({
+  properties,
+}: {
+  properties: Property[];
+}) {
+  const stationGroups = useMemo(
+    () =>
+      transitStations.map((station) => ({
+        ...station,
+        properties: properties.flatMap((property) =>
+          (property.transitConnections ?? [])
+            .filter((connection) => connection.stationId === station.id)
+            .map((connection) => ({
+              property,
+              connection,
+              access: accessLabel(connection),
+            })),
+        ),
+      })),
+    [properties],
+  );
+  const connectedPropertyCount = new Set(
+    stationGroups.flatMap((station) =>
+      station.properties.map(({ property }) => property.slug),
+    ),
+  ).size;
   const [activeStationId, setActiveStationId] = useState<string | null>(
     stationGroups[0]?.id ?? null,
   );
   const [stationSlideIndexes, setStationSlideIndexes] = useState<
     Record<string, number>
   >({});
+
+  useEffect(() => {
+    if (
+      activeStationId &&
+      stationGroups.some((station) => station.id === activeStationId)
+    ) {
+      return;
+    }
+    setActiveStationId(stationGroups[0]?.id ?? null);
+  }, [activeStationId, stationGroups]);
 
   const changeStationSlide = (
     stationId: string,
@@ -105,62 +98,69 @@ export default function TransitPropertyExplorer() {
 
         <div className="transit-explorer-card">
           <aside className="transit-map-sidebar">
-            <div className="transit-sidebar-intro">
-              <span className="transit-eyebrow">
-                <TrainFront aria-hidden="true" /> Transit-linked homes
-              </span>
-              <h3>Commute with less guesswork.</h3>
-              <p>
-                Start with the station you use, then compare nearby managed
-                homes and available rental options.
-              </p>
-            </div>
+            <div className="transit-sidebar-sticky">
+              <div className="transit-sidebar-intro">
+                <span className="transit-eyebrow">
+                  <TrainFront aria-hidden="true" /> Transit-linked homes
+                </span>
+                <h3>Commute with less guesswork.</h3>
+                <p>
+                  Start with the station you use, then compare nearby managed
+                  homes and available rental options.
+                </p>
+              </div>
 
-            <div className="transit-station-list">
-              {stationGroups.map((station) => {
-                const isActive = activeStationId === station.id;
+              <div className="transit-station-list">
+                {stationGroups.map((station) => {
+                  const isActive = activeStationId === station.id;
 
-                return (
-                  <button
-                    type="button"
-                    className={
-                      isActive
-                        ? "transit-station-card is-active"
-                        : "transit-station-card"
-                    }
-                    key={station.id}
-                    onClick={() => setActiveStationId(station.id)}
-                    onFocus={() => setActiveStationId(station.id)}
-                    onPointerEnter={() => setActiveStationId(station.id)}
-                  >
-                    <span
-                      className={`transit-line-badge line-${station.lineCode}`}
+                  return (
+                    <button
+                      type="button"
+                      className={
+                        isActive
+                          ? "transit-station-card is-active"
+                          : "transit-station-card"
+                      }
+                      key={station.id}
+                      onClick={() => setActiveStationId(station.id)}
+                      onFocus={() => setActiveStationId(station.id)}
+                      onPointerEnter={() => setActiveStationId(station.id)}
                     >
-                      {station.lineCode}
-                    </span>
-                    <span>
-                      <strong>{station.station}</strong>
-                      <small>
-                        {station.properties.length} nearby{" "}
-                        {station.properties.length === 1
-                          ? "property"
-                          : "properties"}
-                        {" · "}
-                        {station.access}
-                      </small>
-                    </span>
-                    <MapPin aria-hidden="true" />
-                  </button>
-                );
-              })}
-            </div>
+                      <span
+                        className="transit-line-badge"
+                        style={{
+                          background: station.lineColor,
+                          color: station.lineTextColor,
+                        }}
+                      >
+                        {station.lineCode}
+                      </span>
+                      <span>
+                        <strong>{station.station}</strong>
+                        <small>
+                          {station.properties.length} nearby{" "}
+                          {station.properties.length === 1
+                            ? "property"
+                            : "properties"}
+                          {station.properties[0]
+                            ? ` · ${station.properties[0].access}`
+                            : " · Add a connection in Admin"}
+                        </small>
+                      </span>
+                      <MapPin aria-hidden="true" />
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div className="transit-map-note">
-              <MapPin aria-hidden="true" />
-              <p>
-                Travel times are indicative mock data. Confirm your route before
-                booking.
-              </p>
+              <div className="transit-map-note">
+                <MapPin aria-hidden="true" />
+                <p>
+                  Travel times are indicative. Confirm your route before
+                  booking.
+                </p>
+              </div>
             </div>
           </aside>
 
@@ -182,16 +182,17 @@ export default function TransitPropertyExplorer() {
                   loading="lazy"
                   referrerPolicy="no-referrer"
                   sizes="(max-width: 700px) 680px, (max-width: 1100px) 65vw, 900px"
-                  src={TRANSIT_MAP_URL}
+                  src={transitMap.imageUrl}
                   width={1260}
                 />
 
                 {stationGroups.map((station) => {
                   const isActive = activeStationId === station.id;
                   const activeSlideIndex = stationSlideIndexes[station.id] ?? 0;
-                  const property = station.properties[activeSlideIndex];
+                  const listing = station.properties[activeSlideIndex];
 
-                  if (!property) return null;
+                  if (!listing) return null;
+                  const property = listing.property;
 
                   const lowestRent = Math.min(
                     ...property.units.map((unit) => unit.monthlyRent),
@@ -259,7 +260,7 @@ export default function TransitPropertyExplorer() {
                               width={92}
                             />
                             <div>
-                              <span>{station.access}</span>
+                              <span>{listing.access}</span>
                               <strong>{property.title}</strong>
                               <small>
                                 From RM{lowestRent.toLocaleString()}/mo
@@ -316,7 +317,7 @@ export default function TransitPropertyExplorer() {
 
             <a
               className="transit-map-source"
-              href="https://myrapid.com.my/bus-train/rapid-kl/rapid-kl-integrated-transit-map/"
+              href={transitMap.sourceUrl}
               rel="noreferrer"
               target="_blank"
             >

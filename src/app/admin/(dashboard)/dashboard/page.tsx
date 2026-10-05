@@ -11,28 +11,76 @@ import Link from "next/link";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import { adminEnquiries } from "@/lib/admin-mock-data";
-import { properties } from "@/lib/properties";
+import { hasSupabaseEnv } from "@/lib/env";
+import { listProperties } from "@/lib/property-repository";
+import { createClient } from "@/lib/supabase/server";
 
-const stats = [
-  [
-    "Published properties",
-    properties.length.toString(),
-    "+1 this month",
-    Building2,
-  ],
-  [
-    "Rental options",
-    properties
-      .reduce((total, property) => total + property.units.length, 0)
-      .toString(),
-    "6 currently available",
-    FileText,
-  ],
-  ["New enquiries", "12", "+18% from last week", Inbox],
-  ["Website visitors", "2,418", "+9.4% this month", UsersRound],
-] as const;
+export default async function AdminDashboardPage() {
+  const propertyResult = await listProperties({ admin: true, pageSize: 100 });
+  const properties = propertyResult.data;
+  let enquiries = adminEnquiries;
+  let newEnquiryCount = adminEnquiries.filter(
+    (enquiry) => enquiry.status === "New",
+  ).length;
 
-export default function AdminDashboardPage() {
+  if (hasSupabaseEnv()) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("enquiries")
+      .select(
+        "reference, first_name, last_name, email, topic, status, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(4);
+    enquiries = (data ?? []).map((enquiry) => ({
+      id: enquiry.reference,
+      name: `${enquiry.first_name} ${enquiry.last_name}`,
+      email: enquiry.email,
+      topic: enquiry.topic,
+      property: "—",
+      received: new Intl.DateTimeFormat("en-MY", {
+        dateStyle: "medium",
+      }).format(new Date(enquiry.created_at)),
+      status:
+        enquiry.status === "in_progress"
+          ? "In progress"
+          : `${enquiry.status.charAt(0).toUpperCase()}${enquiry.status.slice(1)}`,
+    }));
+    const { count } = await supabase
+      .from("enquiries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new");
+    newEnquiryCount = count ?? 0;
+  }
+
+  const rentalOptionCount = properties.reduce(
+    (total, property) => total + property.units.length,
+    0,
+  );
+  const availableCount = properties.reduce(
+    (total, property) =>
+      total + property.units.filter((unit) => unit.available).length,
+    0,
+  );
+  const stats = [
+    [
+      "Published properties",
+      properties
+        .filter((property) => property.status !== "draft")
+        .length.toString(),
+      `${properties.length} total records`,
+      Building2,
+    ],
+    [
+      "Rental options",
+      rentalOptionCount.toString(),
+      `${availableCount} currently available`,
+      FileText,
+    ],
+    ["New enquiries", newEnquiryCount.toString(), "Awaiting review", Inbox],
+    ["Website visitors", "—", "Connect analytics later", UsersRound],
+  ] as const;
+
   return (
     <>
       <AdminPageHeader
@@ -85,7 +133,7 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {adminEnquiries.slice(0, 4).map((enquiry) => (
+                {enquiries.slice(0, 4).map((enquiry) => (
                   <tr key={enquiry.id}>
                     <td>
                       <strong>{enquiry.name}</strong>

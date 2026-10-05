@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   BadgeCheck,
@@ -15,7 +16,7 @@ import {
   UsersRound,
   WalletCards,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,12 +24,37 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import StoryScrollSection from "@/components/story-scroll-section";
+import { apiRequest } from "@/lib/api-client";
+import type { SiteSettingsInput } from "@/lib/listing-schema";
 import { properties } from "@/lib/properties";
 
 const areaCards = properties.map((property) => ({
   ...property,
   image: property.gallery[0] ?? property.image,
 }));
+
+const fallbackHeroSlides: SiteSettingsInput["homepageHeroSlides"] = [
+  {
+    path: "/estatein/property-villa.png",
+    url: "/estatein/property-villa.png",
+    alt: "A furnished RentDeer residence",
+  },
+  {
+    path: "/estatein/property-campus.png",
+    url: "/estatein/property-campus.png",
+    alt: "A landscaped RentDeer residential community",
+  },
+  {
+    path: "/estatein/property-tower.png",
+    url: "/estatein/property-tower.png",
+    alt: "A modern RentDeer residential tower",
+  },
+  {
+    path: "/estatein/hero-building.png",
+    url: "/estatein/hero-building.png",
+    alt: "A contemporary home managed by RentDeer",
+  },
+];
 
 const reasons = [
   ["Hassle free", "A clearer way to search, enquire, and move in.", House],
@@ -149,6 +175,17 @@ function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
 
 export default function Home() {
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
+  const settingsQuery = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => apiRequest<{ data: SiteSettingsInput }>("/api/settings"),
+    staleTime: 5 * 60_000,
+  });
+  const heroSlides = settingsQuery.data?.data.homepageHeroSlides.length
+    ? settingsQuery.data.data.homepageHeroSlides.slice(0, 4)
+    : fallbackHeroSlides;
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState("");
@@ -156,8 +193,18 @@ export default function Home() {
   const [locationIndex, setLocationIndex] = useState(0);
   const [storyIndex, setStoryIndex] = useState(0);
   const [reviewsPaused, setReviewsPaused] = useState(false);
-  const [voiceIndex, setVoiceIndex] = useState(0);
-  const [voicesPaused, setVoicesPaused] = useState(false);
+
+  useEffect(() => {
+    if (heroPaused || prefersReducedMotion || heroSlides.length < 2) return;
+    const interval = window.setInterval(() => {
+      setHeroSlideIndex((current) => (current + 1) % heroSlides.length);
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [heroPaused, heroSlides.length, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (heroSlideIndex >= heroSlides.length) setHeroSlideIndex(0);
+  }, [heroSlideIndex, heroSlides.length]);
 
   useEffect(() => {
     if (reviewsPaused) return;
@@ -168,16 +215,6 @@ export default function Home() {
 
     return () => window.clearInterval(interval);
   }, [reviewsPaused]);
-
-  useEffect(() => {
-    if (voicesPaused) return;
-
-    const interval = window.setInterval(() => {
-      setVoiceIndex((currentIndex) => (currentIndex + 1) % testimonials.length);
-    }, 5500);
-
-    return () => window.clearInterval(interval);
-  }, [voicesPaused]);
 
   const visibleAreas = useMemo(
     () =>
@@ -199,12 +236,6 @@ export default function Home() {
     );
   };
 
-  const moveVoice = (direction: number) => {
-    setVoiceIndex(
-      (voiceIndex + direction + testimonials.length) % testimonials.length,
-    );
-  };
-
   const submitDiscovery = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const params = new URLSearchParams();
@@ -219,14 +250,39 @@ export default function Home() {
 
   return (
     <main className="rd-home-page">
-      <section className="rd-hero">
-        <Image
-          src="/estatein/property-villa.png"
-          alt="A furnished RentDeer room"
-          fill
-          priority
-          sizes="100vw"
-        />
+      <section
+        className="rd-hero"
+        aria-label="RentDeer featured homes"
+        aria-roledescription="carousel"
+        onMouseEnter={() => setHeroPaused(true)}
+        onMouseLeave={() => setHeroPaused(false)}
+        onFocusCapture={() => setHeroPaused(true)}
+        onBlurCapture={() => setHeroPaused(false)}
+      >
+        <AnimatePresence initial={false} mode="sync">
+          <motion.div
+            className="rd-hero-slide"
+            key={heroSlides[heroSlideIndex]?.path ?? "fallback"}
+            initial={{ opacity: 0, scale: 1.025 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: prefersReducedMotion ? 0 : 0.9,
+              ease: "easeOut",
+            }}
+          >
+            <Image
+              src={heroSlides[heroSlideIndex]?.url ?? fallbackHeroSlides[0].url}
+              alt={
+                heroSlides[heroSlideIndex]?.alt ||
+                `RentDeer featured home ${heroSlideIndex + 1}`
+              }
+              fill
+              priority={heroSlideIndex === 0}
+              sizes="100vw"
+            />
+          </motion.div>
+        </AnimatePresence>
         <div className="rd-hero-overlay" />
         <SiteHeader active="home" tone="dark" />
         <div className="rd-hero-content">
@@ -302,6 +358,21 @@ export default function Home() {
             )}
           </form>
         </div>
+        {heroSlides.length > 1 && (
+          <fieldset className="rd-hero-carousel-controls">
+            <legend className="sr-only">Choose homepage background</legend>
+            {heroSlides.map((slide, index) => (
+              <button
+                type="button"
+                className={index === heroSlideIndex ? "is-active" : ""}
+                key={slide.path}
+                onClick={() => setHeroSlideIndex(index)}
+                aria-label={`Show background ${index + 1}`}
+                aria-current={index === heroSlideIndex ? "true" : undefined}
+              />
+            ))}
+          </fieldset>
+        )}
       </section>
 
       <StoryScrollSection />
@@ -369,16 +440,14 @@ export default function Home() {
         <div className="rd-stats-heading">
           <span className="rd-script-label">Our footprint</span>
           <h2>Inside RentDeer</h2>
-          <p>
-            Every number reflects a home, a partnership, or a person supported
-            by our growing rental community.
-          </p>
+          <p>Trusted by Hundres, Choose by Thousands</p>
         </div>
         <div className="rd-stats-frame">
           <div className="rd-stats-frame-content">
             <p className="rd-stats-frame-copy">
-              A growing network of managed spaces, trusted partnerships, and
-              people who believe renting can be simpler and better.
+              From helping landlords manage their properties to helping tenants
+              find a place they can call home, we're growing a rental community
+              built around quality, convenience and a peace of mind.
             </p>
             <div className="rd-stats-grid">
               <div className="rd-stat-item">
@@ -418,9 +487,10 @@ export default function Home() {
             <h2>
               <span>WHY</span> RentDeer
             </h2>
+            <p>A Better Rental Experience, Build Around you</p>
             <p>
-              Thoughtful homes, helpful people, and a rental journey designed
-              around your real needs.
+              At Rentdeer, we make renting more comfortable, convenient, and
+              hassle-free with the right support from the moment you move in.
             </p>
           </div>
           <div className="rd-reasons-grid">
@@ -436,7 +506,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="rd-stories-section">
+      <section className="rd-stories-section" id="reviews">
         <div className="rd-container">
           <div className="rd-reviews-heading">
             <span className="rd-script-label">Stories that stay</span>
@@ -467,26 +537,36 @@ export default function Home() {
                     layout
                     initial={false}
                     animate={{
-                      opacity: isActive ? 1 : 0.78,
-                      scale: isActive ? 1 : 0.86,
-                      y: isActive ? 0 : 4,
+                      opacity: isActive ? 1 : 0.82,
+                      scale: 1,
+                      y: 0,
                     }}
                     transition={{ duration: 0.45, ease: "easeOut" }}
                     whileHover={{ y: -6 }}
                   >
+                    <span className="rd-review-role">{testimonial.role}</span>
                     <div className="rd-review-card-name">
                       {testimonial.name}
                     </div>
                     <div className="rd-review-card-body">
-                      <span className="rd-review-role">{testimonial.role}</span>
                       <p>{testimonial.quote}</p>
-                      <span
-                        className="rd-stars"
-                        role="img"
-                        aria-label="5 out of 5 stars"
-                      >
-                        ★★★★★
-                      </span>
+                      <div className="rd-review-footer">
+                        <span
+                          className="rd-stars"
+                          role="img"
+                          aria-label="5 out of 5 stars"
+                        >
+                          ★★★★★
+                        </span>
+                        {isActive ? (
+                          <span
+                            className="rd-review-quote-mark"
+                            aria-hidden="true"
+                          >
+                            ”
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </motion.article>
                 );
@@ -520,81 +600,6 @@ export default function Home() {
               <ChevronRight aria-hidden="true" />
             </button>
           </div>
-        </div>
-      </section>
-
-      <section className="rd-voices-section">
-        <div className="rd-container">
-          <div className="rd-voices-heading">
-            <span className="rd-script-label">Real experiences</span>
-            <h2>Words From Landlords &amp; Tenants</h2>
-            <p>
-              Auto-sliding feedback from the people who live and work with
-              RentDeer.
-            </p>
-          </div>
-          <section
-            className="rd-voices-carousel"
-            aria-label="Words from RentDeer landlords and tenants"
-            onMouseEnter={() => setVoicesPaused(true)}
-            onMouseLeave={() => setVoicesPaused(false)}
-            onFocus={() => setVoicesPaused(true)}
-            onBlur={() => setVoicesPaused(false)}
-          >
-            <button
-              type="button"
-              className="rd-voices-arrow"
-              onClick={() => moveVoice(-1)}
-              aria-label="Previous feedback"
-            >
-              <ChevronLeft aria-hidden="true" />
-            </button>
-            <div className="rd-voices-track">
-              {[-1, 0, 1].map((offset) => {
-                const index =
-                  (voiceIndex + offset + testimonials.length) %
-                  testimonials.length;
-                const testimonial = testimonials[index];
-                return (
-                  <motion.article
-                    className={`rd-voice-card ${offset === 0 ? "is-active" : ""}`}
-                    key={offset}
-                    initial={false}
-                    animate={{
-                      opacity: offset === 0 ? 1 : 0.88,
-                      scale: offset === 0 ? 1 : 0.94,
-                      y: offset === 0 ? 0 : 8,
-                    }}
-                    transition={{ duration: 0.45, ease: "easeOut" }}
-                  >
-                    <span className="rd-voice-quote-mark">“</span>
-                    <div className="rd-voice-name">
-                      <strong>{testimonial.name}</strong>
-                      <span>{testimonial.role}</span>
-                    </div>
-                    <span className="rd-voice-feedback">(Feedback)</span>
-                    <p>{testimonial.quote}</p>
-                    <span
-                      className="rd-voice-stars"
-                      role="img"
-                      aria-label="5 out of 5 stars"
-                    >
-                      ★★★★★
-                    </span>
-                    <span className="rd-voice-quote-mark bottom">”</span>
-                  </motion.article>
-                );
-              })}
-            </div>
-            <button
-              type="button"
-              className="rd-voices-arrow"
-              onClick={() => moveVoice(1)}
-              aria-label="Next feedback"
-            >
-              <ChevronRight aria-hidden="true" />
-            </button>
-          </section>
         </div>
       </section>
 

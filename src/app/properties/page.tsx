@@ -1,12 +1,15 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import PropertyGallery from "@/components/property-gallery";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import TransitPropertyExplorer from "@/components/transit-property-explorer";
-import { cities, properties, roomTypes } from "@/lib/properties";
+import { apiRequest } from "@/lib/api-client";
+import { cities, type Property, roomTypes } from "@/lib/properties";
+import { queryKeys } from "@/lib/query-keys";
 
 function SearchIcon() {
   return (
@@ -71,6 +74,14 @@ export default function PropertiesPage() {
   const [maxPrice, setMaxPrice] = useState(0);
   const [searched, setSearched] = useState(false);
   const resultsRef = useRef<HTMLElement>(null);
+  const propertiesQuery = useQuery({
+    queryKey: queryKeys.properties.list({ pageSize: 100 }),
+    queryFn: () =>
+      apiRequest<{ data: Property[]; total: number }>(
+        "/api/properties?pageSize=100",
+      ),
+  });
+  const properties = propertiesQuery.data?.data ?? [];
 
   const showSearchResults = () => {
     setSearched(true);
@@ -139,7 +150,7 @@ export default function PropertiesPage() {
           matchesFurnished
         );
       }),
-    [city, furnishedOnly, maxPrice, minPrice, query, type],
+    [city, furnishedOnly, maxPrice, minPrice, properties, query, type],
   );
 
   return (
@@ -283,7 +294,16 @@ export default function PropertiesPage() {
             Sorted by: <strong>Featured</strong>
           </span>
         </div>
-        {filteredProperties.length > 0 ? (
+        {propertiesQuery.isPending ? (
+          <div className="empty-results">
+            <h3>Loading available properties...</h3>
+          </div>
+        ) : propertiesQuery.isError ? (
+          <div className="empty-results">
+            <h3>We could not load the properties.</h3>
+            <p>Please refresh the page or try again shortly.</p>
+          </div>
+        ) : filteredProperties.length > 0 ? (
           <div className="property-grid listing-grid">
             {filteredProperties.map((property) => (
               <article className="property-card" key={property.slug}>
@@ -340,7 +360,7 @@ export default function PropertiesPage() {
         )}
       </section>
 
-      <TransitPropertyExplorer />
+      <TransitPropertyExplorer properties={filteredProperties} />
 
       <section className="rd-page-cta-section">
         <div className="about-cta listing-cta">

@@ -5,7 +5,7 @@ import PropertyGallery from "@/components/property-gallery";
 import PropertyLocationMap from "@/components/property-location-map";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
-import { properties } from "@/lib/properties";
+import { getPropertyBySlug } from "@/lib/property-repository";
 
 function ArrowIcon() {
   return (
@@ -23,22 +23,13 @@ function ArrowIcon() {
   );
 }
 
-export function generateStaticParams() {
-  return properties.flatMap((property) =>
-    property.units.map((unit) => ({
-      slug: property.slug,
-      unitSlug: unit.slug,
-    })),
-  );
-}
-
 export default async function RentalUnitPage({
   params,
 }: {
   params: Promise<{ slug: string; unitSlug: string }>;
 }) {
   const { slug, unitSlug } = await params;
-  const property = properties.find((item) => item.slug === slug);
+  const property = await getPropertyBySlug(slug);
   const unit = property?.units.find((item) => item.slug === unitSlug);
 
   if (!property || !unit) {
@@ -73,7 +64,13 @@ export default async function RentalUnitPage({
             <p>{unit.description}</p>
             <div className="detail-price">
               <span>Monthly rent</span>
-              <strong>RM{unit.monthlyRent.toLocaleString()} / month</strong>
+              <strong>
+                RM{unit.monthlyRent.toLocaleString()}
+                {unit.maximumRent && unit.maximumRent !== unit.monthlyRent
+                  ? ` - RM${unit.maximumRent.toLocaleString()}`
+                  : ""}{" "}
+                / month
+              </strong>
               <small>
                 {unit.available
                   ? "Available to enquire"

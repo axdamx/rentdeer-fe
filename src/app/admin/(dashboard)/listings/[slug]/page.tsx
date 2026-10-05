@@ -1,11 +1,7 @@
 import { notFound } from "next/navigation";
 import AdminListingForm from "@/components/admin/admin-listing-form";
 import AdminPageHeader from "@/components/admin/admin-page-header";
-import { properties } from "@/lib/properties";
-
-export function generateStaticParams() {
-  return properties.map((property) => ({ slug: property.slug }));
-}
+import { getPropertyBySlug } from "@/lib/property-repository";
 
 export default async function AdminEditListingPage({
   params,
@@ -13,7 +9,7 @@ export default async function AdminEditListingPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = properties.find((item) => item.slug === slug);
+  const property = await getPropertyBySlug(slug, true);
 
   if (!property) notFound();
 
@@ -24,7 +20,7 @@ export default async function AdminEditListingPage({
         title={`Edit ${property.title}`}
         description="Update property details, rental options, location and media."
       />
-      <AdminListingForm mode="edit" initialTitle={property.title} />
+      <AdminListingForm mode="edit" initialSlug={property.slug} />
     </>
   );
 }
