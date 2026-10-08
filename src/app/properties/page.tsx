@@ -2,14 +2,32 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type MouseEvent, Suspense, useEffect, useRef, useState } from "react";
 import PropertyGallery from "@/components/property-gallery";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import TransitPropertyExplorer from "@/components/transit-property-explorer";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { apiRequest } from "@/lib/api-client";
-import { localAreas, matchesPropertyLocation } from "@/lib/local-areas";
 import { cities, type Property, roomTypes } from "@/lib/properties";
+import {
+  defaultPropertySearch,
+  LISTINGS_PAGE_SIZE,
+  type PropertySearch,
+  paginationItems,
+  positiveInteger,
+  propertySearchParams,
+  readPropertySearch,
+} from "@/lib/property-search";
 import { queryKeys } from "@/lib/query-keys";
 
 function SearchIcon() {
@@ -55,34 +73,59 @@ const prices = [
 ] as const;
 
 export default function PropertiesPage() {
-  const [furnishedOnly, setFurnishedOnly] = useState(false);
-  const [query, setQuery] = useState("");
-  const [type, setType] = useState("All");
-  const [city, setCity] = useState("All locations");
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [searched, setSearched] = useState(false);
-  const resultsRef = useRef<HTMLElement>(null);
-  const propertiesQuery = useQuery({
-    queryKey: queryKeys.properties.list({ pageSize: 100 }),
-    queryFn: async () => {
-      const properties: Property[] = [];
-      let total = 0;
-      for (let page = 1; ; page++) {
-        const result = await apiRequest<{ data: Property[]; total: number }>(
-          `/api/properties?pageSize=100&page=${page}`,
-        );
-        properties.push(...result.data);
-        total = result.total;
-        if (!result.data.length || properties.length >= total) break;
+  return (
+    <Suspense
+      fallback={
+        <main className="listing-page">
+          <SiteHeader active="properties" tone="dark" />
+          <div className="empty-results">Loading available properties...</div>
+        </main>
       }
-      return { data: properties, total };
-    },
+    >
+      <PropertiesBrowser />
+    </Suspense>
+  );
+}
+
+function PropertiesBrowser() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchKey = searchParams.toString();
+  const applied = readPropertySearch(searchParams);
+  const requestedPage = positiveInteger(searchParams.get("page"), 1);
+  const [filters, setFilters] = useState(applied);
+  const [previousSearchKey, setPreviousSearchKey] = useState(searchKey);
+  // Keep the form in sync with links and browser back/forward navigation.
+  if (previousSearchKey !== searchKey) {
+    setPreviousSearchKey(searchKey);
+    setFilters(applied);
+  }
+  const { query, city, type, minPrice, maxPrice, furnishedOnly } = filters;
+  const resultsRef = useRef<HTMLElement>(null);
+  const params = propertySearchParams(applied, requestedPage);
+  params.set("pageSize", String(LISTINGS_PAGE_SIZE));
+  const propertiesQuery = useQuery({
+    queryKey: queryKeys.properties.list({ search: params.toString() }),
+    queryFn: ({ signal }) =>
+      apiRequest<{
+        data: Property[];
+        total: number;
+        page: number;
+        pageSize: number;
+      }>(`/api/properties?${params}`, { signal }),
   });
   const properties = propertiesQuery.data?.data ?? [];
-
-  const showSearchResults = () => {
-    setSearched(true);
+  const total = propertiesQuery.data?.total ?? 0;
+  const page = propertiesQuery.data?.page ?? requestedPage;
+  const totalPages = Math.max(1, Math.ceil(total / LISTINGS_PAGE_SIZE));
+  const searched = Boolean(propertySearchParams(applied).toString());
+  const updateFilters = (patch: Partial<PropertySearch>) =>
+    setFilters((current) => ({ ...current, ...patch }));
+  const pageHref = (target: number) => {
+    const queryString = propertySearchParams(applied, target).toString();
+    return `/properties${queryString ? `?${queryString}` : ""}`;
+  };
+  const scrollToResults = () =>
     requestAnimationFrame(() => {
       resultsRef.current?.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -91,66 +134,35 @@ export default function PropertiesPage() {
         block: "start",
       });
     });
+  const applyFilters = (next = filters) => {
+    setFilters(next);
+    const queryString = propertySearchParams(next).toString();
+    router.push(`/properties${queryString ? `?${queryString}` : ""}`, {
+      scroll: false,
+    });
+    scrollToResults();
   };
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const searchQuery = params.get("query") ?? "";
-    const requestedArea = localAreas.find(
-      (area) => area.key === params.get("area"),
-    );
-    const searchCity =
-      requestedArea?.name ?? params.get("city") ?? "All locations";
-    const budget = params.get("budget")?.split("-").map(Number) ?? [];
-
-    setQuery(searchQuery);
-    setCity(searchCity);
+  const navigatePage = (
+    event: MouseEvent<HTMLAnchorElement>,
+    target: number,
+  ) => {
     if (
-      budget.length === 2 &&
-      budget.every((value) => Number.isFinite(value))
-    ) {
-      setMinPrice(budget[0]);
-      setMaxPrice(budget[1]);
-    }
-    setSearched(
-      Boolean(
-        searchQuery ||
-          requestedArea ||
-          params.get("city") ||
-          params.get("budget"),
-      ),
-    );
-  }, []);
-
-  const filteredProperties = useMemo(
-    () =>
-      properties.filter((property) => {
-        const matchesQuery =
-          `${property.title} ${property.location} ${property.city} ${property.propertyType} ${property.units.map((unit) => `${unit.title} ${unit.roomType}`).join(" ")}`
-            .toLowerCase()
-            .includes(query.trim().toLowerCase());
-        const matchesType =
-          type === "All" ||
-          property.units.some((unit) => unit.roomType === type);
-        const matchesCity = matchesPropertyLocation(property, city);
-        const matchesPrice =
-          (minPrice === 0 && maxPrice === 0) ||
-          property.units.some(
-            (unit) =>
-              unit.monthlyRent >= minPrice && unit.monthlyRent <= maxPrice,
-          );
-        const matchesFurnished =
-          !furnishedOnly || property.units.some((unit) => unit.furnished);
-        return (
-          matchesQuery &&
-          matchesType &&
-          matchesCity &&
-          matchesPrice &&
-          matchesFurnished
-        );
-      }),
-    [city, furnishedOnly, maxPrice, minPrice, properties, query, type],
-  );
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
+    event.preventDefault();
+    router.push(pageHref(target), { scroll: false });
+    scrollToResults();
+  };
+  const normalizedHref = pageHref(page);
+  useEffect(() => {
+    if (propertiesQuery.data && page !== requestedPage)
+      router.replace(normalizedHref, { scroll: false });
+  }, [propertiesQuery.data, page, requestedPage, router, normalizedHref]);
 
   return (
     <main className="listing-page">
@@ -176,14 +188,18 @@ export default function PropertiesPage() {
               <button
                 type="button"
                 className={!furnishedOnly ? "is-selected" : ""}
-                onClick={() => setFurnishedOnly(false)}
+                onClick={() =>
+                  applyFilters({ ...filters, furnishedOnly: false })
+                }
               >
                 All stays
               </button>
               <button
                 type="button"
                 className={furnishedOnly ? "is-selected" : ""}
-                onClick={() => setFurnishedOnly(true)}
+                onClick={() =>
+                  applyFilters({ ...filters, furnishedOnly: true })
+                }
               >
                 Fully furnished
               </button>
@@ -195,7 +211,12 @@ export default function PropertiesPage() {
                   <SearchIcon />
                   <input
                     value={query}
-                    onChange={(event) => setQuery(event.target.value)}
+                    onChange={(event) =>
+                      updateFilters({ query: event.target.value })
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") applyFilters();
+                    }}
                     placeholder="e.g. Damansara, master room"
                   />
                 </div>
@@ -204,12 +225,11 @@ export default function PropertiesPage() {
                 <span>City</span>
                 <select
                   value={city}
-                  onChange={(event) => setCity(event.target.value)}
+                  onChange={(event) =>
+                    updateFilters({ city: event.target.value })
+                  }
                 >
                   <option>All locations</option>
-                  <option>Kuala Lumpur</option>
-                  <option>Petaling Jaya</option>
-                  <option>Puchong</option>
                   {cities.map((location) => (
                     <option key={location}>{location}</option>
                   ))}
@@ -219,7 +239,9 @@ export default function PropertiesPage() {
                 <span>Room type</span>
                 <select
                   value={type}
-                  onChange={(event) => setType(event.target.value)}
+                  onChange={(event) =>
+                    updateFilters({ type: event.target.value })
+                  }
                 >
                   <option>All</option>
                   {roomTypes.map((roomType) => (
@@ -235,8 +257,7 @@ export default function PropertiesPage() {
                     const [minimum, maximum] = event.target.value
                       .split("-")
                       .map(Number);
-                    setMinPrice(minimum);
-                    setMaxPrice(maximum);
+                    updateFilters({ minPrice: minimum, maxPrice: maximum });
                   }}
                 >
                   {prices.map(([label, minimum, maximum]) => (
@@ -249,16 +270,18 @@ export default function PropertiesPage() {
               <button
                 type="button"
                 className="rd-yellow-button search-submit"
-                onClick={showSearchResults}
+                onClick={() => applyFilters()}
               >
                 Search <SearchIcon />
               </button>
             </div>
             {searched && (
               <p className="search-feedback" aria-live="polite">
-                Showing {filteredProperties.length} rental{" "}
-                {filteredProperties.length === 1 ? "property" : "properties"}{" "}
-                matching your search.
+                {propertiesQuery.isPending
+                  ? "Searching available properties..."
+                  : propertiesQuery.isError
+                    ? "Unable to load matching properties."
+                    : `${total} rental ${total === 1 ? "property matches" : "properties match"} your search.`}
               </p>
             )}
           </search>
@@ -269,7 +292,11 @@ export default function PropertiesPage() {
         <div className="section-heading">
           <div>
             <span className="rd-script-label">Explore listings</span>
-            <h2>{filteredProperties.length} properties to explore</h2>
+            <h2>
+              {propertiesQuery.isPending
+                ? "Finding your next stay..."
+                : `${total} properties to explore`}
+            </h2>
           </div>
           <p>
             Explore each residence first, then choose the room or unit that fits
@@ -281,8 +308,9 @@ export default function PropertiesPage() {
             {["All", ...roomTypes].map((filter) => (
               <button
                 type="button"
-                className={type === filter ? "is-selected" : ""}
-                onClick={() => setType(filter)}
+                className={applied.type === filter ? "is-selected" : ""}
+                aria-pressed={applied.type === filter}
+                onClick={() => applyFilters({ ...applied, type: filter })}
                 key={filter}
               >
                 {filter}
@@ -302,41 +330,100 @@ export default function PropertiesPage() {
             <h3>We could not load the properties.</h3>
             <p>Please refresh the page or try again shortly.</p>
           </div>
-        ) : filteredProperties.length > 0 ? (
-          <div className="property-grid listing-grid">
-            {filteredProperties.map((property) => (
-              <article className="property-card" key={property.slug}>
-                <PropertyGallery
-                  className="property-image"
-                  images={property.gallery}
-                  alt={property.title}
-                  label={`${property.units.length} rental options`}
-                />
-                <div className="property-content">
-                  <span className="property-location">{property.location}</span>
-                  <h3>{property.title}</h3>
-                  <p>{property.description}</p>
-                  <div className="property-details">
-                    <span>{property.propertyType}</span>
-                    <span>{property.facilities.length} facilities</span>
-                    <strong>
-                      From RM
-                      {Math.min(
-                        ...property.units.map((unit) => unit.monthlyRent),
-                      ).toLocaleString()}{" "}
-                      / month
-                    </strong>
+        ) : properties.length > 0 ? (
+          <>
+            <div className="property-grid listing-grid">
+              {properties.map((property) => (
+                <article className="property-card" key={property.slug}>
+                  <PropertyGallery
+                    className="property-image"
+                    images={property.gallery}
+                    alt={property.title}
+                    label={`${property.units.length} rental options`}
+                  />
+                  <div className="property-content">
+                    <span className="property-location">
+                      {property.location}
+                    </span>
+                    <h3>{property.title}</h3>
+                    <p>{property.description}</p>
+                    <div className="property-details">
+                      <span>{property.propertyType}</span>
+                      <span>{property.facilities.length} facilities</span>
+                      <strong>
+                        From RM
+                        {property.units.length
+                          ? Math.min(
+                              ...property.units.map((unit) => unit.monthlyRent),
+                            ).toLocaleString()
+                          : "—"}{" "}
+                        / month
+                      </strong>
+                    </div>
+                    <Link
+                      className="property-button"
+                      href={`/properties/${property.slug}`}
+                    >
+                      Explore Property <ArrowIcon />
+                    </Link>
                   </div>
-                  <Link
-                    className="property-button"
-                    href={`/properties/${property.slug}`}
-                  >
-                    Explore Property <ArrowIcon />
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+            <div className="listing-pagination">
+              <p className="listing-page-count" aria-live="polite">
+                Showing {(page - 1) * LISTINGS_PAGE_SIZE + 1}–
+                {Math.min(page * LISTINGS_PAGE_SIZE, total)} of {total}{" "}
+                properties
+              </p>
+              {totalPages > 1 && (
+                <Pagination aria-label="Listing pages">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href={page > 1 ? pageHref(page - 1) : undefined}
+                        aria-disabled={page === 1}
+                        tabIndex={page === 1 ? -1 : undefined}
+                        onClick={(event) => {
+                          if (page > 1) navigatePage(event, page - 1);
+                          else event.preventDefault();
+                        }}
+                      />
+                    </PaginationItem>
+                    {paginationItems(page, totalPages).map((item) => (
+                      <PaginationItem key={item}>
+                        {typeof item === "number" ? (
+                          <PaginationLink
+                            href={pageHref(item)}
+                            isActive={page === item}
+                            aria-label={`Page ${item}`}
+                            onClick={(event) => navigatePage(event, item)}
+                          >
+                            {item}
+                          </PaginationLink>
+                        ) : (
+                          <PaginationEllipsis />
+                        )}
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href={
+                          page < totalPages ? pageHref(page + 1) : undefined
+                        }
+                        aria-disabled={page === totalPages}
+                        tabIndex={page === totalPages ? -1 : undefined}
+                        onClick={(event) => {
+                          if (page < totalPages) navigatePage(event, page + 1);
+                          else event.preventDefault();
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </div>
+          </>
         ) : (
           <div className="empty-results">
             <h3>No properties match those filters.</h3>
@@ -344,14 +431,7 @@ export default function PropertiesPage() {
             <button
               type="button"
               className="button button-secondary"
-              onClick={() => {
-                setQuery("");
-                setType("All");
-                setCity("All locations");
-                setMinPrice(0);
-                setMaxPrice(0);
-                setFurnishedOnly(false);
-              }}
+              onClick={() => applyFilters(defaultPropertySearch)}
             >
               Clear Filters
             </button>
@@ -359,7 +439,7 @@ export default function PropertiesPage() {
         )}
       </section>
 
-      <TransitPropertyExplorer properties={filteredProperties} />
+      <TransitPropertyExplorer properties={properties} currentPageOnly />
 
       <section className="rd-page-cta-section">
         <div className="about-cta listing-cta">

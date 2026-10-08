@@ -8,7 +8,6 @@ import {
   ExternalLink,
   ImagePlus,
   LocateFixed,
-  MapPin,
   Plus,
   Save,
   Trash2,
@@ -16,13 +15,14 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import AdminTransitConnections from "@/components/admin/admin-transit-connections";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
-import { facilityOptions, transitStations } from "@/lib/listing-reference-data";
+import { facilityOptions } from "@/lib/listing-reference-data";
 import {
   type PropertyInput,
   type RentalOptionInput,
@@ -229,37 +229,6 @@ export default function AdminListingForm({
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
       "_blank",
       "noopener,noreferrer",
-    );
-  };
-
-  const toggleTransitStation = (stationId: string) => {
-    const selected = form.transitConnections.some(
-      (connection) => connection.stationId === stationId,
-    );
-    setField(
-      "transitConnections",
-      selected
-        ? form.transitConnections.filter(
-            (connection) => connection.stationId !== stationId,
-          )
-        : [
-            ...form.transitConnections,
-            { stationId, accessMinutes: 10, accessMode: "walk" },
-          ],
-    );
-  };
-
-  const updateTransitStation = (
-    stationId: string,
-    patch: Partial<PropertyInput["transitConnections"][number]>,
-  ) => {
-    setField(
-      "transitConnections",
-      form.transitConnections.map((connection) =>
-        connection.stationId === stationId
-          ? { ...connection, ...patch }
-          : connection,
-      ),
     );
   };
 
@@ -599,91 +568,12 @@ export default function AdminListingForm({
                 </p>
                 {locationNotice && <output>{locationNotice}</output>}
               </div>
-              <div className="admin-form-full admin-transit-selector">
-                <div className="admin-field-heading">
-                  <div>
-                    <Label>Nearby public transport</Label>
-                    <p>
-                      Select stations from the fixed Klang Valley catalogue.
-                      Their line and map-pin details are filled automatically.
-                    </p>
-                  </div>
-                  <span>{form.transitConnections.length} connected</span>
-                </div>
-                <div className="admin-transit-grid">
-                  {transitStations.map((station) => {
-                    const connection = form.transitConnections.find(
-                      (item) => item.stationId === station.id,
-                    );
-                    return (
-                      <article
-                        className={connection ? "is-selected" : ""}
-                        key={station.id}
-                      >
-                        <label>
-                          <input
-                            type="checkbox"
-                            checked={Boolean(connection)}
-                            onChange={() => toggleTransitStation(station.id)}
-                          />
-                          <span
-                            className="admin-transit-badge"
-                            style={{
-                              background: station.lineColor,
-                              color: station.lineTextColor,
-                            }}
-                          >
-                            {station.lineCode}
-                          </span>
-                          <span>
-                            <strong>{station.station}</strong>
-                            <small>{station.line}</small>
-                          </span>
-                          <MapPin aria-hidden="true" />
-                        </label>
-                        {connection && (
-                          <div className="admin-transit-access">
-                            <label htmlFor={`transit-minutes-${station.id}`}>
-                              <span>Travel time</span>
-                              <Input
-                                id={`transit-minutes-${station.id}`}
-                                aria-label={`Minutes to ${station.station}`}
-                                type="number"
-                                min="1"
-                                max="180"
-                                value={connection.accessMinutes}
-                                onChange={(event) =>
-                                  updateTransitStation(station.id, {
-                                    accessMinutes: Number(event.target.value),
-                                  })
-                                }
-                              />
-                            </label>
-                            <label htmlFor={`transit-mode-${station.id}`}>
-                              <span>Access</span>
-                              <select
-                                id={`transit-mode-${station.id}`}
-                                aria-label={`Access mode to ${station.station}`}
-                                value={connection.accessMode}
-                                onChange={(event) =>
-                                  updateTransitStation(station.id, {
-                                    accessMode: event.target
-                                      .value as typeof connection.accessMode,
-                                  })
-                                }
-                              >
-                                <option value="walk">Walk</option>
-                                <option value="drive">Drive</option>
-                                <option value="shuttle">Shuttle</option>
-                              </select>
-                            </label>
-                          </div>
-                        )}
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
+              <AdminTransitConnections
+                value={form.transitConnections}
+                onChange={(connections) =>
+                  setField("transitConnections", connections)
+                }
+              />
             </div>
           </>
         )}

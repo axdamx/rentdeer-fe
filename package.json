@@ -14,7 +14,8 @@
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --local --schema public > src/lib/supabase/database.types.ts",
     "db:types:linked": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > src/lib/supabase/database.types.ts",
-    "test:areas": "node --test tests/local-areas.test.cjs"
+    "test:areas": "node --test tests/local-areas.test.cjs",
+    "test:properties": "node --test tests/property-pagination.test.cjs tests/rental-options.test.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

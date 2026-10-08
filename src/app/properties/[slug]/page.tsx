@@ -1,12 +1,14 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import PropertyGallery from "@/components/property-gallery";
 import PropertyLocationMap from "@/components/property-location-map";
+import RentalOptionsBrowser from "@/components/rental-options-browser";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import { transitStationById } from "@/lib/listing-reference-data";
-import { getPropertyBySlug } from "@/lib/property-repository";
+import { getPropertyOverviewBySlug } from "@/lib/property-repository";
+import { enquiryHref } from "@/lib/rental-options";
 
 function ArrowIcon() {
   return (
@@ -30,16 +32,18 @@ export default async function PropertyDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = await getPropertyBySlug(slug);
+  const overview = await getPropertyOverviewBySlug(slug);
 
-  if (!property) {
+  if (!overview) {
     notFound();
   }
 
-  const startingPrice = Math.min(
-    ...property.units.map((unit) => unit.monthlyRent),
-  );
-  const availableUnits = property.units.filter((unit) => unit.available);
+  const {
+    property,
+    startingPrice,
+    total: totalOptions,
+    available: availableOptions,
+  } = overview;
   const transitConnections = property.transitConnections.flatMap(
     (connection) => {
       const station = transitStationById.get(connection.stationId);
@@ -75,7 +79,7 @@ export default async function PropertyDetailPage({
             className="detail-image"
             images={property.gallery}
             alt={property.title}
-            label={`${property.units.length} rental options`}
+            label={`${totalOptions} rental options`}
             priority
           />
           <div className="detail-copy">
@@ -86,10 +90,13 @@ export default async function PropertyDetailPage({
             <p>{property.description}</p>
             <div className="detail-price">
               <span>Rental options from</span>
-              <strong>RM{startingPrice.toLocaleString()} / month</strong>
+              <strong>
+                {startingPrice == null
+                  ? "Pricing on request"
+                  : `RM${startingPrice.toLocaleString()} / month`}
+              </strong>
               <small>
-                {availableUnits.length} of {property.units.length} options
-                currently available
+                {availableOptions} of {totalOptions} options currently available
               </small>
             </div>
             <div className="detail-managed-by">
@@ -107,11 +114,11 @@ export default async function PropertyDetailPage({
         <div className="detail-specs">
           <div>
             <span>Rental options</span>
-            <strong>{property.units.length}</strong>
+            <strong>{totalOptions}</strong>
           </div>
           <div>
             <span>Available now</span>
-            <strong>{availableUnits.length}</strong>
+            <strong>{availableOptions}</strong>
           </div>
           <div>
             <span>Facilities</span>
@@ -144,77 +151,22 @@ export default async function PropertyDetailPage({
         </div>
       </section>
 
-      <section
-        className="detail-units-section rd-detail-green-section content-section"
-        id="rental-options"
+      <Suspense
+        fallback={
+          <section
+            className="detail-units-section rd-detail-green-section content-section"
+            id="rental-options"
+          >
+            <p>Loading rental options...</p>
+          </section>
+        }
       >
-        <div className="section-heading">
-          <div>
-            <span className="rd-script-label">Rental options</span>
-            <h2>Choose the way you want to live here.</h2>
-          </div>
-          <p>
-            Compare the room or unit options within this residence. Availability
-            and pricing are mock data for now.
-          </p>
-        </div>
-        <div className="unit-grid">
-          {property.units.map((unit) => (
-            <article className="unit-card" key={unit.slug}>
-              <div className="unit-card-image">
-                <Image
-                  src={unit.image}
-                  alt={unit.title}
-                  fill
-                  sizes="(max-width: 700px) 100vw, 33vw"
-                />
-                <span
-                  className={
-                    unit.available
-                      ? "unit-status"
-                      : "unit-status is-unavailable"
-                  }
-                >
-                  {unit.available ? "Available" : "Currently rented"}
-                </span>
-              </div>
-              <div className="unit-card-content">
-                <span className="property-location">{unit.roomType}</span>
-                <h3>{unit.title}</h3>
-                <p>{unit.description}</p>
-                <div className="unit-card-meta">
-                  <span>{unit.bedrooms} bedroom</span>
-                  <span>{unit.toilets} toilet</span>
-                  <span>{unit.area}</span>
-                </div>
-                <div className="unit-card-bottom">
-                  <strong>
-                    RM{unit.monthlyRent.toLocaleString()}
-                    {unit.maximumRent && unit.maximumRent !== unit.monthlyRent
-                      ? ` - RM${unit.maximumRent.toLocaleString()}`
-                      : ""}{" "}
-                    <small>/ month</small>
-                  </strong>
-                  <div className="unit-card-actions">
-                    <Link
-                      className="unit-card-view"
-                      href={`/properties/${property.slug}/units/${unit.slug}`}
-                    >
-                      View details <ArrowIcon />
-                    </Link>
-                    <Link
-                      className="button button-secondary"
-                      href={`/contact?property=${property.slug}&unit=${unit.slug}`}
-                    >
-                      Enquire <ArrowIcon />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+        <RentalOptionsBrowser
+          propertySlug={property.slug}
+          propertyTitle={property.title}
+          totalOptions={totalOptions}
+        />
+      </Suspense>
 
       <section className="detail-discovery-grid content-section">
         <div className="detail-panel">
@@ -368,7 +320,7 @@ export default async function PropertyDetailPage({
               compare the available rental options.
             </p>
           </div>
-          <Link className="rd-yellow-button" href="/contact">
+          <Link className="rd-yellow-button" href={enquiryHref(property.slug)}>
             Submit Enquiry <ArrowIcon />
           </Link>
         </div>

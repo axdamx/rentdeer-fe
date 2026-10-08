@@ -6,6 +6,7 @@ import PropertyLocationMap from "@/components/property-location-map";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import { getPropertyBySlug } from "@/lib/property-repository";
+import { enquiryHref } from "@/lib/rental-options";
 
 function ArrowIcon() {
   return (
@@ -80,13 +81,13 @@ export default async function RentalUnitPage({
             <div className="unit-detail-actions">
               <Link
                 className="rd-yellow-button"
-                href={`/contact?property=${property.slug}&unit=${unit.slug}`}
+                href={enquiryHref(property.slug, unit.slug)}
               >
                 Enquire About This Unit <ArrowIcon />
               </Link>
               {unit.virtualTour && (
                 <Listing360Tour
-                  contactHref={`/contact?property=${property.slug}&unit=${unit.slug}`}
+                  contactHref={enquiryHref(property.slug, unit.slug)}
                   source={unit.virtualTour.source}
                   title={unit.title}
                 />
@@ -210,7 +211,7 @@ export default async function RentalUnitPage({
           </div>
           <Link
             className="rd-yellow-button"
-            href={`/contact?property=${property.slug}&unit=${unit.slug}`}
+            href={enquiryHref(property.slug, unit.slug)}
           >
             Start Enquiry <ArrowIcon />
           </Link>

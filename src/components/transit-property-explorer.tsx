@@ -26,8 +26,10 @@ function accessLabel(connection: TransitConnection) {
 
 export default function TransitPropertyExplorer({
   properties,
+  currentPageOnly = false,
 }: {
   properties: Property[];
+  currentPageOnly?: boolean;
 }) {
   const stationGroups = useMemo(
     () =>
@@ -93,6 +95,8 @@ export default function TransitPropertyExplorer({
             Explore RentDeer properties near Klang Valley rail stations. Hover
             or focus a pin for a quick preview, then select it to view the full
             property.
+            {currentPageOnly &&
+              " Showing transit connections for the listings on this page."}
           </p>
         </div>
 
@@ -145,7 +149,9 @@ export default function TransitPropertyExplorer({
                             : "properties"}
                           {station.properties[0]
                             ? ` · ${station.properties[0].access}`
-                            : " · Add a connection in Admin"}
+                            : currentPageOnly
+                              ? " · None on this page"
+                              : " · Add a connection in Admin"}
                         </small>
                       </span>
                       <MapPin aria-hidden="true" />
@@ -188,7 +194,9 @@ export default function TransitPropertyExplorer({
 
                 {stationGroups.map((station) => {
                   const isActive = activeStationId === station.id;
-                  const activeSlideIndex = stationSlideIndexes[station.id] ?? 0;
+                  const activeSlideIndex =
+                    (stationSlideIndexes[station.id] ?? 0) %
+                    Math.max(1, station.properties.length);
                   const listing = station.properties[activeSlideIndex];
 
                   if (!listing) return null;

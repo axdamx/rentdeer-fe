@@ -13,13 +13,33 @@ import {
   type Property,
   type RoomType,
 } from "@/lib/properties";
+import {
+  defaultPropertySearch,
+  filterFallbackProperties,
+  positiveInteger,
+  propertyLocationFilter,
+  roomTypeDatabaseValues,
+  safePropertyKeyword,
+} from "@/lib/property-search";
+import {
+  type EnquiryContext,
+  paginateRentalOptions,
+  RENTAL_OPTIONS_PAGE_SIZE,
+  type RentalOptionFilters,
+  type RentalOptionsResponse,
+  rentalAvailability,
+  rentalPrice,
+} from "@/lib/rental-options";
 import { createClient } from "@/lib/supabase/server";
 
-const propertySelect = `
+const propertyBaseSelect = `
   *,
   property_facilities(sort_order, facilities(name)),
   property_nearby_places(id, label, distance, sort_order),
-  media_assets(id, bucket, object_path, alt_text, is_cover, sort_order),
+  media_assets(id, bucket, object_path, alt_text, is_cover, sort_order)
+`;
+
+const propertySelect = `${propertyBaseSelect},
   rental_options(
     *,
     media_assets(id, bucket, object_path, alt_text, is_cover, sort_order),
@@ -190,41 +210,46 @@ function mediaGallery(media: MediaRow[] | null | undefined) {
     .filter(Boolean);
 }
 
+function mapRentalOption(
+  option: RentalOptionRow,
+  propertyImage: string,
+): Property["units"][number] {
+  return {
+    id: option.id,
+    slug: option.slug,
+    title: option.title,
+    internalCode: option.internal_code ?? undefined,
+    variant: option.variant ?? undefined,
+    roomType: roomTypeLabels[option.room_type] ?? "Single Bedroom",
+    image: mediaUrl(option.media_assets) ?? propertyImage,
+    monthlyRent: option.price_min,
+    maximumRent: option.price_max ?? undefined,
+    priceNote: option.price_note ?? undefined,
+    bedrooms: Number(option.bedrooms),
+    toilets: Number(option.bathrooms),
+    area: option.area_sqft ? `${option.area_sqft} sq. ft.` : "Size on request",
+    areaSqft: option.area_sqft ?? undefined,
+    description: option.description,
+    furnished: option.furnished,
+    bedType: option.bed_type ?? undefined,
+    bathroomType: option.bathroom_type,
+    quantityAvailable: option.quantity_available,
+    available: option.availability === "available",
+    availability: option.availability,
+    status: option.status,
+    virtualTour: option.virtual_tour_url
+      ? { source: option.virtual_tour_url }
+      : undefined,
+  };
+}
+
 function mapProperty(row: PropertyRow): Property {
   const propertyImage =
     mediaUrl(row.media_assets) ?? "/estatein/property-villa.png";
   const gallery = mediaGallery(row.media_assets);
   const units = [...(row.rental_options ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((option): Property["units"][number] => ({
-      id: option.id,
-      slug: option.slug,
-      title: option.title,
-      internalCode: option.internal_code ?? undefined,
-      variant: option.variant ?? undefined,
-      roomType: roomTypeLabels[option.room_type] ?? "Single Bedroom",
-      image: mediaUrl(option.media_assets) ?? propertyImage,
-      monthlyRent: option.price_min,
-      maximumRent: option.price_max ?? undefined,
-      priceNote: option.price_note ?? undefined,
-      bedrooms: Number(option.bedrooms),
-      toilets: Number(option.bathrooms),
-      area: option.area_sqft
-        ? `${option.area_sqft} sq. ft.`
-        : "Size on request",
-      areaSqft: option.area_sqft ?? undefined,
-      description: option.description,
-      furnished: option.furnished,
-      bedType: option.bed_type ?? undefined,
-      bathroomType: option.bathroom_type,
-      quantityAvailable: option.quantity_available,
-      available: option.availability === "available",
-      availability: option.availability,
-      status: option.status,
-      virtualTour: option.virtual_tour_url
-        ? { source: option.virtual_tour_url }
-        : undefined,
-    }));
+    .map((option) => mapRentalOption(option, propertyImage));
 
   return {
     id: row.id,
@@ -282,50 +307,128 @@ export type PropertyListOptions = {
   status?: string;
   page?: number;
   pageSize?: number;
+  type?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  furnishedOnly?: boolean;
 };
 
 export async function listProperties(options: PropertyListOptions = {}) {
+  const requestedPage = positiveInteger(options.page, 1);
+  const pageSize = positiveInteger(options.pageSize, 24, 100);
+  const filters = {
+    ...defaultPropertySearch,
+    query: options.query ?? "",
+    city: options.city ?? "All locations",
+    type:
+      options.type && Object.hasOwn(roomTypeDatabaseValues, options.type)
+        ? options.type
+        : "All",
+    minPrice: Math.max(0, options.minPrice || 0),
+    maxPrice: Math.max(0, options.maxPrice || 0),
+    furnishedOnly: options.furnishedOnly ?? false,
+  };
   if (!hasSupabaseEnv()) {
-    const filtered = fallbackProperties.filter((property) =>
-      options.query
-        ? `${property.title} ${property.location}`
-            .toLowerCase()
-            .includes(options.query.toLowerCase())
-        : true,
+    const filtered = filterFallbackProperties(
+      fallbackProperties,
+      filters,
+      options.admin,
+    ).filter(
+      (property) =>
+        !options.status ||
+        options.status === "all" ||
+        property.status === options.status,
     );
-    return { data: filtered, total: filtered.length };
+    const page = Math.min(
+      requestedPage,
+      Math.max(1, Math.ceil(filtered.length / pageSize)),
+    );
+    return {
+      data: filtered.slice((page - 1) * pageSize, page * pageSize),
+      total: filtered.length,
+      page,
+      pageSize,
+    };
   }
 
   const supabase = await createClient();
-  const page = Math.max(1, options.page ?? 1);
-  const pageSize = Math.min(100, Math.max(1, options.pageSize ?? 24));
-  let query = supabase
-    .from("properties")
-    .select(propertySelect, { count: "exact" })
+  const keyword = safePropertyKeyword(filters.query);
+  const requiresUnit =
+    filters.type !== "All" ||
+    filters.minPrice > 0 ||
+    filters.maxPrice > 0 ||
+    filters.furnishedOnly;
+  // Separate filter embeds preserve all rental options on the displayed property.
+  const select =
+    propertySelect +
+    (requiresUnit ? ", matching_rentals:rental_options!inner(id)" : "") +
+    (keyword ? ", search_rentals:rental_options(id)" : "");
+  let query = supabase.from("properties").select(select, { count: "exact" });
+
+  if (!options.admin)
+    query = query
+      .order("is_featured", { ascending: false })
+      .eq("rental_options.status", "published");
+  query = query
     .order("updated_at", { ascending: false })
-    .range((page - 1) * pageSize, page * pageSize - 1);
+    .order("id", { ascending: true });
 
   if (!options.admin) query = query.eq("status", "published");
   if (options.status && options.status !== "all") {
     query = query.eq("status", options.status);
   }
-  if (options.city && options.city !== "All locations") {
-    query = query.ilike("city", `%${options.city}%`);
-  }
-  if (options.query) {
-    const safeQuery = options.query.replace(/[^a-zA-Z0-9\s'-]/g, " ").trim();
-    if (safeQuery) {
-      query = query.or(
-        `title.ilike.%${safeQuery}%,city.ilike.%${safeQuery}%,area.ilike.%${safeQuery}%`,
+  const locationFilter = propertyLocationFilter(filters.city);
+  if (locationFilter) query = query.or(locationFilter);
+  if (requiresUnit) {
+    if (!options.admin)
+      query = query.eq("matching_rentals.status", "published");
+    if (filters.type !== "All")
+      query = query.eq(
+        "matching_rentals.room_type",
+        roomTypeDatabaseValues[filters.type],
       );
-    }
+    if (filters.minPrice)
+      query = query.gte("matching_rentals.price_min", filters.minPrice);
+    if (filters.maxPrice)
+      query = query.lte("matching_rentals.price_min", filters.maxPrice);
+    if (filters.furnishedOnly)
+      query = query.eq("matching_rentals.furnished", true);
+  }
+  if (keyword) {
+    if (!options.admin) query = query.eq("search_rentals.status", "published");
+    const matchingTypes = Object.entries(roomTypeDatabaseValues)
+      .filter(([label]) => label.toLowerCase().includes(keyword.toLowerCase()))
+      .map(([, value]) => value);
+    query = query.or(
+      `title.ilike.%${keyword}%${matchingTypes.length ? `,room_type.in.(${matchingTypes.join(",")})` : ""}`,
+      { referencedTable: "search_rentals" },
+    );
+    query = query.or(
+      `title.ilike.%${keyword}%,address_line.ilike.%${keyword}%,city.ilike.%${keyword}%,area.ilike.%${keyword}%,property_type.ilike.%${keyword}%,search_rentals.not.is.null`,
+    );
   }
 
-  const { data, count, error } = await query;
+  const { data, count, error } = await query.range(
+    (requestedPage - 1) * pageSize,
+    requestedPage * pageSize - 1,
+  );
+  // PostgREST returns 416 when a saved page is beyond the current result set.
+  if (error?.code === "PGRST103" && requestedPage > 1) {
+    return listProperties({ ...options, page: 1, pageSize });
+  }
   if (error) throw error;
+  const page = Math.min(
+    requestedPage,
+    Math.max(1, Math.ceil((count ?? 0) / pageSize)),
+  );
+  // A bookmarked page can disappear after listings are archived or filters change.
+  if (page !== requestedPage && count)
+    return listProperties({ ...options, page, pageSize });
   return {
     data: ((data ?? []) as unknown as PropertyRow[]).map(mapProperty),
     total: count ?? 0,
+    page,
+    pageSize,
   };
 }
 
@@ -341,10 +444,206 @@ export async function getPropertyBySlug(slug: string, admin = false) {
     .from("properties")
     .select(propertySelect)
     .eq("slug", slug);
-  if (!admin) query = query.eq("status", "published");
+  if (!admin)
+    query = query
+      .eq("status", "published")
+      .eq("rental_options.status", "published");
   const { data, error } = await query.maybeSingle();
   if (error) throw error;
   return data ? mapProperty(data as unknown as PropertyRow) : null;
+}
+
+// The detail page needs aggregate figures, not every room and its media.
+export async function getPropertyOverviewBySlug(slug: string) {
+  if (!hasSupabaseEnv()) {
+    const property = fallbackProperties.find(
+      (item) =>
+        item.slug === slug && (!item.status || item.status === "published"),
+    );
+    if (!property) return null;
+    const units = property.units.filter(
+      (unit) => !unit.status || unit.status === "published",
+    );
+    return {
+      property: { ...property, units: [] },
+      total: units.length,
+      available: units.filter((unit) => unit.available).length,
+      startingPrice: units.length
+        ? Math.min(...units.map((unit) => unit.monthlyRent))
+        : null,
+    };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select(propertyBaseSelect)
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const property = mapProperty(data as unknown as PropertyRow);
+  const options = () =>
+    supabase
+      .from("rental_options")
+      .select("id", { count: "exact", head: true })
+      .eq("property_id", property.id)
+      .eq("status", "published");
+  const [total, available, cheapest] = await Promise.all([
+    options(),
+    options().eq("availability", "available"),
+    supabase
+      .from("rental_options")
+      .select("price_min")
+      .eq("property_id", property.id)
+      .eq("status", "published")
+      .order("price_min", { ascending: true })
+      .limit(1),
+  ]);
+  for (const result of [total, available, cheapest])
+    if (result.error) throw result.error;
+  return {
+    property,
+    total: total.count ?? 0,
+    available: available.count ?? 0,
+    startingPrice:
+      (cheapest.data?.[0]?.price_min as number | undefined) ?? null,
+  };
+}
+
+export async function listRentalOptions(
+  slug: string,
+  filters: RentalOptionFilters,
+): Promise<RentalOptionsResponse | null> {
+  if (!hasSupabaseEnv()) {
+    const property = fallbackProperties.find(
+      (item) =>
+        item.slug === slug && (!item.status || item.status === "published"),
+    );
+    return property ? paginateRentalOptions(property.units, filters) : null;
+  }
+  const supabase = await createClient();
+  const propertyResult = await supabase
+    .from("properties")
+    .select("id, media_assets(bucket, object_path, is_cover, sort_order)")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (propertyResult.error) throw propertyResult.error;
+  if (!propertyResult.data) return null;
+  const property = propertyResult.data;
+  let query = supabase
+    .from("rental_options")
+    .select("*, media_assets(bucket, object_path, is_cover, sort_order)", {
+      count: "exact",
+    })
+    .eq("property_id", property.id)
+    .eq("status", "published")
+    .order("sort_order", { ascending: true })
+    .order("id", { ascending: true });
+  if (filters.type !== "All")
+    query = query.eq("room_type", roomTypeDatabaseValues[filters.type]);
+  if (filters.availability !== "all")
+    query = query.eq("availability", filters.availability);
+  const { data, count, error } = await query.range(
+    (filters.page - 1) * RENTAL_OPTIONS_PAGE_SIZE,
+    filters.page * RENTAL_OPTIONS_PAGE_SIZE - 1,
+  );
+  if (error?.code === "PGRST103" && filters.page > 1)
+    return listRentalOptions(slug, { ...filters, page: 1 });
+  if (error) throw error;
+  return {
+    data: ((data ?? []) as unknown as RentalOptionRow[]).map((unit) =>
+      mapRentalOption(
+        unit,
+        mediaUrl(property.media_assets) ?? "/estatein/property-villa.png",
+      ),
+    ),
+    total: count ?? 0,
+    page: count ? filters.page : 1,
+    pageSize: RENTAL_OPTIONS_PAGE_SIZE,
+  };
+}
+
+// Resolve the exact published property/room pair before preparing an enquiry.
+export async function getEnquiryContext(
+  propertySlug: string,
+  rentalOptionSlug = "",
+): Promise<EnquiryContext | null> {
+  if (!hasSupabaseEnv()) {
+    const property = fallbackProperties.find(
+      (item) =>
+        item.slug === propertySlug &&
+        (!item.status || item.status === "published"),
+    );
+    if (!property) return null;
+    const unit = property.units.find(
+      (item) =>
+        item.slug === rentalOptionSlug &&
+        (!item.status || item.status === "published"),
+    );
+    if (rentalOptionSlug && !unit) return null;
+    return {
+      propertySlug: property.slug,
+      propertyTitle: property.title,
+      location: property.location,
+      rentalOptionSlug: unit?.slug ?? "",
+      ...(unit
+        ? {
+            unitTitle: unit.title,
+            roomType: unit.roomType,
+            price: rentalPrice(unit),
+            availability: rentalAvailability(unit),
+            furnished: unit.furnished,
+          }
+        : {}),
+    };
+  }
+  const supabase = await createClient();
+  const { data: property, error } = await supabase
+    .from("properties")
+    .select("id, slug, title, address_line, area, city")
+    .eq("slug", propertySlug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (error) throw error;
+  if (!property) return null;
+  const context: EnquiryContext = {
+    propertySlug: property.slug,
+    propertyTitle: property.title,
+    location: [property.address_line, property.area, property.city]
+      .filter(Boolean)
+      .join(", "),
+    rentalOptionSlug: "",
+  };
+  if (!rentalOptionSlug) return context;
+  const result = await supabase
+    .from("rental_options")
+    .select(
+      "slug, title, room_type, price_min, price_max, furnished, availability",
+    )
+    .eq("property_id", property.id)
+    .eq("slug", rentalOptionSlug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (result.error) throw result.error;
+  if (!result.data) return null;
+  const unit = result.data;
+  return {
+    ...context,
+    rentalOptionSlug: unit.slug,
+    unitTitle: unit.title,
+    roomType: roomTypeLabels[unit.room_type],
+    price: rentalPrice({
+      monthlyRent: unit.price_min,
+      maximumRent: unit.price_max ?? undefined,
+    }),
+    availability: rentalAvailability({
+      available: unit.availability === "available",
+      availability: unit.availability,
+    }),
+    furnished: unit.furnished,
+  };
 }
 
 export async function saveProperty(input: PropertyInput, userId: string) {
