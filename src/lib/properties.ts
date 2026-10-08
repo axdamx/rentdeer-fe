@@ -93,6 +93,7 @@ export const cities = [
   "Petaling Jaya",
   "Puchong",
   "Sentul",
+  "Semarak",
   "Seri Kembangan",
 ] as const;
 

@@ -16,6 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import AdminLocalAreasEditor from "@/components/admin/admin-local-areas-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,6 +74,7 @@ export default function AdminPageConfigurator({
   const selectedSection = draftPage.sections.find(
     (section) => section.id === activeSection,
   );
+  const isLocalAreasSection = selectedSection?.sectionKey === "local-areas";
   const isTeamSection = selectedSection?.sectionKey === "team";
   const saveMutation = useMutation({
     mutationFn: () =>
@@ -91,6 +93,7 @@ export default function AdminPageConfigurator({
     onSuccess: async ({ data }) => {
       setDraftPage(data);
       await queryClient.invalidateQueries({ queryKey: ["admin", "content"] });
+      await queryClient.invalidateQueries({ queryKey: ["homepage", "areas"] });
     },
   });
 
@@ -190,6 +193,11 @@ export default function AdminPageConfigurator({
         assetCount: assets.length,
         content: {
           ...selectedSection.content,
+          localAreas: selectedSection.content.localAreas.map((area) =>
+            area.imageAssetId === assetId
+              ? { ...area, imageAssetId: null }
+              : area,
+          ),
           teamMembers: selectedSection.content.teamMembers.map((member) =>
             member.imageAssetId === assetId
               ? { ...member, imageAssetId: null }
@@ -353,9 +361,20 @@ export default function AdminPageConfigurator({
             <label className="admin-switch-row">
               <input
                 type="checkbox"
-                checked={selectedSection?.isVisible ?? false}
+                checked={
+                  isLocalAreasSection
+                    ? selectedSection?.content.localAreasEnabled
+                    : (selectedSection?.isVisible ?? false)
+                }
                 onChange={(event) =>
-                  updateSelectedSection({ isVisible: event.target.checked })
+                  isLocalAreasSection && selectedSection
+                    ? updateSelectedSection({
+                        content: {
+                          ...selectedSection.content,
+                          localAreasEnabled: event.target.checked,
+                        },
+                      })
+                    : updateSelectedSection({ isVisible: event.target.checked })
                 }
               />
               <span>Visible</span>
@@ -401,6 +420,17 @@ export default function AdminPageConfigurator({
               </div>
             </div>
           </div>
+
+          {isLocalAreasSection && selectedSection && (
+            <AdminLocalAreasEditor
+              section={selectedSection}
+              onChange={(localAreas) =>
+                updateSelectedSection({
+                  content: { ...selectedSection.content, localAreas },
+                })
+              }
+            />
+          )}
 
           {isTeamSection && selectedSection && (
             <div className="admin-form-section">

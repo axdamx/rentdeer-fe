@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/auth";
 import { getContentPage, saveContentPage } from "@/lib/content-repository";
 import { contentPageInputSchema } from "@/lib/listing-schema";
+import { validLocalAreaSources } from "@/lib/local-areas";
+import { listAreaDevelopments } from "@/lib/property-repository";
 
 export async function GET(
   _request: Request,
@@ -36,6 +38,46 @@ export async function PATCH(
   const { slug } = await params;
   if (parsed.data.slug !== slug) {
     return NextResponse.json({ error: "Page slug mismatch." }, { status: 400 });
+  }
+  const existing = await getContentPage(slug, true);
+  if (!existing || existing.id !== parsed.data.id) {
+    return NextResponse.json(
+      { error: "Page identity mismatch." },
+      { status: 400 },
+    );
+  }
+  const section = parsed.data.sections.find(
+    (item) => item.sectionKey === "local-areas",
+  );
+  if (section) {
+    const storedSection = existing.sections.find(
+      (item) => item.sectionKey === "local-areas",
+    );
+    if (slug !== "home" || storedSection?.id !== section.id) {
+      return NextResponse.json(
+        { error: "Invalid local area section." },
+        { status: 400 },
+      );
+    }
+    const developments = await listAreaDevelopments();
+    for (const config of section.content.localAreas) {
+      if (
+        !validLocalAreaSources(
+          config,
+          developments,
+          storedSection.assets.map((asset) => asset.id),
+        )
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Choose published developments in the matching area and an image uploaded to this section.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+    section.isVisible = true;
   }
   const data = await saveContentPage(parsed.data);
   revalidatePath(parsed.data.route);

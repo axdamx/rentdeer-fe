@@ -35,6 +35,12 @@ export const adminContentPages: AdminContentPage[] = [
         assetCount: 3,
       },
       {
+        id: "local-areas",
+        name: "Local areas",
+        description: "Development sources and images for the nine local areas.",
+        assetCount: 0,
+      },
+      {
         id: "statistics",
         name: "Inside RentDeer",
         description: "Background image and company statistics.",

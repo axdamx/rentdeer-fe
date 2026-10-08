@@ -90,10 +90,12 @@ export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
           <p>{companyAddress}</p>
           <div className="footer-contact-list">
             <a href={`tel:${tenantPhone.replace(/\s/g, "")}`}>
-              <span aria-hidden="true">⌕</span> Contact Us
+              <span aria-hidden="true">⌕</span>
+              <span className="footer-contact-text">Contact Us</span>
             </a>
             <a href={`mailto:${companyEmail}`}>
-              <span aria-hidden="true">✉</span> {companyEmail}
+              <span aria-hidden="true">✉</span>
+              <span className="footer-contact-text">{companyEmail}</span>
             </a>
           </div>
         </div>

@@ -131,6 +131,7 @@ export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
         )}
       </Link>
       <nav
+        id="site-navigation"
         className={menuOpen ? "main-nav is-open" : "main-nav"}
         aria-label="Main navigation"
       >
@@ -300,6 +301,8 @@ export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
         type="button"
         className="menu-toggle"
         aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-controls="site-navigation"
+        aria-expanded={menuOpen}
         onClick={() => {
           setMenuOpen(!menuOpen);
           setOpenDropdown(null);

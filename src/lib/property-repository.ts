@@ -7,6 +7,7 @@ import {
   slugify,
   type TransitConnectionInput,
 } from "@/lib/listing-schema";
+import type { AreaDevelopment } from "@/lib/local-areas";
 import {
   properties as fallbackProperties,
   type Property,
@@ -512,4 +513,50 @@ export function propertyToInput(property: Property): PropertyInput {
       sortOrder: index,
     })),
   };
+}
+
+// Homepage imagery needs only published development metadata, not rental units.
+export async function listAreaDevelopments(): Promise<AreaDevelopment[]> {
+  if (!hasSupabaseEnv())
+    return fallbackProperties.map((property) => ({
+      id: property.id ?? property.slug,
+      title: property.title,
+      city: property.city,
+      area: property.area,
+      image: property.image,
+      gallery: property.gallery,
+    }));
+  const supabase = await createClient();
+  const result: AreaDevelopment[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const { data, error } = await supabase
+      .from("properties")
+      .select(
+        "id, title, city, area, media_assets(bucket, object_path, is_cover, sort_order)",
+      )
+      .eq("status", "published")
+      .order("title")
+      .order("id")
+      .range(offset, offset + 499);
+    if (error) throw error;
+    const rows = data as unknown as Array<{
+      id: string;
+      title: string;
+      city: string;
+      area: string | null;
+      media_assets: MediaRow[] | null;
+    }>;
+    result.push(
+      ...rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        city: row.city,
+        area: row.area,
+        image: mediaUrl(row.media_assets) ?? "/estatein/property-villa.png",
+        gallery: mediaGallery(row.media_assets),
+      })),
+    );
+    if (rows.length < 500) break;
+  }
+  return result;
 }

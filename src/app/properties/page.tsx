@@ -8,6 +8,7 @@ import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import TransitPropertyExplorer from "@/components/transit-property-explorer";
 import { apiRequest } from "@/lib/api-client";
+import { localAreas, matchesPropertyLocation } from "@/lib/local-areas";
 import { cities, type Property, roomTypes } from "@/lib/properties";
 import { queryKeys } from "@/lib/query-keys";
 
@@ -53,18 +54,6 @@ const prices = [
   ["RM2000 - RM3000", 2000, 3000],
 ] as const;
 
-const regionCities: Record<string, string[]> = {
-  "Kuala Lumpur": ["Kuala Lumpur", "Cheras", "Kepong", "Sentul"],
-  "Petaling Jaya": [
-    "Petaling Jaya",
-    "Ara Damansara",
-    "Damansara Damai",
-    "Kelana Jaya",
-    "Kota Damansara",
-  ],
-  Puchong: ["Puchong", "Seri Kembangan"],
-};
-
 export default function PropertiesPage() {
   const [furnishedOnly, setFurnishedOnly] = useState(false);
   const [query, setQuery] = useState("");
@@ -76,10 +65,19 @@ export default function PropertiesPage() {
   const resultsRef = useRef<HTMLElement>(null);
   const propertiesQuery = useQuery({
     queryKey: queryKeys.properties.list({ pageSize: 100 }),
-    queryFn: () =>
-      apiRequest<{ data: Property[]; total: number }>(
-        "/api/properties?pageSize=100",
-      ),
+    queryFn: async () => {
+      const properties: Property[] = [];
+      let total = 0;
+      for (let page = 1; ; page++) {
+        const result = await apiRequest<{ data: Property[]; total: number }>(
+          `/api/properties?pageSize=100&page=${page}`,
+        );
+        properties.push(...result.data);
+        total = result.total;
+        if (!result.data.length || properties.length >= total) break;
+      }
+      return { data: properties, total };
+    },
   });
   const properties = propertiesQuery.data?.data ?? [];
 
@@ -98,7 +96,11 @@ export default function PropertiesPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const searchQuery = params.get("query") ?? "";
-    const searchCity = params.get("city") ?? "All locations";
+    const requestedArea = localAreas.find(
+      (area) => area.key === params.get("area"),
+    );
+    const searchCity =
+      requestedArea?.name ?? params.get("city") ?? "All locations";
     const budget = params.get("budget")?.split("-").map(Number) ?? [];
 
     setQuery(searchQuery);
@@ -111,7 +113,12 @@ export default function PropertiesPage() {
       setMaxPrice(budget[1]);
     }
     setSearched(
-      Boolean(searchQuery || params.get("city") || params.get("budget")),
+      Boolean(
+        searchQuery ||
+          requestedArea ||
+          params.get("city") ||
+          params.get("budget"),
+      ),
     );
   }, []);
 
@@ -125,15 +132,7 @@ export default function PropertiesPage() {
         const matchesType =
           type === "All" ||
           property.units.some((unit) => unit.roomType === type);
-        const selectedRegionCities = regionCities[city] ?? [city];
-        const matchesCity =
-          city === "All locations" ||
-          selectedRegionCities.some(
-            (location) =>
-              property.city.includes(location) ||
-              property.location.includes(location),
-          ) ||
-          ["Kuala Lumpur", "Puchong"].includes(city);
+        const matchesCity = matchesPropertyLocation(property, city);
         const matchesPrice =
           (minPrice === 0 && maxPrice === 0) ||
           property.units.some(

@@ -18,20 +18,14 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import LocalAreasSection from "@/components/local-areas-section";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import StoryScrollSection from "@/components/story-scroll-section";
 import { apiRequest } from "@/lib/api-client";
 import type { SiteSettingsInput } from "@/lib/listing-schema";
-import { properties } from "@/lib/properties";
-
-const areaCards = properties.map((property) => ({
-  ...property,
-  image: property.gallery[0] ?? property.image,
-}));
 
 const fallbackHeroSlides: SiteSettingsInput["homepageHeroSlides"] = [
   {
@@ -190,7 +184,6 @@ export default function Home() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [locationIndex, setLocationIndex] = useState(0);
   const [storyIndex, setStoryIndex] = useState(0);
   const [reviewsPaused, setReviewsPaused] = useState(false);
 
@@ -215,20 +208,6 @@ export default function Home() {
 
     return () => window.clearInterval(interval);
   }, [reviewsPaused]);
-
-  const visibleAreas = useMemo(
-    () =>
-      areaCards.map(
-        (_, offset) => areaCards[(locationIndex + offset) % areaCards.length],
-      ),
-    [locationIndex],
-  );
-
-  const moveArea = (direction: number) => {
-    setLocationIndex(
-      (locationIndex + direction + areaCards.length) % areaCards.length,
-    );
-  };
 
   const moveStory = (direction: number) => {
     setStoryIndex(
@@ -377,64 +356,7 @@ export default function Home() {
 
       <StoryScrollSection />
 
-      <section className="rd-areas-section" id="properties">
-        <div className="rd-container">
-          <div className="rd-section-heading rd-section-heading-light">
-            <span className="rd-script-label">RentDeer in your area</span>
-            <h2>Serving your local area.</h2>
-            <p>
-              Explore managed rooms and homes close to the places that matter to
-              you.
-            </p>
-          </div>
-          <div className="rd-area-carousel">
-            {visibleAreas.map((property) => (
-              <Link
-                className="rd-area-card"
-                href={`/properties/${property.slug}`}
-                key={property.slug}
-              >
-                <Image
-                  src={property.image}
-                  alt={property.title}
-                  fill
-                  sizes="(max-width: 700px) 100vw, 28vw"
-                />
-                <div>
-                  <span>{property.city}</span>
-                  <strong>{property.title}</strong>
-                </div>
-              </Link>
-            ))}
-            <div className="rd-area-copy">
-              <span className="rd-script-label">RentDeer</span>
-              <p>
-                We are committed to creating comfortable, convenient, and
-                well-connected spaces that enhance everyday living.
-              </p>
-            </div>
-          </div>
-          <div className="rd-carousel-controls">
-            <button
-              type="button"
-              onClick={() => moveArea(-1)}
-              aria-label="Previous area"
-            >
-              <ChevronLeft aria-hidden="true" />
-            </button>
-            <span>
-              0{locationIndex + 1} / 0{areaCards.length}
-            </span>
-            <button
-              type="button"
-              onClick={() => moveArea(1)}
-              aria-label="Next area"
-            >
-              <ChevronRight aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </section>
+      <LocalAreasSection />
 
       <section className="rd-stats-section rd-container">
         <div className="rd-stats-heading">

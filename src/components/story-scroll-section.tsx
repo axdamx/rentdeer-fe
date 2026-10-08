@@ -96,6 +96,7 @@ function StoryContent({
   return (
     <motion.div
       aria-hidden={!isActive}
+      inert={!isActive}
       className={`rd-story-scroll-copy${isActive ? " is-active" : ""}`}
       style={{ opacity, y }}
     >

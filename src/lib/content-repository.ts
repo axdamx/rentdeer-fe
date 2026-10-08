@@ -6,6 +6,7 @@ import {
   type ContentPageInput,
   teamMemberInputSchema,
 } from "@/lib/listing-schema";
+import { localAreaListSchema } from "@/lib/local-areas";
 import { createClient } from "@/lib/supabase/server";
 
 type ContentSectionRow = {
@@ -17,6 +18,8 @@ type ContentSectionRow = {
     heading?: unknown;
     description?: unknown;
     teamMembers?: unknown;
+    localAreas?: unknown;
+    localAreasEnabled?: unknown;
   } | null;
   is_visible: boolean;
   sort_order: number;
@@ -52,19 +55,32 @@ function fallbackPages(): ContentPageInput[] {
       const isBeliefFeature =
         page.slug === "about" && section.id === "belief-feature";
       const isTeam = page.slug === "about" && section.id === "team";
+      const isLocalAreas = page.slug === "home" && section.id === "local-areas";
 
       return {
         id: crypto.randomUUID(),
         sectionKey: section.id,
         name: section.name,
         content: {
-          eyebrow: isBeliefFeature ? "RentDeer" : section.name,
-          heading: isBeliefFeature ? "Striving For Change" : section.name,
-          description: isBeliefFeature
-            ? "The RentDeer team striving to improve rental living"
-            : isTeam
-              ? "With a focus on better living and smarter property solutions, our team continues to shape RentDeer's journey and the future of rental living."
-              : section.description,
+          eyebrow: isLocalAreas
+            ? "RentDeer in your area"
+            : isBeliefFeature
+              ? "RentDeer"
+              : section.name,
+          heading: isLocalAreas
+            ? "Serving your local area."
+            : isBeliefFeature
+              ? "Striving For Change"
+              : section.name,
+          description: isLocalAreas
+            ? "Explore managed rooms and homes close to the places that matter to you."
+            : isBeliefFeature
+              ? "The RentDeer team striving to improve rental living"
+              : isTeam
+                ? "With a focus on better living and smarter property solutions, our team continues to shape RentDeer's journey and the future of rental living."
+                : section.description,
+          localAreas: [],
+          localAreasEnabled: true,
           teamMembers: isTeam
             ? [
                 {
@@ -116,7 +132,15 @@ function mapPage(row: ContentPageRow): ContentPageInput {
     description: row.description,
     status: row.status,
     sections: [...(row.content_sections ?? [])]
-      .sort((a, b) => a.sort_order - b.sort_order)
+      .sort(
+        (a, b) =>
+          a.sort_order - b.sort_order ||
+          (a.section_key === "local-areas"
+            ? -1
+            : b.section_key === "local-areas"
+              ? 1
+              : 0),
+      )
       .map((section) => ({
         id: section.id,
         sectionKey: section.section_key,
@@ -126,6 +150,10 @@ function mapPage(row: ContentPageRow): ContentPageInput {
           heading: String(section.content?.heading ?? ""),
           description: String(section.content?.description ?? ""),
           teamMembers: mapTeamMembers(section.content?.teamMembers),
+          localAreas:
+            localAreaListSchema.safeParse(section.content?.localAreas).data ??
+            [],
+          localAreasEnabled: section.content?.localAreasEnabled !== false,
         },
         assets: [...(section.media_assets ?? [])]
           .sort(
@@ -167,6 +195,36 @@ export async function getContentPage(slug: string, admin = false) {
     return fallbackPages().find((page) => page.slug === slug) ?? null;
   }
   const supabase = await createClient();
+  if (admin && slug === "home") {
+    const { data: home, error: homeError } = await supabase
+      .from("content_pages")
+      .select("id")
+      .eq("slug", "home")
+      .maybeSingle();
+    if (homeError) throw homeError;
+    if (home) {
+      const { error: sectionError } = await supabase
+        .from("content_sections")
+        .upsert(
+          {
+            page_id: home.id,
+            section_key: "local-areas",
+            name: "Local areas",
+            sort_order: 2,
+            content: {
+              eyebrow: "RentDeer in your area",
+              heading: "Serving your local area.",
+              description:
+                "Explore managed rooms and homes close to the places that matter to you.",
+              localAreas: [],
+              localAreasEnabled: true,
+            },
+          },
+          { onConflict: "page_id,section_key", ignoreDuplicates: true },
+        );
+      if (sectionError) throw sectionError;
+    }
+  }
   let query = supabase
     .from("content_pages")
     .select(

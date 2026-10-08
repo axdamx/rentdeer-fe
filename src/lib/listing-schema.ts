@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { transitStationById } from "@/lib/listing-reference-data";
+import { localAreaListSchema } from "@/lib/local-areas";
 
 export const publishStatuses = ["draft", "published", "archived"] as const;
 export const roomTypeValues = [
@@ -175,6 +176,8 @@ export const contentPageInputSchema = z.object({
         heading: z.string().max(500).default(""),
         description: z.string().max(3000).default(""),
         teamMembers: z.array(teamMemberInputSchema).max(3).default([]),
+        localAreas: localAreaListSchema.default([]),
+        localAreasEnabled: z.boolean().default(true),
       }),
       assets: z
         .array(
