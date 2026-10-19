@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dialog";
 
 type Listing360TourProps = {
-  contactHref: string;
+  contactHref?: string;
+  isDemo?: boolean;
   source: string;
   title: string;
 };
@@ -31,6 +32,7 @@ const SphereVideoViewer = dynamic(() => import("./sphere-video-viewer"), {
 
 export default function Listing360Tour({
   contactHref,
+  isDemo = false,
   source,
   title,
 }: Listing360TourProps) {
@@ -64,7 +66,9 @@ export default function Listing360Tour({
                 Drag to look around, scroll to zoom, and press play when ready.
               </DialogDescription>
             </DialogHeader>
-            <span className="tour-demo-badge">Mock 360° tour</span>
+            <span className="tour-demo-badge">
+              {isDemo ? "Mock 360° tour" : "360° tour"}
+            </span>
             <button
               type="button"
               className="tour-dialog-close"
@@ -85,12 +89,15 @@ export default function Listing360Tour({
 
           <div className="tour-dialog-footer">
             <p>
-              This demonstration video will be replaced with the listing&apos;s
-              actual room tour when uploaded through the admin portal.
+              {isDemo
+                ? "This is a demonstration video. Contact us to arrange a viewing of the actual room."
+                : "Explore the space in 360° and contact us to arrange a viewing."}
             </p>
-            <Link className="rd-yellow-button" href={contactHref}>
-              <Play aria-hidden="true" /> Enquire About This Unit
-            </Link>
+            {contactHref && (
+              <Link className="rd-yellow-button" href={contactHref}>
+                <Play aria-hidden="true" /> Enquire About This Unit
+              </Link>
+            )}
           </div>
         </DialogContent>
       </Dialog>

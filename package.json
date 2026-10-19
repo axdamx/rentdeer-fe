@@ -15,10 +15,12 @@
     "db:types": "supabase gen types typescript --local --schema public > src/lib/supabase/database.types.ts",
     "db:types:linked": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > src/lib/supabase/database.types.ts",
     "test:areas": "node --test tests/local-areas.test.cjs",
-    "test:properties": "node --test tests/property-pagination.test.cjs tests/rental-options.test.cjs"
+    "test:navigation": "node --test tests/navigation.test.cjs",
+    "test:properties": "node --test tests/property-pagination.test.cjs tests/rental-options.test.cjs tests/address-geocoding.test.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@maplibre/maplibre-gl-leaflet": "^0.1.4",
     "@photo-sphere-viewer/core": "^5.15.1",
     "@photo-sphere-viewer/equirectangular-video-adapter": "^5.15.1",
     "@photo-sphere-viewer/video-plugin": "^5.15.1",
@@ -31,6 +33,7 @@
     "embla-carousel-react": "^8.6.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.41.0",
+    "maplibre-gl": "^5.24.0",
     "motion": "^13.2.0",
     "next": "^16.3.8",
     "react": "19.2.8",

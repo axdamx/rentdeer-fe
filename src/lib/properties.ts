@@ -1,3 +1,5 @@
+import { defaultPropertyDetails } from "./property-details";
+
 export type RoomType =
   | "Master Bedroom"
   | "Medium Bedroom"
@@ -36,6 +38,7 @@ export type RentalUnit = {
   status?: "draft" | "published" | "archived";
   virtualTour?: {
     source: string;
+    isDemo?: boolean;
   };
 };
 
@@ -46,7 +49,13 @@ export type PropertyDetails = {
   availability: string;
   responseTime: string;
   nearby: { label: string; distance: string }[];
-  review: { quote: string; author: string; role: string; rating: string };
+  review: {
+    quote: string;
+    author: string;
+    role: string;
+    rating: string;
+    isDemo?: boolean;
+  };
   bookingSteps: string[];
 };
 
@@ -106,50 +115,16 @@ export const roomTypes: RoomType[] = [
   "Whole Unit",
 ];
 
-const sharedTerms = [
-  { label: "Deposit", value: "Required upon booking confirmation" },
-  { label: "Utilities", value: "Included as stated during enquiry" },
-  { label: "Parking", value: "Available on request for a monthly fee" },
-];
-
-const sharedRules = [
-  "Minimum rental period: 6 months",
-  "No pets allowed",
-  "Cooking is allowed in the shared kitchen",
-  "Keep shared spaces clean and considerate",
-];
-
-const sharedSteps = [
-  "Send an enquiry with your preferred move-in date",
-  "Ask questions or arrange a viewing with the team",
-  "Confirm the room and review the rental terms",
-];
-
 const mockVirtualTour = {
   source: "https://threejs.org/examples/textures/pano.mp4",
+  isDemo: true,
 };
 
 const baseDetails = (
   nearby: { label: string; distance: string }[],
 ): PropertyDetails => ({
-  highlights: [
-    "Move-in-ready rental options",
-    "Responsive RentDeer support",
-    "Shared spaces kept clean and managed",
-  ],
-  houseRules: sharedRules,
-  rentalTerms: sharedTerms,
-  availability: "Ready to enquire",
-  responseTime: "Usually replies within 1 business day",
+  ...defaultPropertyDetails,
   nearby,
-  review: {
-    quote:
-      "The room was ready when I arrived, and the RentDeer team made the move-in process easy to understand.",
-    author: "Aisyah Rahman",
-    role: "RentDeer tenant",
-    rating: "4.8",
-  },
-  bookingSteps: sharedSteps,
 });
 
 export const properties: Property[] = [

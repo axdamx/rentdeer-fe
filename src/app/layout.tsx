@@ -15,6 +15,14 @@ const handwritten = localFont({
   display: "swap",
 });
 
+const listingFont = localFont({
+  src: "../../public/fonts/manrope/Manrope-VariableFont_wght.ttf",
+  variable: "--font-listing",
+  weight: "200 800",
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: "RentDeer | Rent Smarter. Live Better.",
   description:
@@ -25,7 +33,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={handwritten.variable}>
+    <html
+      lang="en"
+      className={`${handwritten.variable} ${listingFont.variable}`}
+    >
       <body>
         <Providers>{children}</Providers>
       </body>

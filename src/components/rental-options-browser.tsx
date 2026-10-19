@@ -199,7 +199,7 @@ export default function RentalOptionsBrowser({
                     src={unit.image}
                     alt={unit.title}
                     fill
-                    sizes="(max-width: 700px) 100vw, 33vw"
+                    sizes="(max-width: 700px) 100vw, (max-width: 900px) 50vw, 33vw"
                   />
                   <span
                     className={

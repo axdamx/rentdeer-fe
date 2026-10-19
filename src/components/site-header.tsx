@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api-client";
 import type { SiteSettingsInput } from "@/lib/listing-schema";
+import { navigationItems } from "@/lib/navigation";
+import { useSiteNavigation } from "@/lib/use-site-navigation";
 
 type SiteHeaderProps = {
   tone?: "default" | "dark";
@@ -31,6 +33,8 @@ const propertyLocations = [
 ] as const;
 
 export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
+  const isVisible = useSiteNavigation();
+  const hasMenuLinks = navigationItems.some((item) => isVisible(item.id));
   const settingsQuery = useQuery({
     queryKey: ["site-settings"],
     queryFn: () => apiRequest<{ data: SiteSettingsInput }>("/api/settings"),
@@ -135,183 +139,218 @@ export default function SiteHeader({ active, tone = "dark" }: SiteHeaderProps) {
         className={menuOpen ? "main-nav is-open" : "main-nav"}
         aria-label="Main navigation"
       >
-        <Link
-          className={active === "home" ? "nav-link active" : "nav-link"}
-          href="/"
-          onClick={closeNavigation}
-        >
-          Home
-        </Link>
-        <Link
-          className={active === "about" ? "nav-link active" : "nav-link"}
-          href="/about"
-          onClick={closeNavigation}
-        >
-          About Us
-        </Link>
-        <menu
-          className={
-            openDropdown === "properties" ? "nav-menu is-open" : "nav-menu"
-          }
-          onPointerEnter={(event) => {
-            if (event.pointerType === "mouse") {
-              openNavigationDropdown("properties");
-            }
-          }}
-          onPointerLeave={(event) => {
-            if (event.pointerType === "mouse") scheduleDropdownClose();
-          }}
-          onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) {
-              setOpenDropdown(null);
-            }
-          }}
-        >
-          <div
-            className={
-              active === "properties"
-                ? "nav-menu-trigger active"
-                : "nav-menu-trigger"
-            }
+        {isVisible("home") && (
+          <Link
+            className={active === "home" ? "nav-link active" : "nav-link"}
+            href="/"
+            onClick={closeNavigation}
           >
-            <Link
-              className={
-                active === "properties" ? "nav-link active" : "nav-link"
+            Home
+          </Link>
+        )}
+        {isVisible("about") && (
+          <Link
+            className={active === "about" ? "nav-link active" : "nav-link"}
+            href="/about"
+            onClick={closeNavigation}
+          >
+            About Us
+          </Link>
+        )}
+        {isVisible("properties") && (
+          <menu
+            className={
+              openDropdown === "properties" ? "nav-menu is-open" : "nav-menu"
+            }
+            onPointerEnter={(event) => {
+              if (event.pointerType === "mouse") {
+                openNavigationDropdown("properties");
               }
-              href="/properties"
-              onClick={closeNavigation}
-            >
-              Property
-            </Link>
-            <button
-              type="button"
-              className="nav-menu-toggle"
-              aria-label="Show property locations"
-              aria-expanded={openDropdown === "properties"}
-              onClick={() => toggleDropdown("properties")}
-            >
-              <span aria-hidden="true">⌄</span>
-            </button>
-          </div>
-          {openDropdown === "properties" && (
-            <div className="nav-menu-panel">
-              <Link href="/properties" onClick={closeNavigation}>
-                All properties
-              </Link>
-              {propertyLocations.map(([region, locations]) => (
-                <div key={region}>
-                  <strong>{region}</strong>
-                  {locations.map((location) => (
-                    <Link
-                      href={`/properties?city=${encodeURIComponent(location)}`}
-                      key={location}
-                      onClick={closeNavigation}
-                    >
-                      {location}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
-        </menu>
-        <menu
-          className={
-            openDropdown === "services" ? "nav-menu is-open" : "nav-menu"
-          }
-          onPointerEnter={(event) => {
-            if (event.pointerType === "mouse") {
-              openNavigationDropdown("services");
-            }
-          }}
-          onPointerLeave={(event) => {
-            if (event.pointerType === "mouse") scheduleDropdownClose();
-          }}
-          onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) {
-              setOpenDropdown(null);
-            }
-          }}
-        >
-          <div
-            className={
-              active === "services"
-                ? "nav-menu-trigger active"
-                : "nav-menu-trigger"
-            }
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType === "mouse") scheduleDropdownClose();
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setOpenDropdown(null);
+              }
+            }}
           >
-            <Link
-              className={active === "services" ? "nav-link active" : "nav-link"}
-              href="/services"
-              onClick={closeNavigation}
+            <div
+              className={
+                active === "properties"
+                  ? "nav-menu-trigger active"
+                  : "nav-menu-trigger"
+              }
             >
-              Services
-            </Link>
-            <button
-              type="button"
-              className="nav-menu-toggle"
-              aria-label="Show service options"
-              aria-expanded={openDropdown === "services"}
-              onClick={() => toggleDropdown("services")}
-            >
-              <span aria-hidden="true">⌄</span>
-            </button>
-          </div>
-          {openDropdown === "services" && (
-            <div className="nav-menu-panel nav-menu-panel-compact">
-              <Link href="/services?role=tenant" onClick={closeNavigation}>
-                For tenants
-              </Link>
-              <Link href="/services?role=landlord" onClick={closeNavigation}>
-                For landlords
-              </Link>
+              {isVisible("properties") && (
+                <Link
+                  className={
+                    active === "properties" ? "nav-link active" : "nav-link"
+                  }
+                  href="/properties"
+                  onClick={closeNavigation}
+                >
+                  Property
+                </Link>
+              )}
+              <button
+                type="button"
+                className="nav-menu-toggle"
+                aria-label="Show property locations"
+                aria-expanded={openDropdown === "properties"}
+                onClick={() => toggleDropdown("properties")}
+              >
+                <span aria-hidden="true">⌄</span>
+              </button>
             </div>
-          )}
-        </menu>
-        <Link
-          className={active === "story" ? "nav-link active" : "nav-link"}
-          href="/about#story"
-          onClick={closeNavigation}
-        >
-          Our Story
-        </Link>
-        <Link
-          className={active === "faq" ? "nav-link active" : "nav-link"}
-          href="/faq"
-          onClick={closeNavigation}
-        >
-          FAQ
-        </Link>
-        <Link
-          className={active === "bulletin" ? "nav-link active" : "nav-link"}
-          href="/bulletin"
-          onClick={closeNavigation}
-        >
-          Bulletin
-        </Link>
+            {openDropdown === "properties" && (
+              <div className="nav-menu-panel">
+                {isVisible("properties") && (
+                  <Link href="/properties" onClick={closeNavigation}>
+                    All properties
+                  </Link>
+                )}
+                {propertyLocations.map(([region, locations]) => (
+                  <div key={region}>
+                    <strong>{region}</strong>
+                    {locations.map((location) => (
+                      <Link
+                        href={`/properties?city=${encodeURIComponent(location)}`}
+                        key={location}
+                        onClick={closeNavigation}
+                      >
+                        {location}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </menu>
+        )}
+        {isVisible("services") && (
+          <menu
+            className={
+              openDropdown === "services" ? "nav-menu is-open" : "nav-menu"
+            }
+            onPointerEnter={(event) => {
+              if (event.pointerType === "mouse") {
+                openNavigationDropdown("services");
+              }
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType === "mouse") scheduleDropdownClose();
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setOpenDropdown(null);
+              }
+            }}
+          >
+            <div
+              className={
+                active === "services"
+                  ? "nav-menu-trigger active"
+                  : "nav-menu-trigger"
+              }
+            >
+              {isVisible("services") && (
+                <Link
+                  className={
+                    active === "services" ? "nav-link active" : "nav-link"
+                  }
+                  href="/services"
+                  onClick={closeNavigation}
+                >
+                  Services
+                </Link>
+              )}
+              <button
+                type="button"
+                className="nav-menu-toggle"
+                aria-label="Show service options"
+                aria-expanded={openDropdown === "services"}
+                onClick={() => toggleDropdown("services")}
+              >
+                <span aria-hidden="true">⌄</span>
+              </button>
+            </div>
+            {openDropdown === "services" && (
+              <div className="nav-menu-panel nav-menu-panel-compact">
+                <Link href="/services?role=tenant" onClick={closeNavigation}>
+                  For tenants
+                </Link>
+                <Link href="/services?role=landlord" onClick={closeNavigation}>
+                  For landlords
+                </Link>
+              </div>
+            )}
+          </menu>
+        )}
+        {isVisible("story") && (
+          <Link
+            className={active === "story" ? "nav-link active" : "nav-link"}
+            href="/about#story"
+            onClick={closeNavigation}
+          >
+            Our Story
+          </Link>
+        )}
+        {isVisible("faq") && (
+          <Link
+            className={active === "faq" ? "nav-link active" : "nav-link"}
+            href="/faq"
+            onClick={closeNavigation}
+          >
+            FAQ
+          </Link>
+        )}
+        {isVisible("bulletin") && (
+          <Link
+            className={active === "bulletin" ? "nav-link active" : "nav-link"}
+            href="/bulletin"
+            onClick={closeNavigation}
+          >
+            Bulletin
+          </Link>
+        )}
+        {isVisible("contact") && (
+          <Link
+            className="nav-link nav-contact-mobile"
+            href="/contact"
+            onClick={closeNavigation}
+          >
+            Contact Us
+          </Link>
+        )}
       </nav>
-      <Link
-        className="contact-button"
-        href="/contact"
-        onClick={closeNavigation}
-      >
-        Contact Us
-      </Link>
-      <MotionButton
-        type="button"
-        className="menu-toggle"
-        aria-label={menuOpen ? "Close menu" : "Open menu"}
-        aria-controls="site-navigation"
-        aria-expanded={menuOpen}
-        onClick={() => {
-          setMenuOpen(!menuOpen);
-          setOpenDropdown(null);
-        }}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.94 }}
-      >
-        <span aria-hidden="true">{menuOpen ? "×" : "☰"}</span>
-      </MotionButton>
+      {isVisible("contact") && (
+        <Link
+          className="contact-button"
+          href="/contact"
+          onClick={closeNavigation}
+        >
+          Contact Us
+        </Link>
+      )}
+      {hasMenuLinks && (
+        <MotionButton
+          type="button"
+          className="menu-toggle"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-controls="site-navigation"
+          aria-expanded={menuOpen}
+          onClick={() => {
+            setMenuOpen(!menuOpen);
+            setOpenDropdown(null);
+          }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.94 }}
+        >
+          <span aria-hidden="true">{menuOpen ? "×" : "☰"}</span>
+        </MotionButton>
+      )}
     </header>
   );
 }

@@ -7,6 +7,7 @@ import {
   teamMemberInputSchema,
 } from "@/lib/listing-schema";
 import { localAreaListSchema } from "@/lib/local-areas";
+import { navigationSettingsSlug } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 type ContentSectionRow = {
@@ -176,13 +177,17 @@ function mapPage(row: ContentPageRow): ContentPageInput {
 }
 
 export async function listContentPages(admin = false) {
-  if (!hasSupabaseEnv()) return fallbackPages();
+  if (!hasSupabaseEnv())
+    return fallbackPages().filter(
+      (page) => admin || page.status === "published",
+    );
   const supabase = await createClient();
   let query = supabase
     .from("content_pages")
     .select(
       "*, content_sections(*, media_assets(id, bucket, object_path, alt_text, is_cover, sort_order))",
     )
+    .neq("slug", navigationSettingsSlug)
     .order("name");
   if (!admin) query = query.eq("status", "published");
   const { data, error } = await query;
@@ -191,8 +196,13 @@ export async function listContentPages(admin = false) {
 }
 
 export async function getContentPage(slug: string, admin = false) {
+  if (slug === navigationSettingsSlug) return null;
   if (!hasSupabaseEnv()) {
-    return fallbackPages().find((page) => page.slug === slug) ?? null;
+    return (
+      fallbackPages().find(
+        (page) => page.slug === slug && (admin || page.status === "published"),
+      ) ?? null
+    );
   }
   const supabase = await createClient();
   if (admin && slug === "home") {

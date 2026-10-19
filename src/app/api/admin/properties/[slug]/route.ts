@@ -71,6 +71,12 @@ export async function PATCH(
     const data = await saveProperty(parsed.data, admin.id);
     revalidatePath("/properties");
     revalidatePath(`/properties/${slug}`);
+    for (const option of [...existing.units, ...parsed.data.rentalOptions]) {
+      revalidatePath(`/properties/${slug}/units/${option.slug}`);
+      if (parsed.data.slug !== slug) {
+        revalidatePath(`/properties/${parsed.data.slug}/units/${option.slug}`);
+      }
+    }
     if (parsed.data.slug !== slug) {
       revalidatePath(`/properties/${parsed.data.slug}`);
     }

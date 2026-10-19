@@ -5,12 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { apiRequest } from "@/lib/api-client";
 import type { SiteSettingsInput } from "@/lib/listing-schema";
+import { useSiteNavigation } from "@/lib/use-site-navigation";
 
 type SiteFooterProps = {
   tone?: "default" | "dark";
 };
 
 export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
+  const isVisible = useSiteNavigation();
   const fallbackSocialLinks = [
     {
       label: "TikTok",
@@ -56,7 +58,6 @@ export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
           mark: socialMarks[link.platform] ?? "↗",
         }))
     : fallbackSocialLinks;
-  const tenantPhone = settings?.tenantPhone || "+6019 252 3804";
   const companyEmail = settings?.companyEmail || "hello.rentdeer@gmail.com";
   const companyAddress =
     settings?.companyAddress ||
@@ -89,10 +90,12 @@ export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
           <strong className="footer-column-label">Find Us</strong>
           <p>{companyAddress}</p>
           <div className="footer-contact-list">
-            <a href={`tel:${tenantPhone.replace(/\s/g, "")}`}>
-              <span aria-hidden="true">⌕</span>
-              <span className="footer-contact-text">Contact Us</span>
-            </a>
+            {isVisible("contact") && (
+              <Link href="/contact">
+                <span aria-hidden="true">⌕</span>
+                <span className="footer-contact-text">Contact Us</span>
+              </Link>
+            )}
             <a href={`mailto:${companyEmail}`}>
               <span aria-hidden="true">✉</span>
               <span className="footer-contact-text">{companyEmail}</span>
@@ -102,10 +105,10 @@ export default function SiteFooter({ tone = "dark" }: SiteFooterProps) {
         <nav className="footer-links" aria-label="Explore RentDeer">
           <div>
             <strong>Explore RentDeer</strong>
-            <Link href="/about">About Us</Link>
-            <Link href="/services">Services</Link>
-            <Link href="/about#rental-belief">Our Story</Link>
-            <Link href="/faq">FAQ</Link>
+            {isVisible("about") && <Link href="/about">About Us</Link>}
+            {isVisible("services") && <Link href="/services">Services</Link>}
+            {isVisible("story") && <Link href="/about#story">Our Story</Link>}
+            {isVisible("faq") && <Link href="/faq">FAQ</Link>}
           </div>
         </nav>
         <div className="footer-socials">

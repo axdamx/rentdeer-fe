@@ -31,6 +31,7 @@ import {
   rentalPrice,
 } from "@/lib/rental-options";
 import { createClient } from "@/lib/supabase/server";
+import { resolvePropertyDetails } from "./property-details";
 
 const propertyBaseSelect = `
   *,
@@ -65,7 +66,6 @@ const roomTypeValues: Record<RoomType, RentalOptionInput["roomType"]> = {
   "Whole Unit": "whole_unit",
 };
 
-type JsonTerm = { label: string; value: string };
 type MediaRow = {
   bucket: string;
   object_path: string;
@@ -132,23 +132,6 @@ type PropertyRow = {
   media_assets: MediaRow[] | null;
   rental_options: RentalOptionRow[] | null;
 };
-
-function stringArray(value: unknown, fallback: string[] = []) {
-  return Array.isArray(value) && value.every((item) => typeof item === "string")
-    ? value
-    : fallback;
-}
-
-function rentalTerms(value: unknown): JsonTerm[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is JsonTerm =>
-      typeof item === "object" &&
-      item !== null &&
-      typeof (item as JsonTerm).label === "string" &&
-      typeof (item as JsonTerm).value === "string",
-  );
-}
 
 function transitConnections(value: unknown): TransitConnectionInput[] {
   let connections = value;
@@ -275,24 +258,17 @@ function mapProperty(row: PropertyRow): Property {
       .map((item) => item.facilities?.name)
       .filter((name): name is string => Boolean(name)),
     transitConnections: transitConnections(row.transit_connections),
-    details: {
-      highlights: stringArray(row.highlights),
-      houseRules: stringArray(row.house_rules),
-      rentalTerms: rentalTerms(row.rental_terms),
+    details: resolvePropertyDetails({
+      highlights: row.highlights,
+      houseRules: row.house_rules,
+      rentalTerms: row.rental_terms,
       availability: row.availability_label,
       responseTime: row.response_time,
       nearby: [...(row.property_nearby_places ?? [])]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((place) => ({ label: place.label, distance: place.distance })),
-      review: {
-        quote:
-          "Ask our team about the latest tenant experience at this property.",
-        author: "RentDeer",
-        role: "Property management team",
-        rating: "—",
-      },
-      bookingSteps: stringArray(row.booking_steps),
-    },
+      bookingSteps: row.booking_steps,
+    }),
     units,
     status: row.status,
     isFeatured: row.is_featured,
@@ -664,6 +640,12 @@ export async function saveProperty(input: PropertyInput, userId: string) {
     status: input.status,
     is_featured: input.isFeatured,
     transit_connections: input.transitConnections,
+    highlights: input.highlights,
+    house_rules: input.houseRules,
+    rental_terms: input.rentalTerms,
+    booking_steps: input.bookingSteps,
+    availability_label: input.availabilityLabel,
+    response_time: input.responseTime,
     updated_by: userId,
     published_at:
       input.status === "published" ? new Date().toISOString() : null,
@@ -711,6 +693,7 @@ export async function saveProperty(input: PropertyInput, userId: string) {
     furnished: option.furnished,
     availability: option.availability,
     quantity_available: option.quantityAvailable,
+    virtual_tour_url: option.virtualTourUrl || null,
     status: option.status,
     sort_order: option.sortOrder ?? index,
     updated_by: userId,
@@ -788,6 +771,12 @@ export function propertyToInput(property: Property): PropertyInput {
     isFeatured: property.isFeatured ?? false,
     facilities: property.facilities,
     transitConnections: property.transitConnections,
+    highlights: property.details.highlights,
+    houseRules: property.details.houseRules,
+    rentalTerms: property.details.rentalTerms,
+    bookingSteps: property.details.bookingSteps,
+    availabilityLabel: property.details.availability,
+    responseTime: property.details.responseTime,
     rentalOptions: property.units.map((unit, index) => ({
       id: unit.id,
       slug: unit.slug,
@@ -808,6 +797,7 @@ export function propertyToInput(property: Property): PropertyInput {
       availability:
         unit.availability ?? (unit.available ? "available" : "occupied"),
       quantityAvailable: unit.quantityAvailable ?? (unit.available ? 1 : 0),
+      virtualTourUrl: unit.virtualTour?.source ?? "",
       status: unit.status ?? "published",
       sortOrder: index,
     })),

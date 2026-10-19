@@ -94,6 +94,7 @@ export default function AdminPageConfigurator({
       setDraftPage(data);
       await queryClient.invalidateQueries({ queryKey: ["admin", "content"] });
       await queryClient.invalidateQueries({ queryKey: ["homepage", "areas"] });
+      await queryClient.invalidateQueries({ queryKey: ["site-navigation"] });
     },
   });
 
@@ -326,6 +327,27 @@ export default function AdminPageConfigurator({
         </div>
       </div>
 
+      <div className="admin-content-publication">
+        <Label htmlFor="page-publication-status">Page publication</Label>
+        <select
+          id="page-publication-status"
+          value={draftPage.status}
+          onChange={(event) =>
+            setDraftPage((current) => ({
+              ...current,
+              status: event.target.value as ContentPageInput["status"],
+            }))
+          }
+        >
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+        <p>
+          Draft and archived pages are hidden from site navigation. Save changes
+          to apply.
+        </p>
+      </div>
       <div className="admin-configurator-layout">
         <aside className="admin-section-list">
           <div>

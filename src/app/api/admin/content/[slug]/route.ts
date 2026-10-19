@@ -81,5 +81,6 @@ export async function PATCH(
   }
   const data = await saveContentPage(parsed.data);
   revalidatePath(parsed.data.route);
+  revalidatePath("/", "layout");
   return NextResponse.json({ data });
 }

@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Eye, ImageIcon, PanelsTopLeft } from "lucide-react";
 import Link from "next/link";
+import AdminNavigationSettings from "@/components/admin/admin-navigation-settings";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { withAdminFeedback } from "@/lib/admin-feedback";
 import { apiRequest } from "@/lib/api-client";
@@ -43,6 +44,9 @@ export default function AdminContentPage() {
           </span>
         </div>
       </section>
+      {!pagesQuery.isPending && !pagesQuery.isError && (
+        <AdminNavigationSettings pages={adminContentPages} />
+      )}
       <section className="admin-content-grid">
         {pagesQuery.isPending && <p>Loading website content...</p>}
         {pagesQuery.isError && <p>Unable to load website content.</p>}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Listing360Tour from "@/components/listing-360-tour";
 import PropertyGallery from "@/components/property-gallery";
-import PropertyLocationMap from "@/components/property-location-map";
+import PropertyLocationSection from "@/components/property-location-section";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 import { getPropertyBySlug } from "@/lib/property-repository";
@@ -89,6 +89,7 @@ export default async function RentalUnitPage({
                 <Listing360Tour
                   contactHref={enquiryHref(property.slug, unit.slug)}
                   source={unit.virtualTour.source}
+                  isDemo={unit.virtualTour.isDemo}
                   title={unit.title}
                 />
               )}
@@ -154,11 +155,15 @@ export default async function RentalUnitPage({
             </div>
             <div>
               <span className="detail-check">✓</span>
-              <span>Deposit is required upon booking confirmation</span>
+              <span>
+                <strong>Deposit required</strong> upon booking confirmation
+              </span>
             </div>
             <div>
               <span className="detail-check">✓</span>
-              <span>Minimum rental period is 6 months</span>
+              <span>
+                Minimum rental period: <strong>6 months</strong>
+              </span>
             </div>
             <div>
               <span className="detail-check">✓</span>
@@ -182,23 +187,7 @@ export default async function RentalUnitPage({
         </div>
       </section>
 
-      <section className="property-location-section content-section">
-        <div className="section-heading">
-          <div>
-            <span className="rd-script-label">Location</span>
-            <h2>Understand the neighbourhood.</h2>
-          </div>
-          <p>
-            This is a temporary viewing point near KLCC. Replace the mock
-            coordinates with the real property coordinates when available.
-          </p>
-        </div>
-        <PropertyLocationMap
-          propertyTitle={unit.title}
-          address={`Mock viewing point for ${property.title} near KLCC, Kuala Lumpur`}
-          coordinates={[3.1579, 101.7116]}
-        />
-      </section>
+      <PropertyLocationSection property={property} />
       <section className="rd-page-cta-section">
         <div className="about-cta detail-cta">
           <div>

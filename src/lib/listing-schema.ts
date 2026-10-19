@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { transitStationById } from "@/lib/listing-reference-data";
 import { localAreaListSchema } from "@/lib/local-areas";
+import { defaultPropertyDetails } from "./property-details";
 
 export const publishStatuses = ["draft", "published", "archived"] as const;
 export const roomTypeValues = [
@@ -21,6 +22,20 @@ export const availabilityValues = [
 export const transitAccessModes = ["walk", "drive", "shuttle"] as const;
 
 const optionalText = z.string().trim().optional().or(z.literal(""));
+
+export const virtualTourUrlSchema = z
+  .string()
+  .trim()
+  .pipe(
+    z
+      .url({
+        protocol: /^https?$/,
+        error: "Enter a valid HTTP or HTTPS video URL, or leave it blank.",
+      })
+      .max(3000)
+      .or(z.literal("")),
+  )
+  .optional();
 
 export const transitConnectionInputSchema = z.object({
   stationId: z
@@ -54,6 +69,7 @@ export const rentalOptionInputSchema = z.object({
   furnished: z.boolean().default(true),
   availability: z.enum(availabilityValues),
   quantityAvailable: z.coerce.number().int().min(0).default(1),
+  virtualTourUrl: virtualTourUrlSchema,
   status: z.enum(publishStatuses),
   sortOrder: z.coerce.number().int().min(0).default(0),
 });
@@ -77,6 +93,43 @@ export const propertyInputSchema = z
     isFeatured: z.boolean().default(false),
     facilities: z.array(z.string().trim().min(1).max(120)).default([]),
     transitConnections: z.array(transitConnectionInputSchema).default([]),
+    highlights: z
+      .array(z.string().trim().min(1).max(500))
+      .min(1)
+      .max(20)
+      .default(defaultPropertyDetails.highlights),
+    houseRules: z
+      .array(z.string().trim().min(1).max(500))
+      .min(1)
+      .max(20)
+      .default(defaultPropertyDetails.houseRules),
+    rentalTerms: z
+      .array(
+        z.object({
+          label: z.string().trim().min(1).max(120),
+          value: z.string().trim().min(1).max(1000),
+        }),
+      )
+      .min(1)
+      .max(20)
+      .default(defaultPropertyDetails.rentalTerms),
+    bookingSteps: z
+      .array(z.string().trim().min(1).max(500))
+      .min(1)
+      .max(12)
+      .default(defaultPropertyDetails.bookingSteps),
+    availabilityLabel: z
+      .string()
+      .trim()
+      .min(1)
+      .max(160)
+      .default(defaultPropertyDetails.availability),
+    responseTime: z
+      .string()
+      .trim()
+      .min(1)
+      .max(200)
+      .default(defaultPropertyDetails.responseTime),
     rentalOptions: z.array(rentalOptionInputSchema).min(1),
   })
   .superRefine((value, context) => {

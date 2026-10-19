@@ -38,35 +38,106 @@ function ChevronIcon() {
 }
 
 const faqs = [
-  [
-    "Does RentDeer accept internship tenants?",
-    "Yes. Internship tenants are welcome to stay with us. Contact the team to check available rooms and requirements.",
-  ],
-  [
-    "Are Muslimah units available?",
-    "Muslimah units may be available depending on the current listing. Contact RentDeer so we can check the right options for you.",
-  ],
-  [
-    "Is a deposit required?",
-    "Yes, a deposit is required upon booking confirmation. The team will explain the amount and terms before you commit.",
-  ],
-  [
-    "Can I cook in a shared kitchen?",
-    "Cooking is permitted in shared kitchens. Please keep the space clean and considerate for the next person.",
-  ],
-  ["Are pets allowed?", "Pets are not allowed in the current rental homes."],
-  [
-    "What is the minimum rental period?",
-    "The minimum rental period is six months.",
-  ],
-  [
-    "Is parking included?",
-    "Parking is not included by default, but it may be available on request for a monthly fee.",
-  ],
-  [
-    "How do I enquire about a property?",
-    "Use the property listing to review the details, then submit an enquiry. The RentDeer team will help with viewing, booking, and the next steps.",
-  ],
+  {
+    id: "pets",
+    question: (
+      <>
+        Are <strong>pets</strong> allowed?
+      </>
+    ),
+    answer: (
+      <>
+        We understand that many tenants love pets. However, to maintain
+        cleanliness and comfort for all residents,{" "}
+        <strong>pets are not allowed</strong> in our units/rooms at the moment.
+      </>
+    ),
+  },
+  {
+    id: "cooking",
+    question: (
+      <>
+        Is <strong>cooking permitted</strong> in the unit?
+      </>
+    ),
+    answer: (
+      <>
+        Yes, <strong>cooking is permitted</strong>. Each unit is equipped with
+        shared kitchen facilities. We kindly ask all tenants to maintain
+        cleanliness after use for the convenience of others.
+      </>
+    ),
+  },
+  {
+    id: "rental-period",
+    question: (
+      <>
+        What is the <strong>minimum rental period</strong>?
+      </>
+    ),
+    answer: (
+      <>
+        The minimum rental period is <strong>six (6) months</strong>. This helps
+        ensure a stable living environment for all tenants while still providing
+        flexibility for those with shorter commitments.
+      </>
+    ),
+  },
+  {
+    id: "parking",
+    question: (
+      <>
+        Is a <strong>parking space included</strong> in the rental?
+      </>
+    ),
+    answer: (
+      <>
+        Parking is not included in the rent, but it’s{" "}
+        <strong>available upon request with a monthly fee</strong>. Our team
+        will be happy to assist with parking arrangements based on availability.
+      </>
+    ),
+  },
+  {
+    id: "deposit",
+    question: (
+      <>
+        Is a <strong>deposit</strong> required?
+      </>
+    ),
+    answer: (
+      <>
+        Yes, a <strong>deposit is required</strong> upon booking confirmation
+      </>
+    ),
+  },
+  {
+    id: "muslimah",
+    question: (
+      <>
+        Does RentDeer offer <strong>Muslimah units</strong>?
+      </>
+    ),
+    answer: (
+      <>
+        Yes, we <strong>do offer Muslimah units</strong> for female tenants who
+        prefer a Muslim-friendly environment
+      </>
+    ),
+  },
+  {
+    id: "internship",
+    question: (
+      <>
+        Does RentDeer accept <strong>internship</strong> tenants?
+      </>
+    ),
+    answer: (
+      <>
+        Yes, internship tenants <strong>are welcome</strong> to stay with us
+      </>
+    ),
+  },
 ];
 
 export default function FAQPage() {
@@ -98,20 +169,23 @@ export default function FAQPage() {
           </p>
         </div>
         <div className="faq-list">
-          {faqs.map(([question, answer], index) => (
+          {faqs.map(({ id, question, answer }, index) => (
             <div
               className={openFaq === index ? "faq-item is-open" : "faq-item"}
-              key={question}
+              key={id}
             >
               <button
                 type="button"
                 aria-expanded={openFaq === index}
+                aria-controls={`faq-answer-${id}`}
                 onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
               >
-                <span>{question}</span>
+                <span>
+                  {index + 1}. {question}
+                </span>
                 <ChevronIcon />
               </button>
-              {openFaq === index && <p>{answer}</p>}
+              {openFaq === index && <p id={`faq-answer-${id}`}>{answer}</p>}
             </div>
           ))}
         </div>

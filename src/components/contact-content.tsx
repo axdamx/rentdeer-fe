@@ -237,16 +237,15 @@ export default function ContactContent({
             <select
               required
               name="topic"
-              defaultValue={enquiry ? "Viewing a room" : ""}
+              defaultValue={enquiry ? "View a Room" : ""}
             >
               <option value="" disabled>
                 Select an option
               </option>
-              <option>Viewing a room</option>
-              <option>Booking a room</option>
-              <option>Landlord management</option>
-              <option>Property agent partnership</option>
-              <option>General question</option>
+              <option>View a Room</option>
+              <option>Book a Room</option>
+              <option>Landlord / Rental Management</option>
+              <option>General Enquiry</option>
             </select>
           </label>
           <label>

@@ -15,7 +15,11 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import AdminAddressLookup from "@/components/admin/admin-address-lookup";
+import AdminListingInformation from "@/components/admin/admin-listing-information";
 import AdminTransitConnections from "@/components/admin/admin-transit-connections";
+import Listing360Tour from "@/components/listing-360-tour";
+import PropertyLocationMap from "@/components/property-location-map";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,13 +29,23 @@ import { apiRequest } from "@/lib/api-client";
 import { facilityOptions } from "@/lib/listing-reference-data";
 import {
   type PropertyInput,
+  propertyInputSchema,
   type RentalOptionInput,
   slugify,
+  virtualTourUrlSchema,
 } from "@/lib/listing-schema";
 import type { Property } from "@/lib/properties";
+import { defaultPropertyDetails } from "@/lib/property-details";
+import { propertyLocation } from "@/lib/property-location";
 import { queryKeys } from "@/lib/query-keys";
 
-const steps = ["Property details", "Location", "Rental options", "Media"];
+const steps = [
+  "Property details",
+  "Location",
+  "Rental options",
+  "Listing information",
+  "Media",
+];
 
 const emptyOption = (): RentalOptionInput => ({
   slug: "",
@@ -51,6 +65,7 @@ const emptyOption = (): RentalOptionInput => ({
   furnished: true,
   availability: "available",
   quantityAvailable: 1,
+  virtualTourUrl: "",
   status: "draft",
   sortOrder: 0,
 });
@@ -72,6 +87,12 @@ const emptyProperty = (): PropertyInput => ({
   isFeatured: false,
   facilities: [],
   transitConnections: [],
+  highlights: [...defaultPropertyDetails.highlights],
+  houseRules: [...defaultPropertyDetails.houseRules],
+  rentalTerms: defaultPropertyDetails.rentalTerms.map((term) => ({ ...term })),
+  bookingSteps: [...defaultPropertyDetails.bookingSteps],
+  availabilityLabel: defaultPropertyDetails.availability,
+  responseTime: defaultPropertyDetails.responseTime,
   rentalOptions: [emptyOption()],
 });
 
@@ -90,6 +111,13 @@ export default function AdminListingForm({
   const [customFacility, setCustomFacility] = useState("");
   const [locating, setLocating] = useState(false);
   const [locationNotice, setLocationNotice] = useState("");
+  const [informationError, setInformationError] = useState("");
+  const mapLocation = propertyLocation({
+    ...form,
+    location: form.city,
+    latitude: form.latitude ?? undefined,
+    longitude: form.longitude ?? undefined,
+  });
 
   const listingQuery = useQuery({
     queryKey: queryKeys.admin.property(initialSlug ?? "new"),
@@ -233,6 +261,38 @@ export default function AdminListingForm({
   };
 
   const save = (status?: PropertyInput["status"]) => {
+    const validation = propertyInputSchema.safeParse(form);
+    const informationFields = new Set([
+      "highlights",
+      "houseRules",
+      "rentalTerms",
+      "bookingSteps",
+      "availabilityLabel",
+      "responseTime",
+    ]);
+    if (
+      !validation.success &&
+      validation.error.issues.some((issue) =>
+        informationFields.has(String(issue.path[0])),
+      )
+    ) {
+      setInformationError(
+        "Complete each listing information field, or remove any unused rows before saving.",
+      );
+      setStep(3);
+      return;
+    }
+    setInformationError("");
+    if (
+      form.rentalOptions.some(
+        (option) =>
+          !virtualTourUrlSchema.safeParse(option.virtualTourUrl?.trim())
+            .success,
+      )
+    ) {
+      setStep(2);
+      return;
+    }
     const nextForm = status
       ? {
           ...form,
@@ -337,7 +397,7 @@ export default function AdminListingForm({
           <>
             <div className="admin-editor-heading">
               <div>
-                <span>Step 1 of 4</span>
+                <span>Step 1 of 5</span>
                 <h2>Property details</h2>
                 <p>Manage the main property renters see in search results.</p>
               </div>
@@ -470,7 +530,7 @@ export default function AdminListingForm({
           <>
             <div className="admin-editor-heading">
               <div>
-                <span>Step 2 of 4</span>
+                <span>Step 2 of 5</span>
                 <h2>Location</h2>
                 <p>Add the address and map coordinates shown to renters.</p>
               </div>
@@ -549,6 +609,19 @@ export default function AdminListingForm({
                 />
               </div>
               <div className="admin-form-full admin-coordinate-tools">
+                <AdminAddressLookup
+                  address={form.addressLine?.trim() ? mapLocation.address : ""}
+                  onSelect={(match) => {
+                    setForm((current) => ({
+                      ...current,
+                      latitude: match.latitude,
+                      longitude: match.longitude,
+                    }));
+                    setLocationNotice(
+                      `Pin selected: ${match.label}. Check the map, then save the listing.`,
+                    );
+                  }}
+                />
                 <div>
                   <Button
                     variant="outline"
@@ -563,10 +636,34 @@ export default function AdminListingForm({
                   </Button>
                 </div>
                 <p>
-                  Use current location only while you are at the property. You
-                  can always correct the coordinates manually.
+                  Enter the full address above, find its matching pin, and save
+                  the listing. The property and all its rooms will use that pin.
+                  You can also adjust the coordinates manually or use current
+                  location while you are at the property.
                 </p>
                 {locationNotice && <output>{locationNotice}</output>}
+              </div>
+              <div className="admin-form-full">
+                <PropertyLocationMap
+                  address={mapLocation.address}
+                  coordinates={mapLocation.coordinates}
+                  propertyTitle={form.title || "Property location preview"}
+                  onCoordinatesChange={([latitude, longitude]) => {
+                    setForm((current) => ({
+                      ...current,
+                      latitude,
+                      longitude,
+                    }));
+                    setLocationNotice(
+                      "Pin adjusted. Save the listing to publish this location.",
+                    );
+                  }}
+                />
+                <p className="admin-map-help">
+                  {mapLocation.coordinates
+                    ? "Drag the home pin or click the map to adjust its position, then save the listing."
+                    : "Find the address above, or zoom to the property and click the map to place its pin. Save the listing when the position is correct."}
+                </p>
               </div>
               <AdminTransitConnections
                 value={form.transitConnections}
@@ -582,7 +679,7 @@ export default function AdminListingForm({
           <>
             <div className="admin-editor-heading">
               <div>
-                <span>Step 3 of 4</span>
+                <span>Step 3 of 5</span>
                 <h2>Rental options</h2>
                 <p>Create the sub-listings available inside this property.</p>
               </div>
@@ -868,6 +965,59 @@ export default function AdminListingForm({
                       }
                     />
                   </div>
+                  <div className="admin-form-full admin-tour-field">
+                    <Label htmlFor={`tour-url-${index}`}>
+                      360° tour video URL
+                    </Label>
+                    <Input
+                      id={`tour-url-${index}`}
+                      type="url"
+                      value={option.virtualTourUrl ?? ""}
+                      placeholder="https://example.com/room-tour.mp4"
+                      aria-describedby={`tour-help-${index}`}
+                      aria-invalid={
+                        !virtualTourUrlSchema.safeParse(
+                          option.virtualTourUrl?.trim(),
+                        ).success
+                      }
+                      onChange={(event) =>
+                        setOption(index, "virtualTourUrl", event.target.value)
+                      }
+                    />
+                    <p id={`tour-help-${index}`}>
+                      Add a direct link to a hosted 360° equirectangular video
+                      (MP4 or WebM). YouTube, Matterport and webpage links are
+                      not supported. The video host must allow cross-origin
+                      playback. Leave blank to hide the 360° view for this
+                      rental option.
+                    </p>
+                    {!virtualTourUrlSchema.safeParse(
+                      option.virtualTourUrl?.trim(),
+                    ).success && (
+                      <p className="admin-tour-error" role="alert">
+                        Enter a valid HTTP or HTTPS video URL, or leave it
+                        blank.
+                      </p>
+                    )}
+                    {option.virtualTourUrl?.trim() && (
+                      <div className="admin-tour-actions">
+                        {virtualTourUrlSchema.safeParse(
+                          option.virtualTourUrl.trim(),
+                        ).success && (
+                          <Listing360Tour
+                            source={option.virtualTourUrl.trim()}
+                            title={option.title || `Rental option ${index + 1}`}
+                          />
+                        )}
+                        <Button
+                          variant="outline"
+                          onClick={() => setOption(index, "virtualTourUrl", "")}
+                        >
+                          <Trash2 aria-hidden="true" /> Remove tour
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -878,7 +1028,34 @@ export default function AdminListingForm({
           <>
             <div className="admin-editor-heading">
               <div>
-                <span>Step 4 of 4</span>
+                <span>Step 4 of 5</span>
+                <h2>Listing information</h2>
+                <p>
+                  Customize the highlights, rental terms, house rules and
+                  move-in steps for this property.
+                </p>
+              </div>
+            </div>
+            {informationError && (
+              <p className="admin-form-error" role="alert">
+                {informationError}
+              </p>
+            )}
+            <AdminListingInformation
+              value={form}
+              onChange={(update) => {
+                setInformationError("");
+                setForm((current) => ({ ...current, ...update }));
+              }}
+            />
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <div className="admin-editor-heading">
+              <div>
+                <span>Step 5 of 5</span>
                 <h2>Property media</h2>
                 <p>Upload property images to Supabase Storage.</p>
               </div>

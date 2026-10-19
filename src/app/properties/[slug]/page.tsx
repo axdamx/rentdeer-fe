@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import PropertyGallery from "@/components/property-gallery";
-import PropertyLocationMap from "@/components/property-location-map";
+import PropertyLocationSection from "@/components/property-location-section";
 import RentalOptionsBrowser from "@/components/rental-options-browser";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
@@ -50,19 +50,6 @@ export default async function PropertyDetailPage({
       return station ? [{ ...connection, station }] : [];
     },
   );
-  const propertyAddress = [
-    property.addressLine,
-    property.postcode,
-    property.area,
-    property.city,
-    property.state,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  const coordinates: [number, number] | null =
-    property.latitude != null && property.longitude != null
-      ? [property.latitude, property.longitude]
-      : null;
 
   return (
     <main className="property-detail-page">
@@ -96,7 +83,10 @@ export default async function PropertyDetailPage({
                   : `RM${startingPrice.toLocaleString()} / month`}
               </strong>
               <small>
-                {availableOptions} of {totalOptions} options currently available
+                <strong>
+                  {availableOptions} of {totalOptions} options
+                </strong>{" "}
+                currently available
               </small>
             </div>
             <div className="detail-managed-by">
@@ -251,11 +241,14 @@ export default async function PropertyDetailPage({
           <span className="rd-script-label">Tenant experience</span>
           <h2>What moving in can feel like.</h2>
           <p>
-            Mock review data for now. Later, this can be connected to verified
-            tenant feedback and property-level ratings.
+            An illustrative tenant story about settling into a RentDeer-managed
+            home with support from our team.
           </p>
         </div>
         <div className="detail-review-card">
+          {property.details.review.isDemo && (
+            <span className="property-location">Sample tenant review</span>
+          )}
           <strong className="detail-review-rating">
             {property.details.review.rating} <span>★</span>
           </strong>
@@ -271,8 +264,8 @@ export default async function PropertyDetailPage({
           <span className="rd-script-label">How it works</span>
           <h2>From enquiry to move-in.</h2>
           <p>
-            Keep the next step visible so renters know what happens after they
-            find a place they like.
+            Send an enquiry, arrange a viewing, and review the rental terms with
+            our team before you move in.
           </p>
         </div>
         <ol className="detail-booking-steps">
@@ -285,31 +278,7 @@ export default async function PropertyDetailPage({
         </ol>
       </section>
 
-      <section className="property-location-section content-section">
-        <div className="section-heading">
-          <div>
-            <span className="rd-script-label">Location</span>
-            <h2>See the area before you enquire.</h2>
-          </div>
-          <p>
-            {coordinates
-              ? propertyAddress
-              : "Map coordinates have not been added for this property yet."}
-          </p>
-        </div>
-        {coordinates ? (
-          <PropertyLocationMap
-            propertyTitle={property.title}
-            address={propertyAddress || property.location}
-            coordinates={coordinates}
-          />
-        ) : (
-          <div className="property-map-empty">
-            Add the property coordinates in Admin to display its exact map
-            location.
-          </div>
-        )}
-      </section>
+      <PropertyLocationSection property={property} />
       <section className="rd-page-cta-section">
         <div className="about-cta detail-cta">
           <div>

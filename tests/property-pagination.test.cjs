@@ -67,7 +67,10 @@ const { listProperties } = load("../src/lib/property-repository.ts", {
 test("1000 listings are split into 112 pages with nine unique properties per full page", async () => {
   const slugs = [];
   for (let page = 1; page <= 112; page++) {
-    const result = await listProperties({ page, pageSize: 9 });
+    const result = await listProperties({
+      page,
+      pageSize: search.LISTINGS_PAGE_SIZE,
+    });
     assert.equal(result.total, 1000);
     assert.equal(result.data.length, page === 112 ? 1 : 9);
     slugs.push(...result.data.map((property) => property.slug));
@@ -76,14 +79,26 @@ test("1000 listings are split into 112 pages with nine unique properties per ful
 });
 
 test("location filters apply before the page limit, and out-of-range pages recover", async () => {
-  const result = await listProperties({ city: "Sentul", pageSize: 9, page: 2 });
+  const result = await listProperties({
+    city: "Sentul",
+    pageSize: search.LISTINGS_PAGE_SIZE,
+    page: 2,
+  });
   assert.equal(result.total, 500);
   assert.equal(result.data.length, 9);
   assert.ok(result.data.every((property) => property.area === "Sentul"));
-  const last = await listProperties({ city: "Sentul", pageSize: 9, page: 999 });
+  const last = await listProperties({
+    city: "Sentul",
+    pageSize: search.LISTINGS_PAGE_SIZE,
+    page: 999,
+  });
   assert.equal(last.page, 56);
   assert.equal(last.data.length, 5);
-  const empty = await listProperties({ city: "Kepong", pageSize: 9, page: 99 });
+  const empty = await listProperties({
+    city: "Kepong",
+    pageSize: search.LISTINGS_PAGE_SIZE,
+    page: 99,
+  });
   assert.equal(empty.page, 1);
   assert.equal(empty.total, 0);
   assert.equal(empty.data.length, 0);
@@ -220,7 +235,7 @@ test("database requests filter published options and count results before reques
     maxPrice: 899,
     furnishedOnly: true,
     page: 2,
-    pageSize: 9,
+    pageSize: search.LISTINGS_PAGE_SIZE,
   });
   assert.equal(result.total, 1000);
   assert.equal(requestUrl.searchParams.get("limit"), "9");

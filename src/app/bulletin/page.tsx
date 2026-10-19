@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
+import { getAdminUser } from "@/lib/auth";
+import { getContentPage } from "@/lib/content-repository";
 
 function ArrowIcon() {
   return (
@@ -36,7 +39,9 @@ const updates = [
   ],
 ];
 
-export default function BulletinPage() {
+export default async function BulletinPage() {
+  if (!(await getContentPage("bulletin")) && !(await getAdminUser()))
+    notFound();
   return (
     <main className="bulletin-page">
       <section className="bulletin-hero">
